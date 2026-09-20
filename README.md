@@ -39,6 +39,7 @@
 ├── design-dataviz/        # 数据可视化设计系统（原 dataviz）
 │
 ├── db-skill/              # MySQL/PostgreSQL 工具
+├── newapi-management/     # NewAPI 渠道与日志管理（REST API 客户端）
 ├── word-extractor/        # .docx 提取
 ├── unified-search/        # 7 源聚合搜索（含 keenable 源，原 keenable-cli 已并入）
 ├── github-workflow/       # GitHub-first git 工作流（gh CLI）
@@ -58,7 +59,7 @@
 
 | 类别 | 环境 | 适合的 Skill | 说明 |
 |------|------|-------------|------|
-| **A. 统一共享** | `.venv/` 符号链接 | diagram 聚合的脚本目录（diagram-er/ers/module/sequence/usecase）、db-skill、word-extractor、unified-search、github-workflow、thesis-writing、paper-metrics | 依赖轻量（Pillow/sqlglot/psycopg2/pytest 等），共享一份 venv |
+| **A. 统一共享** | `.venv/` 符号链接 | diagram 聚合的脚本目录（diagram-er/ers/module/sequence/usecase）、db-skill、word-extractor、unified-search、github-workflow、thesis-writing、paper-metrics、newapi-management | 依赖轻量（Pillow/sqlglot/psycopg2/requests/pytest 等），共享一份 venv |
 | **B. 独立重型** | skill 内 `venvs/` | paper-reader | 含 GPU 模型权重（5GB+），不可合并，`.gitignore` 已忽略 |
 | **C. 无统一 venv** | 系统/Windows Python 或二进制 | diagram-draft/flow、design-ui/diagram/dataviz（纯文档）、lark-cli（Node）、drawio-xml（npx）、officecli（二进制）、kimi-webbridge、md-to-thesis-latex、thesis-ref-check、wsl-windows-bridge | 无统一 venv（系统/Windows Python 或自带运行时） |
 

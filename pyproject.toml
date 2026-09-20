@@ -30,7 +30,7 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
-testpaths = ["word-extractor/scripts", "paper-reader/scripts", "paper-metrics/scripts", "thesis-writing/scripts", "unified-search/scripts"]
+testpaths = ["word-extractor/scripts", "paper-reader/scripts", "paper-metrics/scripts", "thesis-writing/scripts", "unified-search/scripts", "newapi-management/scripts"]
 python_files = ["test_*.py"]
 addopts = "-q"
 
