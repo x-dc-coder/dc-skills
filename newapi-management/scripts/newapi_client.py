@@ -15,7 +15,8 @@ from typing import Any
 
 import requests
 
-# Go model.Channel 中声明为 *string 的字段：API 写入必须传 JSON 字符串
+# Go model.Channel 中声明为 *string/string 的 JSON 字段：API 写入须传 JSON 字符串，
+# 读取时反向解析为 dict 方便消费。other_info 为系统维护的状态字段，同样解析。
 STRING_JSON_FIELDS: tuple[str, ...] = (
     "setting",
     "settings",
@@ -23,6 +24,7 @@ STRING_JSON_FIELDS: tuple[str, ...] = (
     "status_code_mapping",
     "param_override",
     "header_override",
+    "other_info",
 )
 
 # Go model.Channel 中声明为结构体/json 的字段：API 传对象
