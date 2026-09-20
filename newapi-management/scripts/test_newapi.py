@@ -198,6 +198,18 @@ def test_cli_help_exits_zero():
     assert exc.value.code == 0
 
 
+def test_cli_output_flag_works_after_subcommand(tmp_path, monkeypatch):
+    """--output 可放在子命令之后（子解析器通过 parents 继承全局参数）。"""
+    out = tmp_path / "result.json"
+    monkeypatch.setattr(
+        "cli.NewAPIClient",
+        lambda cfg: type("Fake", (), {"get_status": lambda self: {"ok": True}})(),
+    )
+    rc = cli_main(["status", "--token", "t", "--output", str(out)])
+    assert rc == 0
+    assert json.loads(out.read_text(encoding="utf-8")) == {"ok": True}
+
+
 # ---------- 集成测试：全链路验证 ----------
 
 _INTEGRATION_MARK = pytest.mark.skipif(

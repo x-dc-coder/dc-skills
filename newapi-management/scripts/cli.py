@@ -56,24 +56,29 @@ def _client(args: Any) -> NewAPIClient:
 
 
 def main(argv: list[str] | None = None) -> int:
+    # 全局参数定义在 common parser 上，由顶层与各子命令通过 parents 继承，
+    # 这样 --output/--token 等既可放在子命令前，也可放在子命令后。
+    common = argparse.ArgumentParser(add_help=False)
+    common.add_argument("--base-url", help="API 地址，默认 http://127.0.0.1:3000")
+    common.add_argument("--token", help="访问令牌（或设 NEWAPI_TOKEN 环境变量）")
+    common.add_argument(
+        "--token-file", help="令牌文件路径（或设 NEWAPI_TOKEN_FILE 环境变量）"
+    )
+    common.add_argument("--output", help="结果写入指定文件（默认打印到 stdout）")
+
     parser = argparse.ArgumentParser(
         prog="newapi-management",
         description="NewAPI 渠道与日志管理（fork 版本格式铁律已在客户端内封装）",
+        parents=[common],
     )
-    parser.add_argument("--base-url", help="API 地址，默认 http://127.0.0.1:3000")
-    parser.add_argument("--token", help="访问令牌（或设 NEWAPI_TOKEN 环境变量）")
-    parser.add_argument(
-        "--token-file", help="令牌文件路径（或设 NEWAPI_TOKEN_FILE 环境变量）"
-    )
-    parser.add_argument("--output", help="结果写入指定文件（默认打印到 stdout）")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
-    sub.add_parser("status", help="服务状态（无需鉴权也可探测）")
+    sub.add_parser("status", help="服务状态（无需鉴权也可探测）", parents=[common])
 
-    ch = sub.add_parser("channel", help="渠道管理")
+    ch = sub.add_parser("channel", help="渠道管理", parents=[common])
     ch_sub = ch.add_subparsers(dest="action", required=True)
 
-    p = ch_sub.add_parser("list", help="渠道列表")
+    p = ch_sub.add_parser("list", help="渠道列表", parents=[common])
     p.add_argument("--page", type=int, default=1)
     p.add_argument("--page-size", type=int, default=10)
     p.add_argument("--keyword")
@@ -81,10 +86,10 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--tag")
     p.add_argument("--status", type=int)
 
-    p = ch_sub.add_parser("get", help="渠道详情")
+    p = ch_sub.add_parser("get", help="渠道详情", parents=[common])
     p.add_argument("id", type=int)
 
-    p = ch_sub.add_parser("create", help="创建渠道（自动包裹 mode+channel 并转换字段类型）")
+    p = ch_sub.add_parser("create", help="创建渠道（自动包裹 mode+channel 并转换字段类型）", parents=[common])
     p.add_argument("--config", help="渠道配置 JSON 文件（- 表示 stdin）")
     p.add_argument("--json", help="渠道配置 JSON 字符串")
     p.add_argument(
@@ -94,31 +99,31 @@ def main(argv: list[str] | None = None) -> int:
         help="添加模式：single 单建 | batch 按 key 换行批量建 | multi_to_single 多Key轮询",
     )
 
-    p = ch_sub.add_parser("update", help="更新渠道（配置须含 id）")
+    p = ch_sub.add_parser("update", help="更新渠道（配置须含 id）", parents=[common])
     p.add_argument("--config", help="渠道配置 JSON 文件（- 表示 stdin）")
     p.add_argument("--json", help="渠道配置 JSON 字符串")
 
-    p = ch_sub.add_parser("delete", help="删除渠道")
+    p = ch_sub.add_parser("delete", help="删除渠道", parents=[common])
     p.add_argument("id", type=int)
 
-    p = ch_sub.add_parser("set-status", help="启用/禁用渠道")
+    p = ch_sub.add_parser("set-status", help="启用/禁用渠道", parents=[common])
     p.add_argument("id", type=int)
     p.add_argument("status", type=int, help="1 启用 | 2 手动禁用 | 3 自动禁用")
 
-    p = ch_sub.add_parser("test", help="测试渠道连通性（向上游发探测请求）")
+    p = ch_sub.add_parser("test", help="测试渠道连通性（向上游发探测请求）", parents=[common])
     p.add_argument("id", type=int)
     p.add_argument("--model", help="指定测试模型")
 
-    p = ch_sub.add_parser("copy", help="复制渠道（返回新渠道 id）")
+    p = ch_sub.add_parser("copy", help="复制渠道（返回新渠道 id）", parents=[common])
     p.add_argument("id", type=int)
 
-    p = ch_sub.add_parser("fetch-models", help="拉取上游可用模型列表")
+    p = ch_sub.add_parser("fetch-models", help="拉取上游可用模型列表", parents=[common])
     p.add_argument("id", type=int)
 
-    lg = sub.add_parser("log", help="日志 / 会话")
+    lg = sub.add_parser("log", help="日志 / 会话", parents=[common])
     lg_sub = lg.add_subparsers(dest="action", required=True)
 
-    p = lg_sub.add_parser("list", help="日志列表（可多条件检索）")
+    p = lg_sub.add_parser("list", help="日志列表（可多条件检索）", parents=[common])
     p.add_argument("--page", type=int, default=1)
     p.add_argument("--page-size", type=int, default=10)
     p.add_argument("--channel-id", type=int)
@@ -132,7 +137,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--end", type=int, help="截止时间戳（秒）")
     p.add_argument("--type", type=int, dest="log_type", help="2=消费 3=充值 5=管理 7=错误")
 
-    p = lg_sub.add_parser("get", help="日志详情（含 record 完整会话原文）")
+    p = lg_sub.add_parser("get", help="日志详情（含 record 完整会话原文）", parents=[common])
     p.add_argument("id", type=int)
 
     args = parser.parse_args(argv)
