@@ -69,6 +69,11 @@ description: >
   # 补充标签与备注
   python3 /home/dc/projects/task-hub/taskctl set <ID> --tag "核心,前端" --note "需要协同后端接口联调"
 
+# 关联外部链接（自动识别平台归属：GitHub / bilibili / Linux.do / Gitee / YouTube 等）
+  python3 /home/dc/projects/task-hub/taskctl link <ID> "https://github.com/owner/repo/issues/42"   # → GitHub Issue #42
+  python3 /home/dc/projects/task-hub/taskctl link <ID>            # 只读查看当前链接及归属
+  python3 /home/dc/projects/task-hub/taskctl link <ID> --rm       # 清除链接
+
   # 重置前置依赖列表（全量覆盖）
   python3 /home/dc/projects/task-hub/taskctl set <ID> --dep "PRJ-02, PRJ-03(soft)"
 
@@ -131,6 +136,12 @@ description: >
 - **查看单一任务详情与上下游血缘**：
   ```bash
   python3 /home/dc/projects/task-hub/taskctl show <TASK_ID>
+  ```
+
+- **按平台归属查链接任务**（GitHub / bilibili / Linux.do 等，识别结果形如 `GitHub Issue #42`）：
+  ```bash
+  python3 /home/dc/projects/task-hub/taskctl links
+  python3 /home/dc/projects/task-hub/taskctl links --platform github
   ```
 
 - **状态推进快捷指令**：

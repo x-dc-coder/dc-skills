@@ -198,6 +198,47 @@ def normalize_url(url: str) -> str:
 
 
 # ─── Source adapters ────────────────────────────────────────────────────────
+
+def search_zhipu(query: str, cfg: dict, max_results: int | None = None) -> list[dict]:
+    """智谱 web_search（search_std 引擎）。GLM Coding Plan 套餐 Key 可调用，按次计积分。
+
+    响应 search_result[] 字段：title / link / content / media / publish_date / refer / icon。
+    注意：search_std / search_pro 均不回传 URL（link 为空字符串），只给标题+正文摘要；
+    本源定位为「中文摘要引擎」，无链接结果不参与按 URL 合并，但保留标题供排序展示。
+    """
+    key = get_api_key(cfg, "zhipu")
+    if not key:
+        return [make_result("", "", "[zhipu: no API key]", "zhipu", 0.0, error="no_key")]
+    src = cfg["sources"]["zhipu"]
+    body = dict(src.get("default_params", {}))
+    body["search_query"] = query
+    if max_results:
+        body["count"] = max_results
+    try:
+        with httpx.Client(timeout=src["timeout_sec"]) as client:
+            resp = client.post(src["endpoint"], json=body,
+                               headers={"Authorization": f"Bearer {key}"})
+            if resp.status_code in (401, 402, 403):
+                disable_source("zhipu", f"HTTP {resp.status_code}: {resp.text[:120]}")
+            resp.raise_for_status()
+        data = resp.json()
+        pages = data.get("search_result") or []
+        results = []
+        for r in pages:
+            results.append(make_result(
+                title=r.get("title") or "",
+                url=r.get("link") or r.get("url") or "",
+                snippet=(r.get("content") or "")[:400],
+                source="zhipu",
+                score=0.75,
+                published_date=r.get("publish_date"),
+                no_link=True,
+            ))
+        return results
+    except Exception as e:
+        return [make_result("", "", f"[zhipu error: {type(e).__name__}: {e}]", "zhipu", 0.0, error=str(e))]
+
+
 def search_keenable(query: str, cfg: dict, timeout: int | None = None) -> list[dict]:
     src = cfg["sources"]["keenable"]
     to = timeout or src["timeout_sec"]
@@ -850,6 +891,8 @@ def mode_general(query: str, cfg: dict, top_k: int = 15, tier: str = "value") ->
         fn_map["tavily"] = lambda q, c: search_with_retry(search_tavily, q, c, advanced=(tier == "flagship"))
     if "bocha" in primary:
         fn_map["bocha"] = lambda q, c: search_with_retry(search_bocha, q, c)
+    if "zhipu" in primary:
+        fn_map["zhipu"] = lambda q, c: search_with_retry(search_zhipu, q, c)
     per_source = run_sources_parallel(fn_map, query, cfg)
 
     # check agreement
@@ -899,6 +942,8 @@ def mode_academic(query: str, cfg: dict, top_k: int = 30) -> dict:
         fn_map["openalex"] = lambda q, c: search_with_retry(search_openalex, q, c, max_results=mcfg["max_results_per_source"])
     if "ai4scholar" in sources_list:
         fn_map["ai4scholar"] = lambda q, c: search_with_retry(search_ai4scholar, q, c, retries=1, max_results=mcfg["max_results_per_source"])
+    if "zhipu" in sources_list:
+        fn_map["zhipu"] = lambda q, c: search_with_retry(search_zhipu, q, c, max_results=mcfg["max_results_per_source"])
 
     per_source = run_sources_parallel(fn_map, query, cfg)
     merged = dedup_and_rank(per_source, cfg, top_k=top_k)

@@ -20,6 +20,10 @@
     "ai4scholar": {
       "env_var": "AI4SCHOLAR_API_KEY",
       "value": null
+    },
+    "zhipu": {
+      "env_var": "ZHIPU_API_KEY",
+      "value": null
     }
   },
   "quota": {
@@ -30,6 +34,10 @@
     "firecrawl": {
       "monthly_limit": 1000,
       "strategy": "reserve_for_content_extraction"
+    },
+    "zhipu": {
+      "monthly_limit": 2000,
+      "strategy": "soft_cap_local_only"
     }
   },
   "sources": {
@@ -194,11 +202,29 @@
         "fields": "paperId,title,abstract,authors,year,venue,citationCount,externalIds,openAccessPdf,url"
       },
       "_comment": "Ai4Scholar 开放 API：S2 语料 2 亿+；Bearer 认证；每次成功调用扣积分(1分起)，x-credits-remaining 可对账；PDF 下载需本地 stdio MCP（见 scripts/ai4scholar_download.py）"
+    },
+    "zhipu": {
+      "enabled": true,
+      "type": "http",
+      "endpoint": "https://open.bigmodel.cn/api/paas/v4/web_search",
+      "roles": [
+        "general",
+        "news",
+        "technical",
+        "arbitration"
+      ],
+      "weight": 1.2,
+      "cost": 1,
+      "timeout_sec": 30,
+      "default_params": {
+        "search_engine": "search_std",
+        "count": 8
+      }
     }
   },
   "modes": {
     "general": {
-      "_comment": "通用搜索：2 源对比，有出入则启用第 3 源仲裁",
+      "_comment": "通用搜索：多源对比，有出入则启用第 3 源仲裁（zhipu=智谱 web_search，套餐 Key 按次计积分）",
       "primary_pair": [
         "keenable",
         "tavily"
@@ -207,11 +233,13 @@
         "_comment": "性价比 tier 用免费/便宜源，旗舰 tier 用高质量源",
         "value": [
           "keenable",
-          "bocha"
+          "bocha",
+          "zhipu"
         ],
         "flagship": [
           "tavily",
-          "bocha"
+          "bocha",
+          "zhipu"
         ]
       },
       "arbitrator": "firecrawl",
@@ -220,13 +248,14 @@
       "_agreement_threshold_comment": "两源结果重叠率低于此值则触发仲裁"
     },
     "academic": {
-      "_comment": "学术搜索：5 源并行（arxiv 官方 API 429 时降级 HTML；dblp 有 Anubis 人机墙时自动过墙；semantic_scholar 建议配 S2_API_KEY；openalex 免费兜底；ai4scholar 覆盖 S2 2 亿+ 语料，按积分计费），论文链接留痕",
+      "_comment": "学术搜索：6 源并行（arxiv 官方 API 429 时降级 HTML；dblp 有 Anubis 人机墙时自动过墙；semantic_scholar 建议配 S2_API_KEY；openalex 免费兜底；ai4scholar 按 S2 积分计费；zhipu 中文学术资讯补充），论文链接留痕",
       "sources": [
         "arxiv",
         "dblp",
         "semantic_scholar",
         "openalex",
-        "ai4scholar"
+        "ai4scholar",
+        "zhipu"
       ],
       "max_results_per_source": 15,
       "record_papers": true

@@ -77,6 +77,50 @@ description: 图像理解、网页截图核验、OCR 文字提取、科研绘图
 - `code=PROVIDER_ERROR` 或提示未配置 key：告知用户补 ZHIPU_API_KEY（repo 根目录 .env）并把 config.json 的 mock 改为 false；或说明当前为 mock 结果。
 - 性价比模型失败会自动升级旗舰模型（策略引擎内置），无需人工干预。
 
+## 智谱官方视觉 MCP（zai-mcp-server，2026-09-21 接入并移植）
+
+官方 Local MCP（stdio，`npx -y @z_ai/mcp-server@latest`，v0.1.5，Apache-2.0）的 8 个工具
+**已逐字移植进本地 `~/projects/Vision-MCP`**（提示词见 `vision_mcp/prompts/`，同步脚本
+`scripts/sync_zai_prompts.mjs`），因此**不需要再单独挂载官方 MCP**：
+
+| 工具 | 用途 | 档位 |
+|---|---|---|
+| `ui_to_artifact` | UI 截图 → 代码/提示词/设计规范/描述（`output_type`） | official |
+| `extract_text_from_screenshot` | 代码/终端/文档截图 OCR（比 `extract_text` 更贴代码场景） | official |
+| `diagnose_error_screenshot` | 报错弹窗/堆栈截图诊断（可带 `context`） | official |
+| `understand_technical_diagram` | 架构/流程/UML/ER 图解读（可带 `diagram_type`） | official |
+| `analyze_data_visualization` | 仪表盘/统计图表解读（可带 `analysis_focus`） | official |
+| `ui_diff_check` | 两张 UI 截图差异对比（期望 → 实际） | official |
+| `video_analysis` | MP4/MOV/M4V/WEBM（本地 ≤8MB，或远端 URL 透传） | official |
+
+`official` 档 = `zhipu:glm-5.3-flash`（与官方默认模型一致），回退链
+`zhipu:glm-4.6v` → `dashscope:qwen3-vl-plus`。参数名与官方一致，同时接受本地路径与远端 URL。
+
+**验收（2026-09-21）**：视频（ffmpeg 生成 3s testsrc）正确识别彩条/白圆/彩虹带/数字框；
+OCR 逐字还原 Python 堆栈；错误诊断正确定位 DB 连接失败；图表分析指出缺刻度无法量化；
+UI diff 报出结构性差异。原有 8 个工具回归全部正常，本地共 **15 个工具**。
+
+配置取舍：Grok 的 `~/.grok/config.toml` 中 `zai-vision` 已置 `enabled = false`（功能已并入本地，
+保留配置便于对比官方实现）；`zai-web-search` 保持启用。
+
+**环境约定**：环境变量 `Z_AI_API_KEY`（同 ZHIPU_API_KEY 值）+ `Z_AI_MODE=ZHIPU`；
+密钥统一存 `~/.config/dsh/secrets.env`（600 权限）与 `~/.config/vision-ai/.env`，
+配置里用 `${ZHIPU_API_KEY}` 引用，禁止明文。
+
+**计费**：官方工具走 REST 直调（套餐积分），不经 npx 进程，省一层启动开销。
+
+## Grok 内模型补充（2026-09-21 配置）
+
+Grok `~/.grok/config.toml` 已配置智谱/第三方模型，视觉任务编排时可按需切换主对话模型：
+
+| 模型 | 用途 |
+|---|---|
+| `glm-5.3-flash` / `glm-5.3`（NewAPI 中转） | 日常主力 / 旗舰 |
+| `deepseek-v4.1-flash`（commandcode Provider API，模型 ID `deepseek/deepseek-v4.1-flash`） | 备用对话模型 |
+
+注意：`api.commandcode.ai` 在本机代理节点下会 TLS 黑洞，`~/.bashrc` 的 `no_proxy` 已豁免
+该域名（走 IPv6 直连）；若 Grok 内该模型超时，先检查 `no_proxy` 是否含 `api.commandcode.ai`。
+
 ## 输出规范
 
 - 每条结论注明来源工具与模式；mock 结果必须标注「模拟数据」。

@@ -1,12 +1,12 @@
 ---
 name: unified-search
 description: >
-  统一网页+学术搜索聚合器（9 源：keenable/tavily/firecrawl/bocha/arxiv/dblp/semantic_scholar/openalex/ai4scholar），三模式：general（双源+分歧仲裁）、academic（五源并行+论文链接记录）、fetch（单页正文提取），配额感知。内置自愈：NO_PROXY 方括号 IPv6 清洗、arxiv 429 降级 HTML、dblp Anubis PoW 过墙、401/402 熔断、失败源透出。任何需要实时信息、学术论文、网页内容搜索（搜一下/查一下/find papers/search the web）都优先使用本技能，取代内置 web 搜索工具；纯代码/本地问题勿用。
+  统一网页+学术搜索聚合器（10 源：keenable/tavily/firecrawl/bocha/zhipu/arxiv/dblp/semantic_scholar/openalex/ai4scholar），三模式：general（多源+分歧仲裁）、academic（六源并行+论文链接记录）、fetch（单页正文提取），配额感知。内置自愈：NO_PROXY 方括号 IPv6 清洗、arxiv 429 降级 HTML、dblp Anubis PoW 过墙、401/402 熔断、失败源透出。任何需要实时信息、学术论文、网页内容搜索（搜一下/查一下/find papers/search the web）都优先使用本技能，取代内置 web 搜索工具；纯代码/本地问题勿用。
 ---
 
 # Unified Search
 
-A single skill that replaces ALL default web search tools. 9 sources, 3 modes,
+A single skill that replaces ALL default web search tools. 10 sources, 3 modes,
 quota-aware, with retry and dedup. **Always use this skill first** for any
 search need; only fall back to built-in tools if this skill fails entirely.
 
@@ -18,19 +18,20 @@ search need; only fall back to built-in tools if this skill fails entirely.
 | tavily | HTTP, 1000/mo | metered | AI answer summary, high relevance |
 | firecrawl | HTTP, 1000/mo | metered | Markdown body extraction, scraping |
 | bocha | HTTP | pay-per-call | 中文搜索最强，预充值按量 |
+| zhipu | HTTP | GLM 套餐按次计积分 | 中文资讯聚合摘要（无链接，见下） |
 | arxiv | HTTP | free | Preprint papers (physics/CS/math) |
 | dblp | HTTP | free | CS publication catalog |
 | semantic_scholar | HTTP | free | Citation graph, abstracts, PDF links（需 S2_API_KEY 才稳） |
 | openalex | HTTP | free | 2.5 亿+ 论文目录，无需 key、无人机墙，学术兜底主力 |
 | ai4scholar | HTTP | credits（按次扣积分） | S2 语料 2 亿+；另有 MCP 通道覆盖 arXiv/PubMed/bioRxiv/medRxiv/Google Scholar |
 
-注：arxiv / dblp / semantic_scholar / openalex 全部免费；付费源为 tavily、firecrawl（各 1000/月）
-与 bocha（按次）。源健康与自愈机制见下文「源健康与自愈」。
+注：arxiv / dblp / semantic_scholar / openalex 全部免费；付费源为 tavily、firecrawl（各 1000/月）、
+bocha（按次）与 zhipu（GLM Coding Plan 套餐按次计积分）。源健康与自愈机制见下文「源健康与自愈」。
 
 ## 环境依赖（本技能并入原 keenable-cli 技能）
 
 - **keenable 源为硬依赖**：`unified_search.py` 直接调用 `keenable` CLI 二进制（config.json
-  `sources.keenable.command`），未安装时该源不可用（其余 6 源不受影响）。
+  `sources.keenable.command`），未安装时该源不可用（其余源不受影响）。
 - **安装 / 认证 / 更新 / 为 AI 客户端配置 keenable MCP**：见 `references/keenable-setup.md`
   （原 keenable-cli 技能全文迁移，含安装脚本、设备码登录、configure-mcp、CLI 参考）。
 - 用户提出"配置 keenable MCP / 安装 keenable / 登录 keenable"等工具维护诉求时，同样走本技能
@@ -38,8 +39,8 @@ search need; only fall back to built-in tools if this skill fails entirely.
 
 ## 分层（--tier，general 模式）
 
-- `--tier value`（默认）：性价比源 = keenable（免费）+ bocha（按量中文）
-- `--tier flagship`：旗舰源 = tavily advanced（AI 摘要最强）+ bocha
+- `--tier value`（默认）：性价比源 = keenable（免费）+ bocha（按量中文）+ zhipu（套餐积分）
+- `--tier flagship`：旗舰源 = tavily advanced（AI 摘要最强）+ bocha + zhipu
 - 日常检索用 value；需要权威/深度/外文时用 flagship
 
 ## When to Use (MANDATORY)
@@ -87,21 +88,22 @@ cd ~/.claude/skills && uv run python unified-search/scripts/unified_search.py --
 
 ### `general` (default for non-academic queries)
 
-1. **Parallel**: keenable + tavily (basic depth)
-2. **Agreement check**: compute URL-host Jaccard overlap
+1. **Parallel**: value tier = keenable + bocha + zhipu；flagship tier = tavily + bocha + zhipu
+2. **Agreement check**: compute URL-host Jaccard overlap（无链接源如 zhipu 不参与按 URL 合并）
    - If overlap ≥ 0.4 → merge, dedup, rank, done
    - If overlap < 0.4 → **arbitration**: invoke firecrawl as 3rd source
 3. **Merge**: dedup by normalized URL, cross-validated results get score bonus
 
-Rationale: 2 free/metered sources first; expensive firecrawl only when
-the two sources disagree, conserving the 1000/month quota.
+Rationale: free/metered sources first; expensive firecrawl only when
+sources disagree, conserving the 1000/month quota.
 
 ### `academic` (auto-triggered for paper/research queries)
 
-1. **Parallel**: arxiv + dblp + semantic_scholar + openalex + ai4scholar（前四个免费；ai4scholar 按积分计费）
+1. **Parallel**: arxiv + dblp + semantic_scholar + openalex + ai4scholar + zhipu（前四个免费；ai4scholar 按积分、zhipu 按套餐积分计费）
    - arxiv：export API 被限流（429）时自动降级抓 `https://arxiv.org/search/`（结果带 `via: html_fallback`）
    - dblp：Anubis 人机墙自动过墙（PoW，结果带 `via: anubis_pow`，cookie 缓存 1h）
    - openalex：免费兜底，不受上述限流影响
+   - zhipu：中文资讯/技术报道补充（无链接结果，仅供排序展示）
 2. **Merge**: dedup by DOI/arxiv-id/normalized-URL, cross-validated bonus
 3. **Record**: all paper links saved to `data/history.db` for later retrieval
 4. Each result includes: title, url, pdf_url, doi, arxiv_id, year, venue, authors
@@ -212,6 +214,29 @@ unified-search/
 └── cache/                    # reserved for future result caching
 ```
 
+## Zhipu 源（GLM 套餐 web_search，2026-09-21 接入验收）
+
+| 项 | 值 |
+|---|---|
+| 端点 | `POST https://open.bigmodel.cn/api/paas/v4/web_search` |
+| 认证 | `Authorization: Bearer <ZHIPU_API_KEY>`（GLM Coding Plan 套餐 Key） |
+| 请求体 | `{"search_engine":"search_std","search_query":"...","count":8}`（ engines: search_std/search_pro/search_sim 等） |
+| 响应 | `search_result[]`：`title` / `link` / `content` / `media` / `publish_date` / `refer` / `icon` |
+| 计费 | 套餐按次计积分（联网搜索每次 Output 系数 1.2）；config.json 设软上限 monthly_limit=2000 仅本地计数 |
+| 密钥 | `~/.config/vision-ai/.env` 的 `ZHIPU_API_KEY`（脚本自动加载）；`~/.config/dsh/secrets.env` 同步一份 |
+
+**关键限制（实测）**：`search_std` 与 `search_pro` 的 `link` 字段都返回空字符串——本源只给
+标题 + 正文摘要 + 日期，没有 URL。定位为「中文摘要引擎」：结果带 `no_link: true`，按
+`标题+源` 独立成键，不参与跨源 URL 合并（不会被误判为与其它源重复）。需要链接时用
+keenable/bocha/tavily 的结果，或拿 zhipu 的标题再 `--fetch`。
+
+**验收（2026-09-21）**：`--mode general` 三源并行（keenable+bocha+zhipu）返回正常，
+zhipu 贡献 GLM-5.3 中文报道 6 条且 `sources_failed` 为空；51 个既有单测全过。
+
+**与视觉 MCP 的关系**：智谱官方视觉 MCP（`@z_ai/mcp-server`）的 8 个工具已并进本地
+`~/projects/Vision-MCP`（见 `vision-workflow` 技能），与本技能的搜索源互不重叠——
+搜索走 REST `web_search`，视觉走 `chat/completions`，两者共用同一把 `ZHIPU_API_KEY`。
+
 ## Ai4Scholar 开放 API（新增学术源，2026-09-12 接入验收）
 
 | 项 | 值 |
@@ -308,4 +333,5 @@ uv run python unified-search/scripts/anubis_dblp.py "transformer" -n 5
 | `tavily: quota_exhausted` | Wait for month rollover or use `--mode general` (keenable only path) |
 | `firecrawl: 401` | Check `FIRECRAWL_API_KEY` env var or value in config.json |
 | arxiv returns empty | arxiv rate-limits (1 req/3s); script retries with backoff |
+| zhipu: no API key / 401 | 确认 `ZHIPU_API_KEY` 已写入 `~/.config/vision-ai/.env`；套餐 Key 与平台普通 Key 不通用，需与 `Z_AI_MODE=ZHIPU` 匹配 |
 | All sources fail | Script returns error entries; check network and API keys |
