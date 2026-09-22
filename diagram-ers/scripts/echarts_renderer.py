@@ -38,7 +38,7 @@ _CHROMIUM_CANDIDATES = [
 _ECHARTS_LOCAL_PATHS = [
     # 如果用户本地装过 echarts，直接用
     "/usr/lib/node_modules/echarts/dist/echarts.min.js",
-    os.path.expanduser("~/.claude/skills/diagram-ers/scripts/vendor/echarts.min.js"),
+    os.path.expanduser("~/projects/dc-skills/diagram-ers/scripts/vendor/echarts.min.js"),
 ]
 _ECHARTS_CDN = "https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"
 

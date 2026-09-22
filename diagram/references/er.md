@@ -54,7 +54,7 @@ CREATE TABLE users (
 ## ER 图生成命令
 
 ```bash
-cd ~/.claude/skills/diagram-er
+cd ~/projects/dc-skills/diagram-er
 uv run python -m scripts.cli \
   --sql-file docs/er/sql/<table_name>.sql
 ```
@@ -62,7 +62,7 @@ uv run python -m scripts.cli \
 当输入文件使用**绝对路径**时，CLI 会自动推断项目目录（向上查找包含 `docs/` 或 `thesis-output/` 的目录），默认输出到 `<项目目录>/thesis-output/diagram-er/er-diagram.png`。如使用相对路径或无法推断，则回退到 `~/.claude/skills-output/diagram-er/er-diagram.png`。如需自定义路径：
 
 ```bash
-cd ~/.claude/skills/diagram-er
+cd ~/projects/dc-skills/diagram-er
 uv run python -m scripts.cli \
   --sql-file docs/er/sql/<table_name>.sql \
   --out <自定义路径>.png
@@ -89,7 +89,7 @@ CREATE TABLE users (
 
 生成命令：
 ```bash
-cd ~/.claude/skills/diagram-er
+cd ~/projects/dc-skills/diagram-er
 uv run python -m scripts.cli \
   --sql-file docs/er/sql/users.sql
 ```
@@ -105,6 +105,6 @@ uv run python -m scripts.cli --sql-file users.sql --downsample
 ## 依赖安装
 
 ```bash
-cd ~/.claude/skills
+cd ~/projects/dc-skills
 uv sync
 ```

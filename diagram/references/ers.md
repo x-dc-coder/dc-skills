@@ -241,7 +241,7 @@ docs/er/
 ### 默认（推荐）：ECharts 引擎
 
 ```bash
-cd ~/.claude/skills/diagram-ers
+cd ~/projects/dc-skills/diagram-ers
 uv run python -m scripts.cli \
   --json-file docs/er/json/<name>.json
 ```
@@ -249,7 +249,7 @@ uv run python -m scripts.cli \
 当输入文件使用**绝对路径**时，CLI 会自动推断项目目录（向上查找包含 `docs/` 或 `thesis-output/` 的目录），默认输出到 `<项目目录>/thesis-output/diagram-ers/ers-diagram.png`。如使用相对路径或无法推断，则回退到 `~/.claude/skills-output/diagram-ers/ers-diagram.png`。如需自定义路径：
 
 ```bash
-cd ~/.claude/skills/diagram-ers
+cd ~/projects/dc-skills/diagram-ers
 uv run python -m scripts.cli \
   --json-file docs/er/json/<name>.json \
   --out <自定义路径>.png
@@ -280,7 +280,7 @@ uv run python -m scripts.cli --json-file er.json --layout force --settle-ms 4000
 ### 兜底：Pillow 引擎（无需 Chromium）
 
 ```bash
-cd ~/.claude/skills/diagram-ers
+cd ~/projects/dc-skills/diagram-ers
 uv run python -m scripts.cli \
   --json-file docs/er/json/<name>.json \
   --engine pillow
@@ -334,7 +334,7 @@ Pillow 引擎不支持属性绘制，仅画实体矩形 + 关系菱形 + 连线�
 生成命令：
 
 ```bash
-cd ~/.claude/skills/diagram-ers
+cd ~/projects/dc-skills/diagram-ers
 uv run python -m scripts.cli \
   --json-file docs/er/json/simple.json
 ```
@@ -342,7 +342,7 @@ uv run python -m scripts.cli \
 ### 简化格式（直接使用）
 
 ```bash
-cd ~/.claude/skills/diagram-ers
+cd ~/projects/dc-skills/diagram-ers
 uv run python -m scripts.cli --json-file er.json
 ```
 
@@ -365,7 +365,7 @@ uv run python -m scripts.cli --json-file er.json --engine pillow --downsample
 ## 环境管理（统一规范）
 
 ```bash
-cd ~/.claude/skills
+cd ~/projects/dc-skills
 uv sync
 ```
 

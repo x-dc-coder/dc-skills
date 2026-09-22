@@ -7,7 +7,7 @@ section-skeleton selection, figure/table/equation placement, and citation-style
 decisions in the writing-plan phase.
 
 Usage:
-    cd ~/.claude/skills && uv run python paper-metrics/scripts/profile_papers.py \
+    cd ~/projects/dc-skills && uv run python paper-metrics/scripts/profile_papers.py \
         --corpus /path/to/paper-analysis/ --out /path/to/output/
 
 Outputs:

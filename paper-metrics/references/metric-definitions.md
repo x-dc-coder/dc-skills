@@ -130,7 +130,7 @@
 
 命令：
 
-    cd ~/.claude/skills && uv run python paper-metrics/scripts/profile_papers.py --corpus '/mnt/e/AllProjects202601/M-PCA/_paper-metrics-run/运筹与管理/corpus_ycgl_pdf/paper-conversion' --out /tmp/cn
+    cd ~/projects/dc-skills && uv run python paper-metrics/scripts/profile_papers.py --corpus '/mnt/e/AllProjects202601/M-PCA/_paper-metrics-run/运筹与管理/corpus_ycgl_pdf/paper-conversion' --out /tmp/cn
 
 | 观测量 | **修复前**（A 轮前，实跑） | **修复后**（探测层落地后，同一命令实跑） |
 |---|---|---|
@@ -200,10 +200,10 @@ text_metrics.compute_text_metrics(text, bundle) 的返回值为 {metric_id: metr
 - **证据本身必须可复现**：`evidence.count == n`，且每条证据必须能由原文逐字符重放（span 型用上面的截断规则，块索引型用块文本前缀）。**无法回指的数值不得通过 OBSERVED 层验收**：基线报告以回指率为 gate（目标 >= 0.95，真实语料实测 1.000）。
 - **`inputs` 现在含图片哈希（2026-09-15，issue #18-6）**：每篇论文的 `inputs` 除 content_list / marker markdown / paper_reader meta 外，还逐张登记 `figure_image:<img_path>` 的 sha256（文件集取自 `doc_model` 的 FIGURES 流，即 `S-SIZ-04` 实际打开的那批）。原因是该指标读图片字节：图片不进 `inputs`，换一张图会改变数值却不改变 `corpus_id`，审计只能判 `unexplained_drift`——而那是留给"确定性被破坏"的判决。**副作用**：`corpus_id` 因此变化，旧记录必须重登记（`audit_corpus.py --corpus <path>` 会打印新身份）。
 - **语言自查（先做这一步，再看任何数值）**：唯一事实源是 `text_metrics.detect_language(text)`，返回 `{language, cjk_ratio, supported}`；`cjk_ratio > 0.10` ⇒ 不支持。复算命令：
-  `cd ~/.claude/skills && uv run python -c "import sys; sys.path.insert(0,'paper-metrics/scripts'); import text_metrics as t; print(t.detect_language(open('<canonical_text.txt>').read()))"`
+  `cd ~/projects/dc-skills && uv run python -c "import sys; sys.path.insert(0,'paper-metrics/scripts'); import text_metrics as t; print(t.detect_language(open('<canonical_text.txt>').read()))"`
   语言不支持时**不要解读任何数值**：依 §0 契约，此时每指标为 `null` + `LANGUAGE_NOT_SUPPORTED`、计入 `n_missing`，语料级报 `CORPUS_LANGUAGE_UNSUPPORTED`。契约与中文语料实测对照见 **§0.2**。
 - **第三方复算命令**：
-  `cd ~/.claude/skills && uv run python paper-metrics/scripts/baseline_eval.py --corpus <corpus> --out <out>`
+  `cd ~/projects/dc-skills && uv run python paper-metrics/scripts/baseline_eval.py --corpus <corpus> --out <out>`
   报告 `_baseline_report.json` 的 `evidence_samples[]` 逐条给出 `span` / `block_index`、`source_slice`（实测切片）与 `verified` 布尔值。
 
 ### 1.2 Canonical 文本重建规则（完整、可执行 —— 回指的前置条件）
@@ -228,7 +228,7 @@ text_metrics.compute_text_metrics(text, bundle) 的返回值为 {metric_id: metr
 
 **独立可执行核对**（该脚本**不 import 仓库任何模块**，故为真正的第二条路径）：
 
-    cd ~/.claude/skills && uv run python '<交付目录>/_rebuild_check.py' --corpus '/mnt/e/AllProjects202601/M-PCA/VRP-GPU课题分析/paper-analysis' --jsonl /tmp/prof/_per_paper_metrics.jsonl
+    cd ~/projects/dc-skills && uv run python '<交付目录>/_rebuild_check.py' --corpus '/mnt/e/AllProjects202601/M-PCA/VRP-GPU课题分析/paper-analysis' --jsonl /tmp/prof/_per_paper_metrics.jsonl
 
 **自检点（冻结值，终检实测）**
 
@@ -477,7 +477,7 @@ text_metrics.compute_text_metrics(text, bundle) 的返回值为 {metric_id: metr
 - **反映什么写作行为**：`M-CLS-31` 低 = 短句多、句式简单；高 = 长复句多。`M-CLS-31` 相同而 `M-CLS-32` 不同，是**不同的**写作画像（同分句数、每段更长）。`M-SLEN-34/35` 刻画句长分布的**尾部**——两本期刊可以有相同的均值（`M-SLEN-01`）而在最长 10% 的句子上差异巨大。
 - **不能推断什么**：不能推断"复句多 = 质量差"（中文复句是常态，分句密度高本身不是缺陷）；不能推断作者水平；不能推断语法正确性。
 - **已知失效场景**：① 表格单元格内的逗号（表格走 `table_body` 流，不进正文，本指标不读）；② 未闭合括号后的切分（已按可预测方式降级）；③ 极短文本（无句子时 `M-CLS-31` 为 `null` + 原因码，绝不报 0）。
-- **复算路径**：`cd ~/.claude/skills && uv run python -m pytest paper-metrics/scripts/test_clause_layer.py -q` 跑冻结用例；或对任意文本调 `split_clauses_zh` 手工核对每条跨度。
+- **复算路径**：`cd ~/projects/dc-skills && uv run python -m pytest paper-metrics/scripts/test_clause_layer.py -q` 跑冻结用例；或对任意文本调 `split_clauses_zh` 手工核对每条跨度。
 
 ### 3.12 issue #23 五层：stance / PDTB 连接词 / 句式模式 / 术语一致性
 
@@ -531,7 +531,7 @@ issue #23 的八条新指标分为两类：**一条 INFERRED**（stance，需要
 #### 3.12.5 复算路径
 
 ```bash
-cd ~/.claude/skills && uv run python -m pytest paper-metrics/scripts/test_text_metrics.py -q -k 'stance or pdtb or sentence_pattern or terminology'
+cd ~/projects/dc-skills && uv run python -m pytest paper-metrics/scripts/test_text_metrics.py -q -k 'stance or pdtb or sentence_pattern or terminology'
 ```
 
 校准集自检（κ 与留出集 P/R/F1 从冻结文件**重算**，与代码内常数必须一致）：`-k 'calibration'`。对任意文本手算可用 `tm._classify_sentence_stance` / `tm._term_clusters`。

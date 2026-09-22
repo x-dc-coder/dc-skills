@@ -79,7 +79,7 @@ def _sanitize_no_proxy_env() -> None:
 _sanitize_no_proxy_env()
 
 # ─── Paths ──────────────────────────────────────────────────────────────────
-SKILL_DIR = Path(__file__).resolve().parent.parent          # ~/.claude/skills/unified-search
+SKILL_DIR = Path(__file__).resolve().parent.parent          # ~/projects/dc-skills/unified-search
 SCRIPT_DIR = Path(__file__).resolve().parent                # .../scripts
 CONFIG_PATH = SKILL_DIR / "config.json"
 DATA_DIR = SKILL_DIR / "data"

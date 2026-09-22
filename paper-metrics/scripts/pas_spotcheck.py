@@ -34,7 +34,7 @@ Adjudication (--verdicts JSON, optional): {"P01": "passive", "B04": "unclear",
 column stays empty without --verdicts so a human can fill it in.
 
 Usage:
-    cd ~/.claude/skills && uv run python paper-metrics/scripts/pas_spotcheck.py \
+    cd ~/projects/dc-skills && uv run python paper-metrics/scripts/pas_spotcheck.py \
         --corpus /path/to/paper-analysis --out /tmp/_pas_spotcheck.md \
         --json /tmp/_pas_spotcheck.json --verdicts /tmp/verdicts.json
 """

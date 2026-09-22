@@ -4,7 +4,7 @@ Tests cover: line-by-line streaming, \r cleaning, UTF-8 error handling,
 timeout enforcement, returncode propagation, and environment variable injection.
 
 Run:
-    cd ~/.claude/skills && uv run pytest wsl-windows-bridge/scripts/test_streaming.py -v
+    cd ~/projects/dc-skills && uv run pytest wsl-windows-bridge/scripts/test_streaming.py -v
 """
 from __future__ import annotations
 

@@ -49,7 +49,7 @@ Guarantees
 
 Usage
 -----
-    cd ~/.claude/skills && uv run pytest paper-metrics/scripts/test_lexicon_loader.py -v
+    cd ~/projects/dc-skills && uv run pytest paper-metrics/scripts/test_lexicon_loader.py -v
 """
 from __future__ import annotations
 

@@ -10,7 +10,7 @@ Written against the contract in the task + references/figure-profile-schema.md:
   * section + type_guess are INFERRED with confidence + basis (not vision).
 
 Run:
-    cd ~/.claude/skills && uv run pytest paper-metrics/scripts/test_figure_profile.py -q
+    cd ~/projects/dc-skills && uv run pytest paper-metrics/scripts/test_figure_profile.py -q
 """
 
 from __future__ import annotations

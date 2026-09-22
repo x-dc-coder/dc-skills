@@ -28,7 +28,7 @@ What it does (all OBSERVED, zero LLM, pure stdlib):
      checkable here and exits 1 if any of them fails.
 
 Usage:
-    cd ~/.claude/skills && uv run python paper-metrics/scripts/baseline_eval.py \
+    cd ~/projects/dc-skills && uv run python paper-metrics/scripts/baseline_eval.py \
         --corpus /mnt/e/AllProjects202601/M-PCA/VRP-GPU课题分析/paper-analysis \
         --out /path/to/output/
 
@@ -513,7 +513,7 @@ def build_golden(summary: dict, profile: dict,
         "weight_mode": summary.get("weight_mode"),
         "metrics": per_metric,
         "recompute_hint": (
-            "cd ~/.claude/skills && uv run python "
+            "cd ~/projects/dc-skills && uv run python "
             "paper-metrics/scripts/profile_papers.py --corpus <corpus> --out <out>; "
             "then compare <out>/_corpus_summary.json metrics[*] against this table. "
             "Values match only when metric_spec_version and lexicon_fingerprint match."

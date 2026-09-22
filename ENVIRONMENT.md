@@ -20,7 +20,7 @@ done
 
 | 工具 | 本机版本 | 依赖技能 | 安装方式 | 验证 |
 |---|---|---|---|---|
-| uv | 0.11.28 | 全部 Python 技能（执行环境：先 `cd ~/.claude/skills` 再 `uv run`，见 CLAUDE.md 核心约束） | 官方安装脚本（~/.local/bin/uv） | `uv --version` |
+| uv | 0.11.28 | 全部 Python 技能（执行环境：先 `cd ~/projects/dc-skills` 再 `uv run`，见 CLAUDE.md 核心约束） | 官方安装脚本（~/.local/bin/uv） | `uv --version` |
 | gh | 2.97.0 | github-workflow（认证/远端/Issue/PR） | 官方安装（~/.local/bin/gh） | `gh auth status` |
 | git | 2.55.0 | 全部（github-workflow 为基座） | 系统包 | `git --version` |
 | lark-cli | 1.0.94 | lark-cli（飞书 23 域聚合技能，硬依赖） | nvm npm 全局 `@larksuite/cli` | `lark-cli --version`；升级 `lark-cli update` |
@@ -75,7 +75,7 @@ metadata:
 
 | 命令 | 脚本 | 职责 | 网络 | 耗时 |
 |---|---|---|---|---|
-| `skill-doctor` | `scripts/skill-doctor.mjs` | **有效性 + 注册完整性**：同时扫描 `~/.claude/skills`、`~/.agents/skills`、`~/.dsh/skills`，按 realpath 去重；检查缺失 `SKILL.md`/断链注册、二进制、守护进程、venv 与凭据 → READY·DEGRADED·UNAVAILABLE | ❌ 零网络 | 通常 <250ms |
+| `skill-doctor` | `scripts/skill-doctor.mjs` | **有效性 + 注册完整性**：同时扫描 `~/projects/dc-skills`、`~/.agents/skills`、`~/.dsh/skills`，按 realpath 去重；检查缺失 `SKILL.md`/断链注册、二进制、守护进程、venv 与凭据 → READY·DEGRADED·UNAVAILABLE | ❌ 零网络 | 通常 <250ms |
 | `skill-update-check` | `scripts/skill-update-check.py` | **版本**：npm / pypi / github / self / baseline 五类通道扫更新 + ENVIRONMENT.md 登记漂移 | ✅ 只读 | ~1-3s |
 | `skillctl` | `scripts/skillctl` | **生命周期**：契约 lint / 死链清理 / 5 阶段安全移除 / 秒级回滚 | ❌ 零网络 | 毫秒级 |
 

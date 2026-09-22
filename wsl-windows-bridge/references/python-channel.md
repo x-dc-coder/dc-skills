@@ -296,7 +296,7 @@ print(r.stdout)
 
 当一次启动 ≥2 个 Windows GPU 子进程时，**必须**给每个子进程注入显存配额 + CPU 线程约束。规则全文在 `/home/dc/CLAUDE.md` → "GPU 多路并发铁律"，此 skill 提供现成封装。
 
-**通用模块**：`~/.claude/skills/wsl-windows-bridge/scripts/gpu_safe_subprocess.py`
+**通用模块**：`~/projects/dc-skills/wsl-windows-bridge/scripts/gpu_safe_subprocess.py`
 
 ```python
 from gpu_safe_subprocess import GpuLimits, run_gpu_windows, acquire_gpu_slot

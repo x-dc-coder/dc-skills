@@ -7,7 +7,7 @@
 - 并发测试用 threading.Barrier 同步触发，验证 fcntl 互斥
 
 运行：
-    cd ~/.claude/skills && uv run pytest wsl-windows-bridge/scripts/test_gpu_governor.py -v
+    cd ~/projects/dc-skills && uv run pytest wsl-windows-bridge/scripts/test_gpu_governor.py -v
 """
 from __future__ import annotations
 

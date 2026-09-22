@@ -12,7 +12,7 @@ Covers:
   4. Every record follows the product contract and declares its stream scope
 
 Run:
-    cd ~/.claude/skills && uv run pytest paper-metrics/scripts/test_stream_metrics.py -v
+    cd ~/projects/dc-skills && uv run pytest paper-metrics/scripts/test_stream_metrics.py -v
 """
 
 from __future__ import annotations

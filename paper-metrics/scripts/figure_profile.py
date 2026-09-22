@@ -19,7 +19,7 @@ at the SAME value (800 px) so the two stay in lockstep (asserted by a test).
     读不了的图不计入分母并逐条列出（与 S-SIZ-04 同口径）。
 
 Run:
-    cd ~/.claude/skills
+    cd ~/projects/dc-skills
     uv run python paper-metrics/scripts/figure_profile.py \
         --corpus <paper-analysis dir> --out <output dir>
 """

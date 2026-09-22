@@ -54,7 +54,7 @@ npx -y @mermaid-js/mermaid-cli -i sequence.mmd -o sequence.png -b white
 ### 方式二：使用本项目的 CLI 工具（推荐）
 
 ```bash
-cd ~/.claude/skills/diagram-sequence
+cd ~/projects/dc-skills/diagram-sequence
 uv run python -m scripts.cli \
   --json-file docs/sequence/json/<name>.json
 ```
@@ -62,7 +62,7 @@ uv run python -m scripts.cli \
 当输入文件使用**绝对路径**时，CLI 会自动推断项目目录（向上查找包含 `docs/` 或 `thesis-output/` 的目录），默认输出到 `<项目目录>/thesis-output/diagram-sequence/sequence-diagram.png`；中间 `.mmd` 文件自动存放到 `~/.claude/skills-output/diagram-sequence/`。如使用相对路径或无法推断，则回退到 `~/.claude/skills-output/diagram-sequence/sequence-diagram.png`。如需自定义路径：
 
 ```bash
-cd ~/.claude/skills/diagram-sequence
+cd ~/projects/dc-skills/diagram-sequence
 uv run python -m scripts.cli \
   --json-file docs/sequence/json/<name>.json \
   --out <自定义路径>.png
@@ -122,7 +122,7 @@ docs/sequence/
 ## 时序图生成命令
 
 ```bash
-cd ~/.claude/skills/diagram-sequence
+cd ~/projects/dc-skills/diagram-sequence
 uv run python -m scripts.cli \
   --json-file docs/sequence/json/login.json
 ```
@@ -160,7 +160,7 @@ uv run python -m scripts.cli \
 生成命令：
 
 ```bash
-cd ~/.claude/skills/diagram-sequence
+cd ~/projects/dc-skills/diagram-sequence
 uv run python -m scripts.cli \
   --json-file docs/sequence/json/seat-select.json
 ```
@@ -191,7 +191,7 @@ uv run python -m scripts.cli \
 ## 环境管理（统一规范）
 
 ```bash
-cd ~/.claude/skills
+cd ~/projects/dc-skills
 uv sync
 ```
 

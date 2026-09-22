@@ -1,0 +1,122 @@
+#!/usr/bin/env python3
+"""skills-sync — 按 agent-map.yaml 物化各 Agent 的技能软链接农场。
+
+语义：
+- master（本仓库根）是唯一物理技能目录；每个 agent 的 skills 目录只放启用技能的软链接。
+- 只管理指向 master 的软链接：补齐缺失的、移除不在清单里的。
+- 农场里的真实目录（如安装器着陆产物）与非 master 软链接（vendor/预设技能）一律不碰。
+
+用法：
+  cd ~/projects/dc-skills && uv run python scripts/skills-sync          # 物化并报告
+  uv run python scripts/skills-sync --check                            # 只检查漂移，不修改
+"""
+
+from __future__ import annotations
+
+import argparse
+import os
+import sys
+from pathlib import Path
+
+import yaml
+
+ROOT = Path(__file__).resolve().parent.parent
+MANIFEST = ROOT / "agent-map.yaml"
+
+
+def expand(p: str) -> Path:
+    return Path(os.path.expanduser(p))
+
+
+def load_manifest() -> dict:
+    if not MANIFEST.exists():
+        sys.exit(f"缺少清单文件: {MANIFEST}")
+    return yaml.safe_load(MANIFEST.read_text(encoding="utf-8"))
+
+
+def under_master(target: Path, master: Path) -> bool:
+    try:
+        target.relative_to(master)
+        return True
+    except ValueError:
+        return False
+
+
+def resolve_names(value, base: set[str]) -> set[str]:
+    """skills 字段接受 'base' 引用或显式列表。"""
+    if value is None:
+        return set(base)
+    if isinstance(value, str):
+        if value == "base":
+            return set(base)
+        sys.exit(f"skills 期望列表或 'base'，得到: {value!r}")
+    return set(value)
+
+
+def sync_farm(farm_dir: str, names: set[str], master: Path, check: bool) -> list[str]:
+    farm = expand(farm_dir)
+    actions: list[str] = []
+    farm.mkdir(parents=True, exist_ok=True)
+
+    # 1) 清理：指向 master 但不在启用清单里的软链接
+    for entry in sorted(farm.iterdir()):
+        if not entry.is_symlink():
+            continue  # 真实目录（安装器着陆区产物）不动
+        if not under_master(Path(os.path.realpath(entry)), master):
+            continue  # 非 master 链接（vendor/预设技能）不动
+        if entry.name not in names:
+            actions.append(f"  - 移除 {entry} -> {os.readlink(entry)}")
+            if not check:
+                entry.unlink()
+
+    # 2) 补齐：启用清单里的技能
+    for name in sorted(names):
+        src = master / name
+        if not src.is_dir():
+            actions.append(f"  ! 缺失技能目录: {src}")
+            continue
+        link = farm / name
+        if link.is_symlink() and Path(os.path.realpath(link)) == src.resolve():
+            continue
+        if link.exists() and not link.is_symlink():
+            actions.append(f"  ! 跳过（真实目录已占用）: {link}")
+            continue
+        actions.append(f"  + 链接 {link} -> {src}")
+        if not check:
+            if link.is_symlink() or link.exists():
+                link.unlink()
+            link.symlink_to(src)
+    return actions
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser(description="按 agent-map.yaml 物化技能农场")
+    ap.add_argument("--check", action="store_true", help="只检查漂移，不修改")
+    args = ap.parse_args()
+
+    m = load_manifest()
+    master = expand(m["master"])
+    if not master.is_dir():
+        sys.exit(f"master 不存在: {master}")
+    base = set(m.get("base") or [])
+    on_demand = set(m.get("on_demand") or [])
+
+    for agent_name, cfg in (m.get("agents") or {}).items():
+        names = resolve_names(cfg.get("skills"), base)
+        for extra in cfg.get("extra") or []:
+            if extra not in on_demand and extra not in base:
+                print(f"! [{agent_name}] extra 中的未知技能: {extra}")
+            names.add(extra)
+        print(f"[{agent_name}] {expand(cfg['dir'])}")
+        for line in sync_farm(cfg["dir"], names, master, args.check):
+            print(line)
+        for preset_name, preset in (cfg.get("presets") or {}).items():
+            print(f"[{agent_name}/{preset_name}] {expand(preset['dir'])}")
+            for line in sync_farm(preset["dir"], set(preset["skills"]), master, args.check):
+                print(line)
+
+    print("check 模式，未做修改" if args.check else "农场物化完成")
+
+
+if __name__ == "__main__":
+    main()

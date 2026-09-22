@@ -12,7 +12,7 @@ compatibility: >
 > **职责说明**：本 skill **仅做术语一致性检查**。引用编号检查（连续性、顺序性、唯一性、尾注对应）由 `thesis-writing/scripts/check_markdown_spec.py` 自动覆盖（`_check_reference_continuity` 方法检测 REF_NUMBER_CONTINUITY / DUPLICATE / NOT_START_AT_ONE）。如需检查引用编号，请使用 thesis-writing 的 markdown spec checker：
 >
 > ```bash
-> cd ~/.claude/skills && uv run python thesis-writing/scripts/check_markdown_spec.py <论文文件>
+> cd ~/projects/dc-skills && uv run python thesis-writing/scripts/check_markdown_spec.py <论文文件>
 > ```
 
 ## 核心问题
@@ -163,7 +163,7 @@ grep -n '^# ' <论文文件>               # 一级标题位置
 本 skill **不处理引用编号**。如需检查论文引用编号（连续性、顺序性、唯一性），请使用 thesis-writing checker：
 
 ```bash
-cd ~/.claude/skills && uv run python thesis-writing/scripts/check_markdown_spec.py <论文文件>
+cd ~/projects/dc-skills && uv run python thesis-writing/scripts/check_markdown_spec.py <论文文件>
 ```
 
 该 checker 自动检测 REF_NUMBER_CONTINUITY（编号不连续）、DUPLICATE（重复引用）、NOT_START_AT_ONE（未从 [1] 开始）等问题。

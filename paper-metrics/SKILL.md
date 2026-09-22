@@ -84,7 +84,7 @@ PDF ──paper-reader──▶ paper-analysis/（Canonical Document）
 **纯 stdlib、零视觉**（不做视觉识别，那些是 issue #1 Phase 1/4/5）：
 
 ```bash
-cd ~/.claude/skills
+cd ~/projects/dc-skills
 uv run python paper-metrics/scripts/figure_profile.py --corpus <paper-analysis> --out <out>
 ```
 
@@ -101,7 +101,7 @@ uv run python paper-metrics/scripts/figure_profile.py --corpus <paper-analysis> 
 ## 快速开始
 
 ```bash
-cd ~/.claude/skills
+cd ~/projects/dc-skills
 
 # 1) 语料 → 指标（主入口）
 uv run python paper-metrics/scripts/profile_papers.py \
@@ -267,7 +267,7 @@ uv run python paper-metrics/scripts/pas_spotcheck.py --corpus <paper-analysis> -
 中文词表是**策展词表**（无公开可再分发的 Hyland 对应资源，见 issue #11 B 组结论），所以它必须能被质疑、被度量。`scripts/lexicon_calibration.py` 提供四步：
 
 ```bash
-cd ~/.claude/skills
+cd ~/projects/dc-skills
 
 # ① 抽标注表（确定性分层抽样：P = 词表命中的句子 / N = 未命中的对照句）
 uv run python paper-metrics/scripts/lexicon_calibration.py sample \
@@ -311,7 +311,7 @@ uv run python paper-metrics/scripts/lexicon_calibration.py mine \
 ## 测试
 
 ```bash
-cd ~/.claude/skills && uv run pytest paper-metrics/scripts -q   # 610 tests
+cd ~/projects/dc-skills && uv run pytest paper-metrics/scripts -q   # 610 tests
 ```
 
 - 分句层冻结用例（可单独跑、无需外部语料）：`uv run pytest paper-metrics/scripts/test_clause_layer.py -q`；
@@ -323,7 +323,7 @@ cd ~/.claude/skills && uv run pytest paper-metrics/scripts -q   # 610 tests
 指标值只有在能说清"**哪份输入 + 哪版代码**"时才可审计。两个语料已登记，审计随时可跑：
 
 ```bash
-cd ~/.claude/skills
+cd ~/projects/dc-skills
 uv run python paper-metrics/scripts/audit_corpus.py --name vrp-en  --out /tmp/audit-en   # 英文基线
 uv run python paper-metrics/scripts/audit_corpus.py --name ycgl-zh --out /tmp/audit-zh   # 中文语料
 ```

@@ -5,7 +5,7 @@ environment variable injection, graceful degradation on Linux, and use_wrapper
 flag routing in stream_gpu_windows().
 
 Run:
-    cd ~/.claude/skills && uv run pytest wsl-windows-bridge/scripts/test_wrapper.py -v
+    cd ~/projects/dc-skills && uv run pytest wsl-windows-bridge/scripts/test_wrapper.py -v
 """
 from __future__ import annotations
 

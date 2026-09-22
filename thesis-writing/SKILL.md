@@ -74,7 +74,7 @@ description: >
 1. 将所有章节合并为 `thesis-output/thesis-writing/full-thesis.md`
 2. **执行 Markdown 规范检查**（必须）：
    ```bash
-   cd ~/.claude/skills && uv run python thesis-writing/scripts/check_markdown_spec.py \
+   cd ~/projects/dc-skills && uv run python thesis-writing/scripts/check_markdown_spec.py \
      --md <output_dir>/full-thesis.md --mode undergraduate
    ```
    - 若检查失败，必须修复所有 ERROR 后才能继续
@@ -106,7 +106,7 @@ description: >
 
 #### A.2 运行 paper-metrics profiler（确定性 OBSERVED 层）
 ```bash
-cd ~/.claude/skills && uv run python paper-metrics/scripts/profile_papers.py \
+cd ~/projects/dc-skills && uv run python paper-metrics/scripts/profile_papers.py \
   --corpus "<user_paper_dir>/paper-analysis/" \
   --out "<output_dir>/" [--verify]
 ```
@@ -209,7 +209,7 @@ profiler 是纯 Python 脚本（stdlib 实现，**零第三方依赖、零 LLM t
 
 #### E.2 运行 checker
 ```bash
-cd ~/.claude/skills && uv run python thesis-writing/scripts/check_markdown_spec.py \
+cd ~/projects/dc-skills && uv run python thesis-writing/scripts/check_markdown_spec.py \
   --md <output_dir>/full-paper.md --mode journal
 ```
 `--mode journal` 相对 `undergraduate` 的差异：
@@ -222,11 +222,11 @@ cd ~/.claude/skills && uv run python thesis-writing/scripts/check_markdown_spec.
 
 ```bash
 # 1) 由语料分位生成写作契约（区间 = p25/p75，而非人工设定）
-cd ~/.claude/skills && uv run python paper-metrics/scripts/build_contract.py \
+cd ~/projects/dc-skills && uv run python paper-metrics/scripts/build_contract.py \
   --summary <output_dir>/_corpus_summary.json --out <output_dir>/_writing_contract.yaml
 
 # 2) 用同一套指标计算校验草稿（输出 实际值 / 目标区间 / 偏差 / 行号）
-cd ~/.claude/skills && uv run python paper-metrics/scripts/validate_draft.py \
+cd ~/projects/dc-skills && uv run python paper-metrics/scripts/validate_draft.py \
   --contract <output_dir>/_writing_contract.yaml \
   --draft <output_dir>/full-paper.md \
   --json <output_dir>/_draft_validation.json
@@ -250,7 +250,7 @@ cd ~/.claude/skills && uv run python paper-metrics/scripts/validate_draft.py \
 **中文语料的标准流程**：
 
 ```bash
-cd ~/.claude/skills
+cd ~/projects/dc-skills
 # 1) 中文语料 → 指标（自动按语言选 v2-zh 词表；12/14 条有值）
 uv run python paper-metrics/scripts/profile_papers.py --corpus <zh_paper-analysis> --out <output_dir>
 
@@ -374,7 +374,7 @@ uv run python paper-metrics/scripts/validate_draft.py \
 ## 输出目录约定
 
 遵循 CLAUDE.md 的两级回退规则：
-- 用户在工作项目目录下（cwd 不在 `~/.claude/skills`）：输出到 `<cwd>/thesis-output/thesis-writing/`
+- 用户在工作项目目录下（cwd 不在 `~/projects/dc-skills`）：输出到 `<cwd>/thesis-output/thesis-writing/`
 - 否则：输出到 `~/.claude/skills-output/thesis-writing/`
 
 可用 `--output` 显式覆盖。profiler 的 `_domain_profile.{json,md}` 默认写入同一输出目录。

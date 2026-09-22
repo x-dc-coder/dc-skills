@@ -13,7 +13,7 @@ Covers:
 Does NOT test the Marker/MinerU engines (needs GPU).
 
 Run:
-    cd ~/.claude/skills && uv run pytest paper-reader/scripts/test_paper_reader.py -v
+    cd ~/projects/dc-skills && uv run pytest paper-reader/scripts/test_paper_reader.py -v
 """
 
 from __future__ import annotations

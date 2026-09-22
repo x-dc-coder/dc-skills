@@ -13,7 +13,7 @@ Locks three properties of the data-driven language dispatch:
      literal comparison (`== "zh"` or `== 'zh'`, likewise en / unknown).
 
 Run:
-    cd ~/.claude/skills && uv run pytest paper-metrics/scripts/test_language_registry.py -q
+    cd ~/projects/dc-skills && uv run pytest paper-metrics/scripts/test_language_registry.py -q
 """
 
 from __future__ import annotations

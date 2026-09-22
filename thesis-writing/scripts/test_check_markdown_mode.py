@@ -6,7 +6,7 @@ journal-specific rules). They are expected to FAIL until C3 implements
 the feature (TDD red phase). After C3, all tests should pass (green phase).
 
 Run:
-    cd ~/.claude/skills && uv run pytest thesis-writing/scripts/test_check_markdown_mode.py -v
+    cd ~/projects/dc-skills && uv run pytest thesis-writing/scripts/test_check_markdown_mode.py -v
 """
 from __future__ import annotations
 

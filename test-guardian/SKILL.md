@@ -23,19 +23,19 @@ description: >
 
 ```bash
 # 1. 静态规则扫描（检测无断言、裸Mock、吞异常、任务编号命名）
-python ~/.claude/skills/test-guardian/scripts/cli.py audit tests/ --own-packages app
+python ~/projects/dc-skills/test-guardian/scripts/cli.py audit tests/ --own-packages app
 
 # 2. 增量暂存区扫描（适合 Git pre-commit，0.1秒级）
-python ~/.claude/skills/test-guardian/scripts/cli.py audit --staged
+python ~/projects/dc-skills/test-guardian/scripts/cli.py audit --staged
 
 # 3. 存量摸底（只打印违规警告，不阻断退出码）
-python ~/.claude/skills/test-guardian/scripts/cli.py audit tests/ --warn-only
+python ~/projects/dc-skills/test-guardian/scripts/cli.py audit tests/ --warn-only
 
 # 4. 为指定工程接入 pytest 分层守卫插件
-python ~/.claude/skills/test-guardian/scripts/cli.py install-guard /path/to/project
+python ~/projects/dc-skills/test-guardian/scripts/cli.py install-guard /path/to/project
 
 # 5. 查看防假绿规则速查卡
-python ~/.claude/skills/test-guardian/scripts/cli.py cheat-sheet
+python ~/projects/dc-skills/test-guardian/scripts/cli.py cheat-sheet
 ```
 
 ---

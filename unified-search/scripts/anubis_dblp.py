@@ -20,7 +20,7 @@ text/html（"Making sure you're not a bot!"）。绕过只需复现浏览器 mai
 
 用法
 ----
-    cd /home/dc/.claude/skills && export NO_PROXY='localhost,127.0.0.1,::1' no_proxy='localhost,127.0.0.1,::1'
+    cd /home/dc/projects/dc-skills && export NO_PROXY='localhost,127.0.0.1,::1' no_proxy='localhost,127.0.0.1,::1'
     uv run python ~/.claude/skills-output/unified-search/anubis_dblp.py "transformer" -n 5
 
 仅依赖 httpx（skills venv 已装，无第三方新依赖）。

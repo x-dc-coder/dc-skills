@@ -12,7 +12,7 @@
 | `recorded_with` | profiler / schema / 指标层 / 词表 release 的版本与指纹 | 用于**解释**漂移：代码或词表变了 |
 
 ```bash
-cd ~/.claude/skills
+cd ~/projects/dc-skills
 uv run python paper-metrics/scripts/audit_corpus.py --name vrp-en --out /tmp/audit-en     # 英文语料
 uv run python paper-metrics/scripts/audit_corpus.py --name ycgl-zh --out /tmp/audit-zh    # 中文语料
 ```

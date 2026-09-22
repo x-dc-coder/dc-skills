@@ -11,7 +11,7 @@
 （必须 mcp<2：ai4scholar-mcp 0.4.0 用的是旧版 mcp.server.fastmcp API）
 
 用法：
-    cd ~/.claude/skills
+    cd ~/projects/dc-skills
     uv run python unified-search/scripts/ai4scholar_download.py --doi 10.48550/arXiv.1706.03762
     uv run python unified-search/scripts/ai4scholar_download.py --arxiv 1706.03762 --out ./papers
     uv run python unified-search/scripts/ai4scholar_download.py --semantic 659bf9ce7175e1ec266ff54359e2bd76e0b7ff31
@@ -66,7 +66,7 @@ def find_python(explicit: str | None = None) -> Path | None:
 
 def default_out_dir() -> Path:
     cwd = Path.cwd()
-    if cwd == SKILL_DIR.parent:  # 在 ~/.claude/skills 下运行 → 统一兜底目录
+    if cwd == SKILL_DIR.parent:  # 在 ~/projects/dc-skills 下运行 → 统一兜底目录
         return Path.home() / ".claude" / "skills-output" / "unified-search" / "downloads"
     return cwd / "unified-search-output" / "downloads"
 

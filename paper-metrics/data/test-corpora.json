@@ -65,8 +65,8 @@
         "2026-09-15 重登记（issue #22 后续，半角句点）：TEXT_METRICS_VERSION 1.5 → 1.6。发现《控制与决策》等 CNKI 期刊用半角 . 而非 。 结尾，原终止符集不含半角点导致句子合并、句长虚高（实测一篇 10740 字符仅切 53 句，修复后 86 句，+62%）。修复带护栏：数字间（3.14）、ASCII 缩写后（U.S. / et al.）不切。ycgl-zh（全角文本）所有值逐位不变；vrp-en 仅 3 个值微动（M-SLEN-01 26.157916→26.100766 即 −0.22%、M-PAS-09、M-LSF-16），均在小数点后第 4 位，英文路径不受影响。"
       ],
       "reproduce": [
-        "cd ~/.claude/skills && uv run python paper-metrics/scripts/profile_papers.py --corpus \"<path>\" --out \"<out>\"",
-        "cd ~/.claude/skills && uv run python paper-metrics/scripts/baseline_eval.py --corpus \"<path>\" --out \"<out>\""
+        "cd ~/projects/dc-skills && uv run python paper-metrics/scripts/profile_papers.py --corpus \"<path>\" --out \"<out>\"",
+        "cd ~/projects/dc-skills && uv run python paper-metrics/scripts/baseline_eval.py --corpus \"<path>\" --out \"<out>\""
       ],
       "expected_null_metrics": [
         "M-CLS-31", "M-CLS-32", "M-SLEN-34", "M-SLEN-35"
@@ -204,10 +204,10 @@
         "2026-09-15 重登记（issue #22 后续，半角句点）：TEXT_METRICS_VERSION 1.5 → 1.6。发现《控制与决策》等 CNKI 期刊用半角 . 而非 。 结尾，原终止符集不含半角点导致句子合并、句长虚高（实测一篇 10740 字符仅切 53 句，修复后 86 句，+62%）。修复带护栏：数字间（3.14）、ASCII 缩写后（U.S. / et al.）不切。ycgl-zh（全角文本）所有值逐位不变；vrp-en 仅 3 个值微动（M-SLEN-01 26.157916→26.100766 即 −0.22%、M-PAS-09、M-LSF-16），均在小数点后第 4 位，英文路径不受影响。"
       ],
       "reproduce": [
-        "cd ~/.claude/skills && uv run python paper-metrics/scripts/profile_papers.py --corpus \"<path>\" --out \"<out>\"",
-        "cd ~/.claude/skills && uv run python paper-metrics/scripts/build_contract.py --summary \"<out>/_corpus_summary.json\" --out \"<out>/_writing_contract.zh.yaml\"",
-        "cd ~/.claude/skills && uv run python paper-metrics/scripts/validate_draft.py --contract \"<out>/_writing_contract.zh.yaml\" --draft \"<draft.md>\"",
-        "cd ~/.claude/skills && uv run python paper-metrics/scripts/lexicon_calibration.py validate --corpus \"<path>\" --out \"<out>\" --lexicon hedge"
+        "cd ~/projects/dc-skills && uv run python paper-metrics/scripts/profile_papers.py --corpus \"<path>\" --out \"<out>\"",
+        "cd ~/projects/dc-skills && uv run python paper-metrics/scripts/build_contract.py --summary \"<out>/_corpus_summary.json\" --out \"<out>/_writing_contract.zh.yaml\"",
+        "cd ~/projects/dc-skills && uv run python paper-metrics/scripts/validate_draft.py --contract \"<out>/_writing_contract.zh.yaml\" --draft \"<draft.md>\"",
+        "cd ~/projects/dc-skills && uv run python paper-metrics/scripts/lexicon_calibration.py validate --corpus \"<path>\" --out \"<out>\" --lexicon hedge"
       ],
       "expected_null_metrics": [
         "M-TENSE-28"

@@ -16,7 +16,7 @@ Covers the frozen contract in INTERFACES.md section 5:
      that module lands, so this suite stays green while it is in flight)
 
 Run:
-    cd ~/.claude/skills && uv run pytest paper-metrics/scripts/test_validate_draft.py -v
+    cd ~/projects/dc-skills && uv run pytest paper-metrics/scripts/test_validate_draft.py -v
 """
 from __future__ import annotations
 

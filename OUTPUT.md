@@ -11,8 +11,8 @@
 
 | 优先级 | 条件 | 输出位置 | 示例 |
 |---|---|---|---|
-| 1 | 用户 cwd 在工作项目目录（cwd 不在 `~/.claude/skills`） | `<工作项目目录>/<skill-output-root>/<skill-name>/<filename>` | `/home/dc/projects/MyThesis/thesis-output/diagram/er-diagram.png` |
-| 2（兜底） | cwd 在 `~/.claude/skills` 或无明确工作项目 | `~/.claude/skills-output/<skill-name>/<filename>` | `~/.claude/skills-output/diagram/er-diagram.png` |
+| 1 | 用户 cwd 在工作项目目录（cwd 不在 `~/projects/dc-skills`） | `<工作项目目录>/<skill-output-root>/<skill-name>/<filename>` | `/home/dc/projects/MyThesis/thesis-output/diagram/er-diagram.png` |
+| 2（兜底） | cwd 在 `~/projects/dc-skills` 或无明确工作项目 | `~/.claude/skills-output/<skill-name>/<filename>` | `~/.claude/skills-output/diagram/er-diagram.png` |
 
 ## skill-output-root 命名
 

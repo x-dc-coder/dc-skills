@@ -110,4 +110,4 @@ workflow-meeting-summary / workflow-standup-report），模型目录只保留本
 - 探索 API：`lark-cli schema <service.resource.method>`（参数/类型/scope/示例）；
   `lark-cli api GET|POST <path> [--params <json>] [--data <json>]`（逃生舱）
 - 回退到分散技能模式（如官方恢复独立技能）：`npx skills add larksuite/cli -g -y`（重装 28 个独立 SKILL.md
-  到 `~/.claude/skills/`，本聚合技能可自行决定去留）
+  到 `~/projects/dc-skills/`，本聚合技能可自行决定去留）

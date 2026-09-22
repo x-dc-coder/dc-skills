@@ -12,7 +12,7 @@ Two groups:
     unit suite stays green during parallel development.
 
 Run:
-    cd ~/.claude/skills && uv run pytest paper-metrics/scripts/test_baseline_eval.py -q
+    cd ~/projects/dc-skills && uv run pytest paper-metrics/scripts/test_baseline_eval.py -q
 """
 from __future__ import annotations
 

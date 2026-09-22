@@ -77,7 +77,7 @@ metadata:
 
 **规则 B4**：新增 SKILL 前，**必须**检查现有 SKILL.md 的触发词，避免重叠。检查命令：
 ```bash
-grep -l "<你的触发词>" ~/.claude/skills/*/SKILL.md
+grep -l "<你的触发词>" ~/projects/dc-skills/*/SKILL.md
 ```
 
 **规则 B5**：如果一个能力已被专用 SKILL 覆盖，通用 SKILL **不可**在其触发词中重复该关键词。曾发现某兜底 SKILL 的 trigger list 含"流程图/架构图/ER图/时序图/模块图"等 40+ 关键词，与多个专用 diagram skill 冲突——已修正为"仅当其他 diagram-* 无法满足时使用"。
@@ -90,7 +90,7 @@ grep -l "<你的触发词>" ~/.claude/skills/*/SKILL.md
 
 **规则 B7a（行数门禁，2026-08-22 补充）**：提交前必须跑以下检查，任何 SKILL.md 超 400 行即阻塞提交：
 ```bash
-cd ~/.claude/skills && find . -name SKILL.md -not -path "*/node_modules/*" -not -path "*/.venv/*" -not -path "./archive/*" -not -path "./.git/*" \
+cd ~/projects/dc-skills && find . -name SKILL.md -not -path "*/node_modules/*" -not -path "*/.venv/*" -not -path "./archive/*" -not -path "./.git/*" \
   | xargs wc -l | awk '$1 > 400 && $2 != "total" {print "❌ 超限:", $2, "("$1"行)"; bad=1} END {if (!bad) print "✅ 全部 ≤400 行"}'
 ```
 
@@ -235,7 +235,7 @@ fontname = "Noto Sans CJK SC"  # 在仅装 SimSun 的机器上方块
 
 **规则 F7**：修改一个 SKILL 的触发词后**必须**检查是否影响其他 SKILL 的触发。检查命令：
 ```bash
-grep -l "<你的触发词>" ~/.claude/skills/*/SKILL.md
+grep -l "<你的触发词>" ~/projects/dc-skills/*/SKILL.md
 ```
 
 ---
@@ -268,7 +268,7 @@ grep -l "<你的触发词>" ~/.claude/skills/*/SKILL.md
 
 ### 测试
 - [ ] 新增功能有对应 pytest 测试
-- [ ] `cd ~/.claude/skills && uv run pytest` 全绿
+- [ ] `cd ~/projects/dc-skills && uv run pytest` 全绿
 - [ ] 测试路径已加到 `pyproject.toml` testpaths
 
 ### 文档同步

@@ -21,7 +21,7 @@ Anyone who already has a converted corpus (any directory layout) can run
 profile_papers.py directly and never touch this file.
 
 Usage:
-    cd ~/.claude/skills && uv run python paper-metrics/scripts/run_pipeline.py \\
+    cd ~/projects/dc-skills && uv run python paper-metrics/scripts/run_pipeline.py \\
         --papers /path/to/pdfs --out /path/to/metrics-out [--analysis-dir DIR] \\
         [--engines both|marker|mineru] [--no-resume] [--skip-convert] [--verify] [--dry-run]
 

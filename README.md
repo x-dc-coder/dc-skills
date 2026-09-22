@@ -9,9 +9,9 @@
 ## 目录结构
 
 ```
-~/.claude/skills/
+~/projects/dc-skills/
 ├── README.md              # 本说明文档
-├── CLAUDE.md              # 执行约束（cd ~/.claude/skills 再 uv run）
+├── CLAUDE.md              # 执行约束（cd ~/projects/dc-skills 再 uv run）
 ├── ENVIRONMENT.md         # 外部工具依赖登记表（12 工具 + 验证命令 + 声明模板）
 ├── OUTPUT.md              # 输出目录兜底规范（两级回退，唯一事实源）
 ├── SKILL-AUTHORING-RULES.md # SKILL 开发与修改规则
@@ -65,12 +65,12 @@
 
 ## 统一执行约定（所有 Python skill 必须遵守）
 
-**所有 Python 脚本必须先 `cd ~/.claude/skills` 再用 `uv run` 执行**，绝不依赖用户当前项目的 `pyproject.toml`。
+**所有 Python 脚本必须先 `cd ~/projects/dc-skills` 再用 `uv run` 执行**，绝不依赖用户当前项目的 `pyproject.toml`。
 
 ### 标准格式
 
 ```bash
-cd ~/.claude/skills && uv run python <skill-name>/scripts/<script>.py ...
+cd ~/projects/dc-skills && uv run python <skill-name>/scripts/<script>.py ...
 ```
 
 ### 为什么是 `cd` 而非 `--directory`
@@ -83,7 +83,7 @@ diagram 聚合技能（er/ers/module/sequence/usecase 五类）使用 Python 包
 脚本保留在原 `diagram-*` 目录，需进入对应子目录执行：
 
 ```bash
-cd ~/.claude/skills/diagram-er && uv run python -m scripts.cli ...
+cd ~/projects/dc-skills/diagram-er && uv run python -m scripts.cli ...
 ```
 
 这是因为 `-m scripts.cli` 要求 `scripts/` 在 cwd 下；脚本内 `sys.path` 引用顶层 `scripts/common.py`
@@ -95,28 +95,28 @@ cd ~/.claude/skills/diagram-er && uv run python -m scripts.cli ...
 ### 添加新依赖
 
 ```bash
-cd ~/.claude/skills
+cd ~/projects/dc-skills
 uv add <package-name>
 ```
 
 ### 同步环境（新机器/重装后）
 
 ```bash
-cd ~/.claude/skills
+cd ~/projects/dc-skills
 uv sync
 ```
 
 ### 验证环境
 
 ```bash
-cd ~/.claude/skills
+cd ~/projects/dc-skills
 uv run python -c "import PIL, sqlglot, psycopg2, pymysql; print('OK')"
 ```
 
 ### 重建符号链接（新机器/重装后必做）
 
 ```bash
-cd ~/.claude/skills
+cd ~/projects/dc-skills
 for skill in diagram-er diagram-ers diagram-module diagram-sequence diagram-usecase db-skill; do
   ln -sf ../.venv "$skill/.venv"
 done
@@ -126,7 +126,7 @@ done
 ### paper-reader 重型 venv 重建
 
 ```bash
-bash ~/.claude/skills/paper-reader/scripts/bootstrap.sh
+bash ~/projects/dc-skills/paper-reader/scripts/bootstrap.sh
 ```
 
 ## 工作目录依赖（重要）
@@ -135,7 +135,7 @@ bash ~/.claude/skills/paper-reader/scripts/bootstrap.sh
 
 1. **在 skills 目录内运行（推荐）**
    ```bash
-   cd ~/.claude/skills
+   cd ~/projects/dc-skills
    uv run python db-skill/scripts/pg_tool.py ...
    ```
    正常找到虚拟环境。
@@ -143,7 +143,7 @@ bash ~/.claude/skills/paper-reader/scripts/bootstrap.sh
 2. **在临时/外部目录运行（错误）**
    ```bash
    cd /tmp
-   uv run python ~/.claude/skills/db-skill/scripts/pg_tool.py ...
+   uv run python ~/projects/dc-skills/db-skill/scripts/pg_tool.py ...
    ```
    `uv` 在 `/tmp` 找不到 `pyproject.toml`，会使用系统默认 Python，导致依赖缺失（如 `psycopg2` 找不到）。
 
@@ -192,9 +192,9 @@ Node 工具（非 Python 依赖，完整登记表见 ENVIRONMENT.md）：
 
 1. 在该 Skill 目录下创建符号链接：
    ```bash
-   ln -sf ~/.claude/skills/.venv ~/.claude/skills/<new-skill>/.venv
+   ln -sf ~/projects/dc-skills/.venv ~/projects/dc-skills/<new-skill>/.venv
    ```
-2. 如果新 Skill 需要新的 Python 包，在 `~/.claude/skills/pyproject.toml` 中添加依赖，然后执行 `uv lock` 或 `uv sync`。
+2. 如果新 Skill 需要新的 Python 包，在 `~/projects/dc-skills/pyproject.toml` 中添加依赖，然后执行 `uv lock` 或 `uv sync`。
 3. 如果新 Skill 依赖 GPU/重型模型（如 paper-reader），保持独立 `venvs/`，并在 `.gitignore` 中添加忽略条目。
 4. SKILL.md **必须**以 YAML frontmatter 开头（`---` 包裹的 `name` + `description`），否则 OpenCode 无法识别。
 5. 更新本 README 的依赖列表和环境分类表。

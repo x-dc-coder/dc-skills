@@ -11,7 +11,7 @@ to return the original WSL path (passthrough).  Test 5 overrides this
 with a fake UNC-path mock to cover the conversion path.
 
 Run:
-    cd ~/.claude/skills && uv run pytest wsl-windows-bridge/scripts/test_detached.py -v
+    cd ~/projects/dc-skills && uv run pytest wsl-windows-bridge/scripts/test_detached.py -v
 """
 from __future__ import annotations
 

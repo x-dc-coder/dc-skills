@@ -6,7 +6,7 @@ the *command construction* and the input validation, which is where the real
 contract lives. --dry-run is used as the end-to-end smoke path.
 
 Run:
-    cd ~/.claude/skills && uv run pytest paper-metrics/scripts/test_run_pipeline.py -v
+    cd ~/projects/dc-skills && uv run pytest paper-metrics/scripts/test_run_pipeline.py -v
 """
 from __future__ import annotations
 

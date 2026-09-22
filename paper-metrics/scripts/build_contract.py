@@ -40,7 +40,7 @@ The module also hosts the minimal deterministic YAML emitter/parser used by
 validate_draft.py (same write scope, no extra file, no third-party dependency).
 
 Usage:
-    cd ~/.claude/skills && uv run python paper-metrics/scripts/build_contract.py \
+    cd ~/projects/dc-skills && uv run python paper-metrics/scripts/build_contract.py \
         --summary <dir>/_corpus_summary.json --out <dir>/_writing_contract.yaml
 """
 from __future__ import annotations

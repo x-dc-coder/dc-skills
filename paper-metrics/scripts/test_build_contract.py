@@ -13,7 +13,7 @@ Covers the frozen contract in INTERFACES.md section 5:
   9. OBSERVED layer imports no LLM or network module
 
 Run:
-    cd ~/.claude/skills && uv run pytest paper-metrics/scripts/test_build_contract.py -v
+    cd ~/projects/dc-skills && uv run pytest paper-metrics/scripts/test_build_contract.py -v
 """
 from __future__ import annotations
 

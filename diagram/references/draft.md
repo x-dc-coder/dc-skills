@@ -98,7 +98,7 @@ graph-easy arch.txt --as=boxart
 使用 `scripts/render.sh` 一键导出所有格式：
 
 ```bash
-bash ~/.claude/skills/diagram-draft/scripts/render.sh arch.txt ./output/
+bash ~/projects/dc-skills/diagram-draft/scripts/render.sh arch.txt ./output/
 ```
 
 ## 示例模板
@@ -113,7 +113,7 @@ bash ~/.claude/skills/diagram-draft/scripts/render.sh arch.txt ./output/
 可以直接复制修改：
 
 ```bash
-cp ~/.claude/skills/diagram-draft/examples/microservice.txt my-arch.txt
+cp ~/projects/dc-skills/diagram-draft/examples/microservice.txt my-arch.txt
 # 编辑 my-arch.txt，然后
 graph-easy my-arch.txt --as=boxart
 ```

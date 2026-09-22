@@ -63,25 +63,25 @@ bocha（按次）与 zhipu（GLM Coding Plan 套餐按次计积分）。源健�
 
 ```bash
 # Auto-classify intent (general vs academic) and search
-cd ~/.claude/skills && uv run python unified-search/scripts/unified_search.py "your query"
+cd ~/projects/dc-skills && uv run python unified-search/scripts/unified_search.py "your query"
 
 # Force general mode (keenable + tavily, firecrawl arbitration if divergent)
-cd ~/.claude/skills && uv run python unified-search/scripts/unified_search.py "query" --mode general
+cd ~/projects/dc-skills && uv run python unified-search/scripts/unified_search.py "query" --mode general
 
 # Force academic mode (arxiv + dblp + semantic_scholar, paper links recorded)
-cd ~/.claude/skills && uv run python unified-search/scripts/unified_search.py "transformer attention" --mode academic
+cd ~/projects/dc-skills && uv run python unified-search/scripts/unified_search.py "transformer attention" --mode academic
 
 # Export paper links as _download_manifest.json for paper-reader
-cd ~/.claude/skills && uv run python unified-search/scripts/unified_search.py "VRP GPU" --mode academic --export-manifest papers/
+cd ~/projects/dc-skills && uv run python unified-search/scripts/unified_search.py "VRP GPU" --mode academic --export-manifest papers/
 
 # Fetch single URL content (markdown) — firecrawl primary, keenable fallback
-cd ~/.claude/skills && uv run python unified-search/scripts/unified_search.py --fetch https://example.com/article
+cd ~/projects/dc-skills && uv run python unified-search/scripts/unified_search.py --fetch https://example.com/article
 
 # Search history cache (reuse past accurate results)
-cd ~/.claude/skills && uv run python unified-search/scripts/unified_search.py --history "past query"
+cd ~/projects/dc-skills && uv run python unified-search/scripts/unified_search.py --history "past query"
 
 # Check monthly quota usage for tavily/firecrawl
-cd ~/.claude/skills && uv run python unified-search/scripts/unified_search.py --quota
+cd ~/projects/dc-skills && uv run python unified-search/scripts/unified_search.py --quota
 ```
 
 ## Modes
@@ -138,7 +138,7 @@ Tavily and Firecrawl each have **1000 calls/month**. The script:
 
 **Before searching, check quota**:
 ```bash
-cd ~/.claude/skills && uv run python unified-search/scripts/unified_search.py --quota
+cd ~/projects/dc-skills && uv run python unified-search/scripts/unified_search.py --quota
 ```
 
 If a metered source is exhausted, the script automatically degrades to free
@@ -275,7 +275,7 @@ uv pip install --python ~/.local/share/ai4scholar-mcp/venv/bin/python ai4scholar
 用法（脚本会自动找上面的 venv）：
 
 @@BT@@@@BT@@@@BT@@bash
-cd ~/.claude/skills
+cd ~/projects/dc-skills
 uv run python unified-search/scripts/ai4scholar_download.py --doi 10.48550/arXiv.1706.03762
 uv run python unified-search/scripts/ai4scholar_download.py --arxiv 2312.10997 --out ./papers
 uv run python unified-search/scripts/ai4scholar_download.py --semantic <paperId>
@@ -302,7 +302,7 @@ Unpaywall → 出版商页面 → 可选 Sci-Hub；在校园网出口可借机�
 2. 密钥通过**邮件**发送。官方限流口径：未认证=全站共享且会被额外节流；带 key 起步 1 RPS。**不要外传密钥**
 3. 写入统一密钥文件 @@BT@@~/.config/vision-ai/.env@@BT@@（本脚本自动加载）：
    @@BT@@S2_API_KEY=<你的key>@@BT@@
-4. 验证：@@BT@@cd ~/.claude/skills && uv run python unified-search/scripts/unified_search.py "retrieval augmented generation" --mode academic@@BT@@ ，
+4. 验证：@@BT@@cd ~/projects/dc-skills && uv run python unified-search/scripts/unified_search.py "retrieval augmented generation" --mode academic@@BT@@ ，
    输出 JSON 的 @@BT@@sources_failed@@BT@@ 中不再出现 @@BT@@semantic_scholar@@BT@@ 即为生效
 
 ### 输出新增字段
@@ -313,7 +313,7 @@ Unpaywall → 出版商页面 → 可选 Sci-Hub；在校园网出口可借机�
 ### 排查命令
 
 @@BT@@@@BT@@@@BT@@bash
-cd ~/.claude/skills
+cd ~/projects/dc-skills
 
 # 逐源体检（一条命令看各源真实状态与降级通道）
 uv run python ~/.claude/skills-output/unified-search/probe_sources2.py nobracket

@@ -12,7 +12,7 @@ Covers:
   4. Boundary parsing: a malformed content_list raises DocumentParseError
 
 Run:
-    cd ~/.claude/skills && uv run pytest paper-metrics/scripts/test_doc_model.py -v
+    cd ~/projects/dc-skills && uv run pytest paper-metrics/scripts/test_doc_model.py -v
 """
 
 from __future__ import annotations

@@ -66,7 +66,7 @@ docs/usecase/
 ## 用例图生成命令
 
 ```bash
-cd ~/.claude/skills/diagram-usecase
+cd ~/projects/dc-skills/diagram-usecase
 uv run python -m scripts.cli \
   --json-file docs/usecase/json/<usecase_name>.json
 ```
@@ -74,7 +74,7 @@ uv run python -m scripts.cli \
 当输入文件使用**绝对路径**时，CLI 会自动推断项目目录（向上查找包含 `docs/` 或 `thesis-output/` 的目录），默认输出到 `<项目目录>/thesis-output/diagram-usecase/usecase-diagram.png`。如使用相对路径或无法推断，则回退到 `~/.claude/skills-output/diagram-usecase/usecase-diagram.png`。如需自定义路径：
 
 ```bash
-cd ~/.claude/skills/diagram-usecase
+cd ~/projects/dc-skills/diagram-usecase
 uv run python -m scripts.cli \
   --json-file docs/usecase/json/<usecase_name>.json \
   --out <自定义路径>.png
@@ -92,7 +92,7 @@ uv run python -m scripts.cli \
 
 生成命令：
 ```bash
-cd ~/.claude/skills/diagram-usecase
+cd ~/projects/dc-skills/diagram-usecase
 uv run python -m scripts.cli \
   --json-file docs/usecase/json/user.json
 ```
@@ -107,7 +107,7 @@ uv run python -m scripts.cli \
 
 生成命令：
 ```bash
-cd ~/.claude/skills/diagram-usecase
+cd ~/projects/dc-skills/diagram-usecase
 uv run python -m scripts.cli \
   --json-file docs/usecase/json/admin.json
 ```
@@ -117,7 +117,7 @@ uv run python -m scripts.cli \
 也可以直接使用简化格式，省略 `--out` 参数：
 
 ```bash
-cd ~/.claude/skills/diagram-usecase
+cd ~/projects/dc-skills/diagram-usecase
 uv run python -m scripts.cli --json-file usecase.json
 ```
 
@@ -142,6 +142,6 @@ uv run python -m scripts.cli --json-file usecase.json
 ## 依赖安装
 
 ```bash
-cd ~/.claude/skills
+cd ~/projects/dc-skills
 uv sync
 ```

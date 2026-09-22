@@ -46,7 +46,7 @@ Design rules (frozen):
     ({block_index, excerpt}); all other metrics keep coming from the provider.
 
 Usage:
-    cd ~/.claude/skills && uv run python paper-metrics/scripts/validate_draft.py \
+    cd ~/projects/dc-skills && uv run python paper-metrics/scripts/validate_draft.py \
         --contract <dir>/_writing_contract.yaml --draft draft.md [--json <out.json>]
 """
 from __future__ import annotations

@@ -69,7 +69,7 @@ cd <repo> && codegraph sync
 
 cloudreve / RuoYi-AI / grm-repro / grm-upstream / github-release-monitor / container-homework /
 D2 / Soul-Spark / lab-monitor / monitor-panel / Custom-Agents / Vision-MCP / dsh-llm-agentrouter /
-`~/.claude/skills`（后者索引存 `~/.omo/`，经符号链接挂载；合计约 306 MB）
+`~/projects/dc-skills`（后者索引存 `~/.omo/`，经符号链接挂载；合计约 306 MB）
 
 **未索引的仓库不要自动 `codegraph init`**（索引是用户决策），提示用户即可。
 `next-ai-draw-io-main` 目录属 root，无 sudo 无法索引。

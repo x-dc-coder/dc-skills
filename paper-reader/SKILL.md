@@ -300,7 +300,7 @@ paper_reader.py <papers_dir> --backfill-meta
 `--resume` 会把状态文件里"已完成"的论文整篇跳过，所以**接入之前就转换好的语料永远拿不到阶段 1.5 证据**（真重跑转换约 6 分钟/篇）。这个入口只读 PDF 自带文本层：不启动引擎、不碰 GPU。
 
 ```bash
-cd ~/.claude/skills && uv run python paper-reader/scripts/paper_reader.py <papers_dir> --backfill-probe [--force]
+cd ~/projects/dc-skills && uv run python paper-reader/scripts/paper_reader.py <papers_dir> --backfill-probe [--force]
 ```
 
 输出 `scanned/probed/reused/warn/not_measured/no_pdf` 计数：有效记录算 `reused`，源 PDF 找不到的论文计入 `no_pdf` 且不写记录。实测（真实中文语料副本《序定车辆路径问题》）：首次 `probed=1 warn=1`（数字丢失 78.2%），第二次 `reused=1`，`--force` 重新测量。
@@ -308,7 +308,7 @@ cd ~/.claude/skills && uv run python paper-reader/scripts/paper_reader.py <paper
 ### 单独跑（离线复核用）
 
 ```bash
-cd ~/.claude/skills && uv run python paper-reader/scripts/textlayer_probe.py \
+cd ~/projects/dc-skills && uv run python paper-reader/scripts/textlayer_probe.py \
     --pdf paper.pdf --canonical canonical.txt --canonical-source mineru_content_list \
     --out _textlayer_probe.json
 ```

@@ -35,7 +35,7 @@ but never the warnings that explained the values).
 
 Usage
 -----
-    cd ~/.claude/skills
+    cd ~/projects/dc-skills
     # audit a registered corpus (exit 0 = match, 1 = drift)
     uv run python paper-metrics/scripts/audit_corpus.py --name vrp-en --out /tmp/audit-en
 

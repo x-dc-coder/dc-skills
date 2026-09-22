@@ -15,7 +15,7 @@ Focus areas (the logic most likely to break silently):
   5. quota bookkeeping — monthly counters gate metered sources.
 
 Run:
-    cd ~/.claude/skills && uv run pytest unified-search/scripts/test_unified_search.py -v
+    cd ~/projects/dc-skills && uv run pytest unified-search/scripts/test_unified_search.py -v
 """
 
 from __future__ import annotations

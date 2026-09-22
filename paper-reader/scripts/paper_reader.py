@@ -3439,12 +3439,12 @@ def main() -> int:
     #
     if args.engines in ("both", "marker") and not MARKER_BIN.exists():
         print(f"ERROR: marker venv  : {MARKER_BIN}", file=sys.stderr)
-        print("  : bash ~/.claude/skills/paper-reader/scripts/bootstrap.sh",
+        print("  : bash ~/projects/dc-skills/paper-reader/scripts/bootstrap.sh",
               file=sys.stderr)
         return 2
     if args.engines in ("both", "mineru") and not MINERU_BIN.exists():
         print(f"ERROR: mineru venv  : {MINERU_BIN}", file=sys.stderr)
-        print("  : bash ~/.claude/skills/paper-reader/scripts/bootstrap.sh",
+        print("  : bash ~/projects/dc-skills/paper-reader/scripts/bootstrap.sh",
               file=sys.stderr)
         return 2
 

@@ -19,7 +19,7 @@ Test map (T1-T10, mirroring the review report section 3.5):
     T10 _run_meta.json is the only volatile carrier
 
 Run:
-    cd ~/.claude/skills && uv run pytest paper-metrics/scripts/test_determinism.py -v
+    cd ~/projects/dc-skills && uv run pytest paper-metrics/scripts/test_determinism.py -v
 """
 from __future__ import annotations
 

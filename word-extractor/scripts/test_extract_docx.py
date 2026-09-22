@@ -8,7 +8,7 @@ Covers:
   4. Comment .docx — comment extraction
 
 Run:
-    cd ~/.claude/skills && uv run pytest word-extractor/scripts/test_extract_docx.py -v
+    cd ~/projects/dc-skills && uv run pytest word-extractor/scripts/test_extract_docx.py -v
 """
 
 from __future__ import annotations

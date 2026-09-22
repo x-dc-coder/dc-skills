@@ -2,7 +2,7 @@
 """Tests for text_metrics.py - the rule-based text metrics layer (I4/I5).
 
 Run:
-    cd ~/.claude/skills && uv run pytest paper-metrics/scripts/test_text_metrics.py -v
+    cd ~/projects/dc-skills && uv run pytest paper-metrics/scripts/test_text_metrics.py -v
 
 Coverage: rule-based sentence splitting (abbreviations / decimals / numbering /
 initials must not mis-split), tokenization, MTLD (parameters, short-text

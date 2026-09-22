@@ -10,7 +10,7 @@ Covers:
   6. Robustness: empty corpus, papers with missing mineru/, mixed engine outputs
 
 Run:
-    cd ~/.claude/skills && uv run pytest paper-metrics/scripts/test_profile_papers.py -v
+    cd ~/projects/dc-skills && uv run pytest paper-metrics/scripts/test_profile_papers.py -v
 """
 from __future__ import annotations
 

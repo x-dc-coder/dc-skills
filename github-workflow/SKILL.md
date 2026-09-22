@@ -25,7 +25,7 @@ description: >
 
 | 用户意图 | 指令 |
 |---------|------|
-| 初始化本地 Git | `uv run --project ~/.claude/skills python ~/.claude/skills/github-workflow/scripts/github_bootstrap.py local-only --project <path> --json` |
+| 初始化本地 Git | `uv run --project ~/projects/dc-skills python ~/projects/dc-skills/github-workflow/scripts/github_bootstrap.py local-only --project <path> --json` |
 | 预览待提交文件 | `... github_bootstrap.py preview --project <path> --json` |
 | 创建 GitHub 远端 | `... github_bootstrap.py create-remote --project <path> --json`（内部调 `gh repo create --source --remote`） |
 | 提交并推送 | `... github_bootstrap.py publish --project <path> --commit-message "<msg>" --json` |
@@ -49,7 +49,7 @@ gh 命令全表 → `references/gh-cheatsheet.md`（替换了旧版 GitCode API 
 
 所有 Python 脚本用 `uv --project` 指定 skill 项目运行（**保持当前工作目录为项目仓库**，脚本自动从 git remote 推断 owner/repo）：
 ```bash
-uv run --project ~/.claude/skills python ~/.claude/skills/github-workflow/scripts/<script>.py ...
+uv run --project ~/projects/dc-skills python ~/projects/dc-skills/github-workflow/scripts/<script>.py ...
 ```
 
 ## 输出规范（脚本 --json 模式）
@@ -57,7 +57,7 @@ uv run --project ~/.claude/skills python ~/.claude/skills/github-workflow/script
 - **stdout 是纯 JSON**，日志/进度走 stderr —— 读取结果时**勿用 `2>&1` 混流**。
 - 长输出会截断：重定向到文件后分段读：
   ```bash
-  uv run --project ~/.claude/skills python ~/.claude/skills/github-workflow/scripts/github_bootstrap.py preview --project . --json > /tmp/gw_preview.json 2>/tmp/gw_preview.err
+  uv run --project ~/projects/dc-skills python ~/projects/dc-skills/github-workflow/scripts/github_bootstrap.py preview --project . --json > /tmp/gw_preview.json 2>/tmp/gw_preview.err
   ```
   安全扫描在 `safety_scan` 字段，候选输入在 `diff_excerpt` / `files_by_kind` / `type_hints` / `scope_hints`。
 
@@ -81,7 +81,7 @@ uv run --project ~/.claude/skills python ~/.claude/skills/github-workflow/script
 ## local-only workflow
 
 ```bash
-uv run --project ~/.claude/skills python ~/.claude/skills/github-workflow/scripts/github_bootstrap.py local-only --project /path/to/project --json
+uv run --project ~/projects/dc-skills python ~/projects/dc-skills/github-workflow/scripts/github_bootstrap.py local-only --project /path/to/project --json
 ```
 
 此模式：初始化 Git、配置仓库级身份（默认 `x-dc-coder / x.dc0521@gmail.com`）、设置 `master` 为默认分支、检测技术栈、追加 `.gitignore` + `.git/info/exclude` 规则。完成后汇报结果并停止。不预览、不创建远端、不提交。
@@ -89,7 +89,7 @@ uv run --project ~/.claude/skills python ~/.claude/skills/github-workflow/script
 ## adopt-existing-project workflow
 
 ```bash
-uv run --project ~/.claude/skills python ~/.claude/skills/github-workflow/scripts/github_bootstrap.py adopt-existing-project --project /path/to/project --max-layers 6 --json
+uv run --project ~/projects/dc-skills python ~/projects/dc-skills/github-workflow/scripts/github_bootstrap.py adopt-existing-project --project /path/to/project --max-layers 6 --json
 ```
 
 输出启发式分层提交建议（路径+文件名推断），标注为"需人工审查"。不初始化 Git、不修改文件。
@@ -105,7 +105,7 @@ uv run --project ~/.claude/skills python ~/.claude/skills/github-workflow/script
 ## preview workflow
 
 ```bash
-uv run --project ~/.claude/skills python ~/.claude/skills/github-workflow/scripts/github_bootstrap.py preview --project /path/to/project --json
+uv run --project ~/projects/dc-skills python ~/projects/dc-skills/github-workflow/scripts/github_bootstrap.py preview --project /path/to/project --json
 ```
 
 预览待提交文件（按 added/modified/deleted/renamed/untracked 分组）、安全扫描高风险文件、生成候选提交信息、写入 review manifest。
@@ -212,7 +212,7 @@ Diff 内容：
 仅用户明确确认提交信息后执行：
 
 ```bash
-uv run --project ~/.claude/skills python ~/.claude/skills/github-workflow/scripts/github_bootstrap.py publish --project /path/to/project --commit-message "<msg>" --json
+uv run --project ~/projects/dc-skills python ~/projects/dc-skills/github-workflow/scripts/github_bootstrap.py publish --project /path/to/project --commit-message "<msg>" --json
 ```
 
 **单批次**：加载 review manifest → 验证 worktree 未变 → 安全扫描 → stage 文件 → commit → push → 清除 manifest
@@ -325,7 +325,7 @@ git config core.quotepath false
 
 | 意图 | 命令 |
 |------|------|
-| 列出 | `uv run --project ~/.claude/skills python ~/.claude/skills/github-workflow/scripts/github_issues.py --owner <o> --repo <r> list [--state open|closed|all] [--labels <l>]` |
+| 列出 | `uv run --project ~/projects/dc-skills python ~/projects/dc-skills/github-workflow/scripts/github_issues.py --owner <o> --repo <r> list [--state open|closed|all] [--labels <l>]` |
 | 创建 | `... github_issues.py --owner <o> --repo <r> create --title "..." [--body "..."] [--labels "..."] [--assignee <a>]` |
 | 查看 | `... github_issues.py --owner <o> --repo <r> get <number>` |
 | 更新 | `... github_issues.py --owner <o> --repo <r> update <number> [--title "..."] [--body "..."] [--labels "..."]` |

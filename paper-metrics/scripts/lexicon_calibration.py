@@ -37,7 +37,7 @@ Honesty rules
 
 Usage
 -----
-    cd ~/.claude/skills
+    cd ~/projects/dc-skills
     # 1) draw sheets (120 positives + 80 controls by default)
     uv run python paper-metrics/scripts/lexicon_calibration.py sample --corpus <corpus> --out /tmp/calib --lexicon hedge
     # 2) a human fills annotator_a (and annotator_b for a second pass) in the TSV

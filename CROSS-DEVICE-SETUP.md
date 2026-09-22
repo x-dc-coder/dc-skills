@@ -37,7 +37,7 @@
 
 ```bash
 # Linux / WSL —— 克隆到用户级 skills 目录
-git clone https://github.com/x-dc-coder/CC-Skills.git ~/.claude/skills
+git clone https://github.com/x-dc-coder/CC-Skills.git ~/projects/dc-skills
 
 # Windows —— 克隆到 Claude Code 读取的 skills 目录（PowerShell）
 git clone https://github.com/x-dc-coder/CC-Skills.git "$env:USERPROFILE\.claude\skills"
@@ -53,7 +53,7 @@ git clone https://github.com/x-dc-coder/CC-Skills.git "$env:USERPROFILE\.claude\
 ### A 类：统一共享 venv（大多数 Python skill）
 
 ```bash
-cd ~/.claude/skills
+cd ~/projects/dc-skills
 uv sync                 # 按 pyproject.toml + uv.lock 创建 .venv 并装齐依赖
 
 # Linux/WSL：重建各 skill 的 .venv 符号链接（指向统一环境）
@@ -64,13 +64,13 @@ done
 ```
 
 Windows 符号链接受限时（无开发者模式），**改用绝对路径模式**：脚本统一用
-`uv run --project ~/.claude/skills python <skill>/scripts/<script>.py`，不依赖各 skill 下的 `.venv` 符号链接。
+`uv run --project ~/projects/dc-skills python <skill>/scripts/<script>.py`，不依赖各 skill 下的 `.venv` 符号链接。
 
 ### B 类：paper-reader（重型 GPU venv，约 6GB）
 
 ```bash
 # Linux/WSL：跑自带 bootstrap（自动建 venvs/marker + venvs/mineru）
-bash ~/.claude/skills/paper-reader/scripts/bootstrap.sh
+bash ~/projects/dc-skills/paper-reader/scripts/bootstrap.sh
 ```
 
 **Windows / GPU 场景**：paper-reader 通过 WSL 桥接调用 Windows 原生 Python 跑 GPU，
@@ -110,7 +110,7 @@ bash ~/.claude/skills/paper-reader/scripts/bootstrap.sh
 
 ```bash
 # ① 统一 venv 关键依赖
-cd ~/.claude/skills
+cd ~/projects/dc-skills
 uv run python -c "import PIL, sqlglot, psycopg2, pymysql; print('py deps OK')"
 
 # ② 外部工具（按需）
@@ -139,7 +139,7 @@ gh auth status            # github-workflow（gh 认证）
 
 ## 八、常见问题
 
-- **`uv run` 报找不到包** → 未在 skills 根目录执行；先 `cd ~/.claude/skills` 或改用 `--project ~/.claude/skills`
+- **`uv run` 报找不到包** → 未在 skills 根目录执行；先 `cd ~/projects/dc-skills` 或改用 `--project ~/projects/dc-skills`
 - **Windows 上 `.venv` 符号链接失效** → 用 `uv run --project` 绝对路径模式，或 `mklink /J` 建 junction
 - **中文变方框** → 缺中文字体 / texlive-lang-chinese（见外部工具表）
 - **kimi-webbridge 不工作** → 按 `references/operations.md` 的启动/诊断表排查（含陈旧 PID 文件场景）

@@ -16,7 +16,7 @@ import os from 'node:os';
 const SKILLS_ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const REGISTRATION_ROOTS = Array.from(new Set([
   SKILLS_ROOT,
-  path.join(os.homedir(), '.agents', 'skills'),
+  path.join(os.homedir(), '.claude', 'skills'),
   path.join(os.homedir(), '.dsh', 'skills')
 ]));
 const IGNORED_DIRS = new Set([

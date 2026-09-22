@@ -25,7 +25,7 @@ This skill solves these problems by deeply inspecting the Word XML structure.
 ### 1. Run the extraction script
 
 ```bash
-cd ~/.claude/skills
+cd ~/projects/dc-skills
 uv run python word-extractor/scripts/extract_docx.py <input.docx> -o <output-dir> -f both
 ```
 
@@ -111,7 +111,7 @@ level detection may fail (heading_level will be 0). You can still use the
 
 Install if missing:
 ```bash
-cd ~/.claude/skills
+cd ~/projects/dc-skills
 uv sync
 ```
 
@@ -119,7 +119,7 @@ uv sync
 
 ```bash
 # Extract a thesis document
-cd ~/.claude/skills
+cd ~/projects/dc-skills
 uv run python word-extractor/scripts/extract_docx.py ~/thesis.docx -o ./output -f both
 
 # Read the Markdown for overview

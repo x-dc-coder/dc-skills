@@ -1,0 +1,77 @@
+# agent-map.yaml — 技能农场唯一事实源
+#
+# 主库 ~/projects/dc-skills 是全机唯一物理技能目录（git 仓库，gitcode + github 双远端）。
+# 每个 Agent 只通过自己技能目录里的软链接看到启用技能；未登记的技能对任何 Agent 不可见。
+#
+# 用法：
+#   cd ~/projects/dc-skills && uv run python scripts/skills-sync   # 物化全部农场
+#   uv run python scripts/skills-sync --check                     # 只检查漂移，不修改
+#
+# 启用一个按需技能：把技能名加进对应 agent 的 extra，再跑 skills-sync。
+# 安装器着陆区 ~/.agents/skills（通用技能安装器的默认目标，见 .skill-lock.json）如出现新技能：
+#   mv ~/.agents/skills/<name> ~/projects/dc-skills/ 并在此文件登记，再跑 skills-sync。
+
+master: /home/dc/projects/dc-skills
+
+# 全局基座：默认进入所有 Agent 农场
+base:
+  - codegraph-explore   # 大仓符号检索/调用链/影响分析
+  - db-skill            # MySQL/PostgreSQL 操作
+  - diagram             # 7 类图表统一入口（脚本目录 diagram-* 随主库，不单独成链）
+  - github-workflow     # git/gh 工作流
+  - kimi-webbridge      # 真实浏览器控制
+  - lark-cli            # 飞书全家桶统一入口
+  - unified-search      # 10 源聚合搜索
+  - wsl-windows-bridge  # WSL→Windows 跨边界框架
+  - orca-cli            # Orca worktree/终端操作
+  - orchestration       # Orca worker 编排
+  - task-hub            # 跨会话任务中心
+  - word-extractor      # .docx 高精度提取
+
+# 按需技能：默认不在任何农场；在对应 agent 的 extra 中列出即启用
+on_demand:
+  - thesis-writing      # 论文写作（毕设/期刊双模式）
+  - thesis-ref-check    # 论文术语一致性检查
+  - md-to-thesis-latex  # 毕业论文 md→LaTeX→PDF
+  - paper-metrics       # 论文写作特征指标层
+  - paper-reader        # 论文 PDF 双引擎阅读（venvs 11GB）
+  - newapi-management   # 本机 NewAPI 网关渠道/日志运维
+  - computer-use        # GUI 驱动（orca computer）
+  - vision-workflow     # 视觉任务编排
+  - design-dataviz      # 数据可视化设计系统
+  - design-diagram      # 内联 SVG 图表规范
+  - design-ui           # 前端页面设计
+  - drawio-xml          # .drawio 原生图表
+  - test-guardian       # 测试工程质量规范
+  - officecli           # Office 文档 CLI
+
+agents:
+  claude-code:
+    dir: ~/.claude/skills
+    skills: base
+    extra: []
+
+  grok:
+    dir: ~/.grok/skills
+    skills: base
+    extra: []
+
+  dsh:
+    dir: ~/.dsh/skills
+    skills: base
+    extra: []
+    presets:
+      # 论文族挂 thesis-agent 预设：跨项目的任务维度按需加载
+      thesis-agent:
+        dir: ~/.dsh/.agent-presets/thesis-agent/skills
+        skills:
+          - thesis-writing
+          - thesis-ref-check
+          - md-to-thesis-latex
+          - paper-metrics
+          - paper-reader
+
+  zcode:
+    dir: ~/.zcode/skills
+    skills: base
+    extra: []
