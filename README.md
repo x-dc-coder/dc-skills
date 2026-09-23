@@ -67,7 +67,7 @@
 |-------|---------|---------|
 | Claude Code | `~/.claude/skills` | base |
 | Grok | `~/.grok/skills` | base |
-| dsh | `~/.dsh/skills` | base + extra（omo 4 技能 / thesis-export / dsh-ui-optimization） |
+| dsh | `~/.dsh/skills` | base + extra（thesis-export / dsh-ui-optimization） |
 | zcode | `~/.zcode/skills` | base |
 | Codex | `~/.codex/skills` | base |
 

@@ -44,6 +44,11 @@ base:
   - orchestration       # Orca worker 编排
   - task-hub            # 跨会话任务中心
   - word-extractor      # .docx 高精度提取
+  # 2026-09-23 提升为 base（用户决策：所有 Agent 可识别）：omo vendor 4 技能
+  - debugging           # 系统化调试（oh-my-openagent 4.17.1 vendored）
+  - git-master          # git 进阶操作（oh-my-openagent 4.17.1 vendored）
+  - programming         # 编程任务分流（oh-my-openagent 4.17.1 vendored）
+  - remove-ai-slops     # AI 味代码清除（oh-my-openagent 4.17.1 vendored）
 
 # 按需技能：默认不在任何农场；在对应 agent 的 extra 中列出即启用
 on_demand:
@@ -62,10 +67,7 @@ on_demand:
   - test-guardian       # 测试工程质量规范
   - officecli           # Office 文档 CLI
   # ---- 2026-09-23 全机聚合收编（原散落于 dsh vendor / dsh 农场 / dsh 预设，见 git log）----
-  - debugging                # omo vendor：系统化调试（oh-my-openagent 4.17.1）
-  - git-master               # omo vendor：git 进阶操作（oh-my-openagent 4.17.1）
-  - programming              # omo vendor：编程任务分流（oh-my-openagent 4.17.1）
-  - remove-ai-slops          # omo vendor：AI 味代码清除（oh-my-openagent 4.17.1）
+  # 注：omo 4 技能（debugging/git-master/programming/remove-ai-slops）同日已提升为 base
   - thesis-export            # 原 ~/.dsh/skills 真实目录：论文导出编排
   - dsh-ui-optimization      # 原 plugin-specialist 预设：DSH 插件 UI 优化
   - dsh-plugin-troubleshooting  # 原 plugin-specialist 预设：DSH 插件故障排查
@@ -85,11 +87,7 @@ agents:
     dir: ~/.dsh/skills
     skills: base
     extra:
-      # omo vendor 技能与原 dsh 真实目录技能：收编主库后保持 dsh 侧可见性不变
-      - debugging
-      - git-master
-      - programming
-      - remove-ai-slops
+      # omo 4 技能已于 2026-09-23 提升 base（全农场可见）；此处仅留 dsh 侧按需技能
       - thesis-export
       # 预设技能在主农场保持可见（dsh-plugin-troubleshooting 仅经 preset 暴露）
       - dsh-ui-optimization
