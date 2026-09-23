@@ -1,0 +1,290 @@
+# registry.yaml — 资产健康断言登记（不是清单的第二份）
+#
+# 定位（2026-09-24，设计见 docs/specs/SKILL-MANAGEMENT.md）：只登记**目前无家可归**的
+# 事实 + 对已有事实源的**断言与检查元数据**。归属权硬规则——
+#   技能名/启用范围      → agent-map.yaml（本文件不复记）
+#   技能格式契约        → docs/specs/SKILL-AUTHORING-RULES.md
+#   外部工具版本基线     → docs/arch/ENVIRONMENT.md（本文件只写 baseline_key 引用）
+#   模型渠道人读全字段   → docs/arch/MODELS.md（到期日在彼处机器可解析）
+# 违反归属权的字段不许加入本文件。消费者：scripts/assets-doctor。
+version: 1
+updated_at: 2026-09-24
+
+settings:
+  net_timeout_s: 4
+  expiry_warn_days: 14          # 到期前 N 天转 ⚠️（来源 MODELS.md，本处只放阈值）
+  # 可达性白名单：实测这些码均表示"服务活着"（404/405/501 是端点语义非故障）
+  reachable_http_codes: [200, 204, 301, 302, 400, 401, 403, 404, 405, 501]
+
+# ── 模型渠道（人读全字段见 docs/arch/MODELS.md；此处只记可检字段）──
+models:
+  - name: deepseek-v4.1-flash          # = MODELS.md 行首 + ~/.grok/config.toml [model.*] 键
+    type: model_channel
+    client: grok
+    location: "~/.grok/config.toml#[model.\"deepseek-v4.1-flash\"]"
+    env_key: COMMANDCODE_API_KEY
+    upstream_url: "https://api.commandcode.ai/provider/v1"
+    check_cmd: "grok inspect --json"
+    asserts: [provider_registered, env_key_present, upstream_reachable, expiry_ok]
+    notes: "上游 deepseek/deepseek-v4.1-flash；到期日只在 MODELS.md 维护"
+  - name: step-5-preview
+    type: model_channel
+    client: grok
+    location: "~/.grok/config.toml#[model.step-5-preview]"
+    env_key: STEPFUN_API_KEY
+    upstream_url: "http://127.0.0.1:8321/v1"
+    check_cmd: "grok inspect --json"
+    asserts: [provider_registered, env_key_present, upstream_reachable, expiry_ok]
+    notes: "经本机 stepfun-shim（services.stepfun-shim）转发 StepFun"
+  - name: glm-5.3-flash
+    type: model_channel
+    client: grok
+    location: "~/.grok/config.toml#[model.\"glm-5.3-flash\"]"
+    env_key: ZHIPU_API_KEY
+    upstream_url: "https://open.bigmodel.cn/api/v1"
+    check_cmd: "grok inspect --json"
+    asserts: [provider_registered, env_key_present, upstream_reachable, expiry_ok]
+    notes: "团队 Coding Plan；Responses 协议"
+  - name: gemini-3.8-flash
+    type: model_channel
+    client: grok
+    location: "~/.grok/config.toml#[model.\"gemini-3.8-flash\"]"
+    env_key: GEMINI_API_KEY
+    upstream_url: "https://ai.x-lf.com/v1"
+    check_cmd: "grok inspect --json"
+    asserts: [provider_registered, env_key_present, upstream_reachable]
+  - name: Atria-Dawn-Preview
+    type: model_channel
+    client: grok
+    location: "~/.grok/config.toml#[model.Atria-Dawn-Preview]"
+    env_key: NEWAPI_API_KEY
+    upstream_url: "http://127.0.0.1:3000/v1"
+    check_cmd: "grok inspect --json"
+    asserts: [provider_registered, env_key_present, upstream_reachable]
+    notes: "经本机 NewAPI 网关（services.newapi-gateway）"
+  - name: codex-default
+    type: model_channel
+    client: codex
+    location: "~/.codex/config.toml#model + [model_providers.localnewapi]"
+    env_key: null                        # bearer token 在 config.toml 内（doctor 只验存在性）
+    upstream_url: "http://localhost:3000/v1"
+    check_cmd: "codex doctor"
+    asserts: [config_loads, upstream_reachable]
+    notes: "2026-09-24 事故记录：[skills] bundled 必须是 table（{enabled=false}）"
+  - name: claude-default
+    type: model_channel
+    client: claude-code
+    location: "~/.claude/settings.json#env"
+    env_key: ANTHROPIC_AUTH_TOKEN
+    upstream_url: "http://localhost:3000"
+    check_cmd: "claude mcp list"
+    asserts: [config_loads, env_key_present, upstream_reachable]
+  - name: dsh-default
+    type: model_channel
+    client: dsh
+    location: "~/.dsh/settings.yaml#agent-default-model"
+    env_key: null                        # 凭据经 ~/.dsh/.credentials.yaml refs（keyring）
+    upstream_url: null
+    check_cmd: "dsh --version"
+    asserts: [provider_refs_resolve]
+    notes: "llm-pi-ai.providers 7 个；allowedModels 引用须 ⊆ providers 键集合"
+
+# ── MCP 期望矩阵（哪个客户端应见哪些 server）──
+mcp:
+  - name: codegraph
+    type: mcp
+    location: "~/.claude.json#mcpServers.codegraph"
+    version: null
+    check_cmd: "grok mcp doctor"
+    expects: [claude-code, grok, dsh]
+    asserts: [registered, index_fresh]
+    notes: "stdio codegraph serve --mcp；DSH 侧见 ~/.dsh/cordis.patch.yml；索引在 ~/.omo/codegraph"
+  - name: vision
+    type: mcp
+    location: "~/.claude.json#mcpServers.vision"
+    expects: [claude-code, dsh]
+    asserts: [registered]
+    notes: "stdio ~/projects/Vision-MCP/.venv/bin/python -m vision_mcp"
+  - name: keenable
+    type: mcp
+    location: "~/.claude.json#mcpServers.keenable"
+    expects: [claude-code]
+    asserts: [registered, http_reachable]
+    notes: "http api.keenable.ai/mcp；无本地 daemon（勿查进程）"
+  - name: context7
+    type: mcp
+    location: "~/.claude/plugins/cache/claude-plugins-official/context7/*/.mcp.json"
+    expects: [claude-code]
+    asserts: [registered]
+  - name: browser
+    type: mcp
+    location: "~/.dsh/cordis.patch.yml"
+    expects: [dsh]
+    asserts: [registered]
+    notes: "stdio playwright-mcp --headless"
+  - name: zai-web-search
+    type: mcp
+    location: "~/.grok/config.toml#[mcp_servers.zai-web-search]"
+    expects: [grok]
+    asserts: [registered, enabled_true, http_reachable]
+  - name: zai-vision
+    type: mcp
+    location: "~/.grok/config.toml#[mcp_servers.zai-vision]"
+    expects: []                        # 当前 enabled=false：登记为已知关闭
+    asserts: [registered]
+    notes: "npx @z_ai/mcp-server；启用时移出 expects 空列表并加 http_reachable"
+
+# 会话级注入、无本地配置来源的 server（不可静态审计，doctor 只做出现即提示）
+session_injected_mcp: [github, tasks]
+
+# ── 外部 CLI（版本基线归属 docs/arch/ENVIRONMENT.md；未登记者以实机为准并提示补登记）──
+cli:
+  - name: uv
+    type: cli
+    bin: uv
+    location: "~/.local/bin/uv"
+    check_cmd: "uv --version"
+    asserts: [bin_present, version_probe]
+  - name: gh
+    type: cli
+    bin: gh
+    check_cmd: "gh --version"
+    asserts: [bin_present, version_probe]
+  - name: lark-cli
+    type: cli
+    bin: lark-cli
+    check_cmd: "lark-cli --version"
+    asserts: [bin_present, version_probe, skills_compiled]
+    notes: "28 域技能编译进二进制；skills list 计数=28 为基线"
+  - name: keenable
+    type: cli
+    bin: keenable
+    location: "~/.cargo/bin/keenable"
+    check_cmd: "keenable --help"
+    asserts: [bin_present]
+  - name: mmdc
+    type: cli
+    bin: mmdc
+    check_cmd: "mmdc --version"
+    asserts: [bin_present, version_probe]
+  - name: graph-easy
+    type: cli
+    bin: graph-easy
+    check_cmd: "graph-easy --version"
+    asserts: [bin_present]
+    notes: "退出码 2 属正常（白名单）"
+  - name: officecli
+    type: cli
+    bin: officecli
+    location: "~/.local/bin/officecli"
+    check_cmd: "officecli --version"
+    asserts: [bin_present, version_probe]
+    notes: "自更新型：与 ENVIRONMENT.md 基线漂移仅 ⚠️"
+  - name: codegraph
+    type: cli
+    bin: codegraph
+    location: "~/.local/bin/codegraph"
+    check_cmd: "codegraph --version"
+    asserts: [bin_present, version_probe]
+  - name: mysql
+    type: cli
+    bin: mysql
+    check_cmd: "mysql --version"
+    asserts: [bin_present]
+    notes: "输出形如 'mysql  Ver...' 且退出码非零也属正常（白名单）"
+  - name: node
+    type: cli
+    bin: node
+    check_cmd: "node --version"
+    asserts: [bin_present, version_probe]
+  - name: xelatex
+    type: cli
+    bin: xelatex
+    check_cmd: "xelatex --version"
+    asserts: [bin_present]
+    notes: "未进 ENVIRONMENT.md 依赖表（md-to-thesis-latex 依赖）——待补登记"
+  - name: grok
+    type: cli
+    bin: grok
+    location: "~/.local/bin/grok"
+    check_cmd: "grok inspect --json"
+    asserts: [bin_present, config_loads]
+  - name: codex
+    type: cli
+    bin: codex
+    location: "~/.local/share/pnpm/bin/codex"
+    check_cmd: "codex doctor"
+    asserts: [bin_present, config_loads, version_probe]
+    notes: "config_loads 是 2026-09-24 事故后新增的必检项"
+  - name: claude
+    type: cli
+    bin: claude
+    check_cmd: "claude --version"
+    asserts: [bin_present, config_loads, version_probe]
+  - name: dsh
+    type: cli
+    bin: dsh
+    check_cmd: "dsh --version"
+    asserts: [bin_present, config_loads]
+  - name: orca-ide
+    type: cli
+    bin: orca-ide
+    location: "~/.local/bin/orca-ide"
+    check_cmd: "orca-ide --version"
+    asserts: [bin_present]
+  - name: zcode
+    type: cli
+    bin: zcode
+    location: "/home/dc/bin/zcode"
+    check_cmd: "zcode --version"
+    asserts: [bin_present]
+
+# ── App 自管根基线（计数变化即报告；与主库重名=🚨）──
+app_roots:
+  - name: grok-bundled
+    type: app_root
+    location: "~/.grok/bundled/skills"
+    version: "public-2026-09-21-r2"     # 来自 bundled/manifest.json
+    count_baseline: {dirs: 28, skill_md: 22}
+    asserts: [count_unchanged, no_name_collision]
+  - name: codex-system
+    type: app_root
+    location: "~/.codex/skills/.system"
+    count_baseline: {dirs: 6}
+    asserts: [count_unchanged, no_name_collision]
+    notes: "本机已 bundled={enabled=false} 停载，但目录仍在；计数变化随 CLI 更新属预期"
+  - name: codex-plugins
+    type: app_root
+    location: "~/.codex/plugins/cache"
+    count_baseline: {skill_md: 21}
+    asserts: [count_unchanged, no_name_collision]
+  - name: claude-plugins
+    type: app_root
+    location: "~/.claude/plugins/cache"
+    count_baseline: {skill_md: 2}
+    asserts: [count_unchanged, no_name_collision]
+    notes: "口径=递归 SKILL.md 数（与 skillctl inventory 一致）"
+  - name: agents-landing
+    type: app_root
+    location: "~/.agents/skills"
+    count_baseline: {entries: 0}
+    asserts: [must_be_empty]             # 🚨 非空即高危（规约 P1）
+
+# ── 本地依赖服务 ──
+services:
+  - name: newapi-gateway
+    type: service
+    location: "http://127.0.0.1:3000"
+    check_cmd: "curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3000/api/status"
+    asserts: [tcp_reachable, api_status_ok]
+    notes: "Claude/Codex/DSH/Grok(Atria) 的共同上游；渠道清单只在库内（newapi-management 查）"
+  - name: stepfun-shim
+    type: service
+    location: "http://127.0.0.1:8321"
+    asserts: [tcp_reachable]
+    notes: "Grok step-5-preview 的后端；进程 ~/.local/share/stepfun-shim/server.py"
+  - name: codegraph-daemon
+    type: service
+    location: "~/.omo/codegraph"
+    asserts: [daemon_pid_alive]
+    notes: "daemon.pid 记录 pid/version；索引新鲜度归 mcp.codegraph 的 index_fresh"

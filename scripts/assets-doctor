@@ -1,0 +1,517 @@
+#!/usr/bin/env python3
+"""assets-doctor — 全资产健康巡检 + CI 闸门（与 skills-sync/skillctl 同族）。
+
+分工（严格不重叠）：
+  skills-sync  物化农场软链        skillctl  技能生命周期（lint/inventory/remove）
+  family-apply 族群标记物化        skill-doctor.mjs  单技能 bin/daemon/venv 探针
+  skill-update-check.py  版本更新检查
+  assets-doctor（本脚本）= 编排上述 + 补它们没有的检查，独占 CI 闸门（退出码）。
+
+七组检查：
+  (a) contract  技能契约缺口：400 行门禁 / name==目录名 / 唯一性 / 私有字段 / description 超长
+  (b) farm      农场漂移（解析 skills-sync --check stdout，自定退出码）
+  (c) cli       外部 CLI 健康 + config_loads（codex/grok/claude/dsh 的配置能否加载）
+  (d) mcp       MCP 期望矩阵对账 + codegraph 索引新鲜度 + 会话注入 server 差分
+  (e) models    模型渠道：注册一致性 / env key 存在（不打印值）/ 上游可达 / 到期 / provider 悬空
+  (f) app_roots App 自管根基线计数 + 与主库重名
+  (g) landing   着陆区 ~/.agents/skills 必须为空（P1）
+
+用法：
+  cd ~/projects/dc-skills && uv run python scripts/assets-doctor            # 人读报告
+  uv run python scripts/assets-doctor --check        # CI：⚠️→1 / 🚨→2 / 全绿→0
+  uv run python scripts/assets-doctor --check --strict   # 警告也算失败
+  uv run python scripts/assets-doctor --json        # 机器可读
+  uv run python scripts/assets-doctor --offline     # 跳过网络检查（标 💤）
+  uv run python scripts/assets-doctor --only models,mcp
+  uv run python scripts/assets-doctor --deep        # MCP 真握手（贵，默认关）
+铁律：只读；绝不打印密钥（只输出 SET(len=N)/UNSET）；网络失败最高 ⚠️（本地服务不可达才 🚨）。
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+import subprocess
+import sys
+import time
+import urllib.request
+from datetime import date, datetime
+from pathlib import Path
+
+try:
+    import yaml
+except ImportError:
+    sys.exit("需要 pyyaml（uv run）")
+
+ROOT = Path(__file__).resolve().parent.parent
+REGISTRY = ROOT / "registry.yaml"
+SKILL_MD = re.compile(r"^---\r?\n([\s\S]*?)\r?\n---", re.M)
+GROUPS = ["contract", "farm", "cli", "mcp", "models", "app_roots", "landing"]
+
+
+class Report:
+    def __init__(self) -> None:
+        self.items: list[dict] = []
+
+    def add(self, group: str, level: str, name: str, msg: str, hint: str = "") -> None:
+        self.items.append({"group": group, "level": level, "name": name,
+                           "msg": msg, "hint": hint})
+
+    def by(self, group: str) -> list[dict]:
+        return [i for i in self.items if i["group"] == group]
+
+    def counts(self) -> dict[str, int]:
+        return {lv: sum(1 for i in self.items if i["level"] == lv)
+                for lv in ("ok", "warn", "crit", "skip")}
+
+
+def run_cmd(args: list[str], timeout: int = 8) -> tuple[int, str]:
+    try:
+        r = subprocess.run(args, capture_output=True, text=True, timeout=timeout, cwd=ROOT)
+        return r.returncode, (r.stdout or "") + (r.stderr or "")
+    except (subprocess.TimeoutExpired, FileNotFoundError) as e:
+        return 127, str(e)
+
+
+def load_registry() -> dict:
+    return yaml.safe_load(REGISTRY.read_text(encoding="utf-8"))
+
+
+# ── (a) 技能契约缺口 ────────────────────────────────────────────────────────
+
+def check_contract(rep: Report) -> None:
+    g = "contract"
+    skills = sorted(p for p in ROOT.iterdir() if p.is_dir() and (p / "SKILL.md").exists())
+    names: list[str] = []
+    for d in skills:
+        txt = (d / "SKILL.md").read_text(encoding="utf-8", errors="replace")
+        m = SKILL_MD.match(txt)
+        if not m:
+            rep.add(g, "crit", d.name, "SKILL.md 无 frontmatter（B1）")
+            continue
+        try:
+            fm = yaml.safe_load(m.group(1)) or {}
+        except yaml.YAMLError as e:
+            rep.add(g, "crit", d.name, f"frontmatter YAML 错误: {e}")
+            continue
+        name = str(fm.get("name") or "")
+        names.append(name)
+        if name != d.name:
+            rep.add(g, "crit", d.name, f"name({name}) != 目录名（agentskills 规范硬约束）")
+        desc = str(fm.get("description") or "")
+        if len(desc) > 1024:
+            rep.add(g, "crit", d.name, f"description {len(desc)} 字符 > 1024")
+        lines = txt.count("\n") + (0 if txt.endswith("\n") else 1)
+        if lines > 400:
+            rep.add(g, "warn", d.name, f"SKILL.md {lines} 行 > 400 门禁（B7a，应拆 references/）")
+        priv = sorted(set(fm) - {"name", "description", "license", "compatibility",
+                                 "metadata", "allowed-tools", "disable-model-invocation"})
+        if priv:
+            rep.add(g, "warn", d.name, f"非规范顶层字段: {priv}")
+        dmi = fm.get("disable-model-invocation")
+        meta = fm.get("metadata") or {}
+        if dmi is True and meta.get("load-mode") != "manual":
+            rep.add(g, "warn", d.name, "disable-model-invocation 缺 metadata.load-mode: manual（B3 例外）")
+    dup = {n for n in names if names.count(n) > 1}
+    if dup:
+        rep.add(g, "crit", "name-uniqueness", f"主库内重名: {sorted(dup)}")
+    else:
+        rep.add(g, "ok", "contract", f"{len(skills)} 技能契约巡检完成（命名/1024/400 行/私有字段）")
+
+
+# ── (b) 农场漂移 ────────────────────────────────────────────────────────────
+
+def check_farm(rep: Report) -> None:
+    g = "farm"
+    code, out = run_cmd(["uv", "run", "python", "scripts/skills-sync", "--check"], timeout=60)
+    drift = [ln for ln in out.splitlines() if re.match(r"^\s+[-+] ", ln)]
+    hard = [ln for ln in out.splitlines() if re.match(r"^\s+! ", ln)]
+    fam = [ln for ln in out.splitlines() if ln.startswith("[families]")]
+    if hard:
+        for ln in hard:
+            rep.add(g, "crit", "farm", ln.strip())
+    if drift:
+        for ln in drift[:10]:
+            rep.add(g, "warn", "farm", f"漂移: {ln.strip()}")
+        if len(drift) > 10:
+            rep.add(g, "warn", "farm", f"…另 {len(drift) - 10} 条漂移")
+    if fam and "一致" not in fam[0]:
+        rep.add(g, "crit", "families", fam[0])
+    if not drift and not hard:
+        rep.add(g, "ok", "farm", "农场零漂移（skills-sync --check）" +
+                ("；族群标记一致" if fam else ""))
+
+
+# ── (c) CLI 健康 ────────────────────────────────────────────────────────────
+
+OK_NONZERO = {"graph-easy", "mysql"}  # --version 退出码非零属正常的白名单
+
+
+def check_cli(rep: Report, reg: dict, deep: bool) -> None:
+    g = "cli"
+    import shutil
+    env_md = ROOT / "docs" / "arch" / "ENVIRONMENT.md"
+    baselines: dict[str, str] = {}
+    if env_md.exists():
+        in_cli_table = False
+        for line in env_md.read_text(encoding="utf-8", errors="replace").splitlines():
+            if line.startswith("## "):
+                in_cli_table = "依赖登记表" in line  # 只解析 CLI 依赖表，避免误收 MCP 表同名行
+                continue
+            if not in_cli_table:
+                continue
+            m = re.match(r"^\|\s*`?([A-Za-z0-9_.-]+)`?(?:\s*/\s*[A-Za-z0-9_.-]+)?\s*\|\s*([^|]+?)\s*\|", line)
+            if m:
+                baselines[m.group(1)] = m.group(2).split("/")[0].strip()
+    for item in reg.get("cli") or []:
+        name, bin_ = item["name"], item["bin"]
+        path = shutil.which(bin_)
+        if not path:
+            rep.add(g, "warn", name, f"bin 不在 PATH: {bin_}")
+            continue
+        # config_loads 断言（2026-09-24 事故后必检）
+        if "config_loads" in (item.get("asserts") or []):
+            cc, cout = run_cmd(item["check_cmd"].split())
+            bad = ("✗ config" in cout or "Error loading" in cout
+                   or "could not be loaded" in cout or cc == 127)
+            if bad:
+                rep.add(g, "crit", name,
+                        f"配置无法加载（{item['check_cmd']}）—— 该客户端可能全量不可用",
+                        hint="修复后重跑；参见 SKILL-MANAGEMENT.md 风险台账")
+                continue
+        if "version_probe" in (item.get("asserts") or []):
+            cc, cout = run_cmd([bin_, "--version"])
+            ver = cout.strip().splitlines()[0][:40] if cout.strip() else ""
+            if cc not in (0,) and name not in OK_NONZERO and not ver:
+                rep.add(g, "warn", name, f"--version 异常（exit {cc}）")
+            elif name in baselines and ver and baselines[name] not in ver:
+                rep.add(g, "warn", name,
+                        f"ENVIRONMENT.md 登记 {baselines[name]} ≠ 实际 {ver!r}（漂移，建议同步登记）")
+            elif name not in baselines:
+                rep.add(g, "warn", name, f"未登记 ENVIRONMENT.md 基线（实际 {ver!r}）")
+    rep.add(g, "ok", "cli-summary", f"{len(reg.get('cli') or [])} 个外部 CLI 巡检完成")
+
+
+# ── (d) MCP 健康 ────────────────────────────────────────────────────────────
+
+def _claude_mcp_names() -> set[str]:
+    p = Path.home() / ".claude.json"
+    if not p.exists():
+        return set()
+    try:
+        data = json.loads(p.read_text(encoding="utf-8", errors="replace"))
+    except json.JSONDecodeError:
+        return set()
+    return set((data.get("mcpServers") or {}).keys())
+
+
+def _grok_mcp_names() -> set[str]:
+    p = Path.home() / ".grok" / "config.toml"
+    if not p.exists():
+        return set()
+    names = set(re.findall(r"^\[mcp_servers\.([A-Za-z0-9_-]+)\]", p.read_text(encoding="utf-8"), re.M))
+    return names
+
+
+def _dsh_mcp_names() -> set[str]:
+    """~/.dsh/cordis.patch.yml：递归查 config.serverName（顶层 [{insert:[rows]}]）。"""
+    p = Path.home() / ".dsh" / "cordis.patch.yml"
+    if not p.exists():
+        return set()
+    try:
+        data = yaml.safe_load(p.read_text(encoding="utf-8")) or []
+    except yaml.YAMLError:
+        return set()
+    names: set[str] = set()
+
+    def walk(node) -> None:
+        if isinstance(node, dict):
+            cfg = node.get("config")
+            if isinstance(cfg, dict) and cfg.get("serverName"):
+                names.add(str(cfg["serverName"]))
+            for v in node.values():
+                walk(v)
+        elif isinstance(node, list):
+            for v in node:
+                walk(v)
+
+    walk(data)
+    return names
+
+
+def _http_reachable(url: str, timeout: int, whitelist: set[int]) -> tuple[bool, int]:
+    try:
+        req = urllib.request.Request(url, method="HEAD")
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            return r.status in whitelist, r.status
+    except urllib.error.HTTPError as e:
+        return e.code in whitelist, e.code
+    except Exception:
+        try:  # HEAD 被拒时回落 GET
+            with urllib.request.urlopen(url, timeout=timeout) as r:
+                return r.status in whitelist, r.status
+        except urllib.error.HTTPError as e:
+            return e.code in whitelist, e.code
+        except Exception:
+            return False, 0
+
+
+def check_mcp(rep: Report, reg: dict, offline: bool, deep: bool) -> None:
+    g = "mcp"
+    settings = reg.get("settings") or {}
+    whitelist = set(settings.get("reachable_http_codes") or [200])
+    timeout = int(settings.get("net_timeout_s") or 4)
+    claude_json = _claude_mcp_names()
+    registered = {"claude-code": claude_json,
+                  "grok": _grok_mcp_names() | claude_json,  # Grok 兼容读 ~/.claude.json
+                  "dsh": _dsh_mcp_names()}
+    for item in reg.get("mcp") or []:
+        name = item["name"]
+        loc0 = str(item.get("location") or "")
+        if loc0.endswith(".mcp.json"):
+            # 插件自带 MCP：只判文件在位，不走客户端注册矩阵
+            hits = sorted(Path.home().glob(loc0[len("~/"):])) if loc0.startswith("~/") else []
+            rep.add(g, "ok" if hits else "warn", name,
+                    f"插件 .mcp.json 在位 ×{len(hits)}" if hits else f"插件 .mcp.json 缺失: {loc0}")
+            continue
+        for client in item.get("expects") or []:
+            if client in registered and name not in registered[client]:
+                rep.add(g, "warn", name, f"期望 {client} 注册但未找到（{item['location']}）")
+        loc = str(item.get("location") or "")
+        if loc.endswith(".mcp.json"):  # 插件自带 MCP：判定文件存在即可
+            exists = Path(os.path.expanduser(loc)).exists()
+            rep.add(g, "ok" if exists else "warn", name,
+                    "插件 .mcp.json 在位" if exists else f"插件 .mcp.json 缺失: {loc}")
+            continue
+        if "http_reachable" in (item.get("asserts") or []) and "http" in loc:
+            if offline:
+                rep.add(g, "ok", name, "可达性检查跳过（--offline）💤")
+            else:
+                url = str(item["location"]).split("#")[0]
+                ok, code = _http_reachable(url, timeout, whitelist)
+                rep.add(g, "ok" if ok else "warn", name,
+                        f"HTTP {code}（{'可达' if ok else '不可达'}）" if ok else
+                        f"不可达（HTTP {code or '超时'}）")
+    # codegraph 索引新鲜度（不用 codegraph status——其 pendingChanges 不可信）
+    link = ROOT / ".codegraph"
+    projs = [Path(os.path.realpath(link)) / "codegraph.db"] if link.is_symlink() else []
+    for proj in projs:
+        if not proj.exists():
+            continue
+            db_mtime = proj.stat().st_mtime
+            code, out = run_cmd(["git", "-C", str(ROOT), "log", "-1", "--format=%ct"])
+            try:
+                last_commit = float(out.strip())
+            except ValueError:
+                continue
+            lag = last_commit - db_mtime
+            if lag > 60:
+                rep.add(g, "warn", "codegraph-index",
+                        f"索引滞后 {int(lag)}s（{proj.parent.name}）—— 建议 codegraph sync")
+    # 会话级注入 server 差分（不可静态审计，出现即提示）
+    sess = Path.home() / ".grok" / "sessions"
+    known = {i["name"] for i in reg.get("mcp") or []} | set(reg.get("session_injected_mcp") or [])
+    if sess.is_dir():
+        for st in sorted(sess.glob("*/announcement_state.json"))[-3:]:
+            try:
+                fps = json.loads(st.read_text(encoding="utf-8", errors="replace")).get(
+                    "mcp_server_fingerprints") or {}
+            except json.JSONDecodeError:
+                continue
+            unknown = set(fps) - known
+            for u in sorted(unknown):
+                rep.add(g, "warn", u, "会话级注入的 MCP server（无本地配置来源，请人工确认来源）")
+    rep.add(g, "ok", "mcp-summary", f"{len(reg.get('mcp') or [])} 个 MCP 期望矩阵对账完成")
+
+
+# ── (e) 模型渠道 ────────────────────────────────────────────────────────────
+
+def check_models(rep: Report, reg: dict, offline: bool) -> None:
+    g = "models"
+    settings = reg.get("settings") or {}
+    whitelist = set(settings.get("reachable_http_codes") or [200])
+    timeout = int(settings.get("net_timeout_s") or 4)
+    warn_days = int(settings.get("expiry_warn_days") or 14)
+    grok_cfg = (Path.home() / ".grok" / "config.toml").read_text(encoding="utf-8") \
+        if (Path.home() / ".grok" / "config.toml").exists() else ""
+    models_md = ROOT / "docs" / "arch" / "MODELS.md"
+    expiry: dict[str, str] = {}
+    if models_md.exists():
+        for line in models_md.read_text(encoding="utf-8").splitlines():
+            m = re.match(r"^\|\s*([\w.\-]+)\s*\|.*\|\s*(\d{4}-\d{2}-\d{2})\s*\|\s*$", line)
+            if m:
+                expiry[m.group(1)] = m.group(2)
+    today = date.today()
+    for item in reg.get("models") or []:
+        name = item["name"]
+        loc = str(item.get("location") or "")
+        if "config.toml" in loc and '[model."' in loc:
+            key = loc.split('#[model."')[1].split('"')[0]
+            if f'[model."{key}"]' not in grok_cfg:
+                rep.add(g, "warn", name, f"~/.grok/config.toml 未见 [model.\"{key}\"]（MODELS.md 或 registry 过期）")
+        env_key = item.get("env_key")
+        if env_key:
+            val = os.environ.get(str(env_key))
+            rep.add(g, "ok" if val else "warn", name,
+                    f"env {env_key}: {'SET(len=%d)' % len(val) if val else 'UNSET'}")
+        url = item.get("upstream_url")
+        if url and "http" in str(url):
+            if offline:
+                rep.add(g, "ok", name, "上游可达性跳过（--offline）💤")
+            else:
+                ok, code = _http_reachable(str(url), timeout, whitelist)
+                rep.add(g, "ok" if ok else "warn", name,
+                        f"上游 HTTP {code}" if ok else f"上游不可达（{url} → HTTP {code or '超时'}）")
+        exp = expiry.get(name)
+        if exp:
+            days = (datetime.strptime(exp, "%Y-%m-%d").date() - today).days
+            if days < 0:
+                rep.add(g, "crit", name, f"套餐已到期 {exp}（{abs(days)} 天前）")
+            elif days <= warn_days:
+                rep.add(g, "warn", name, f"套餐 {days} 天后到期（{exp}）—— 待续费")
+    # DSH provider 悬空引用
+    dsh_cfg = Path.home() / ".dsh" / "settings.yaml"
+    if dsh_cfg.exists():
+        try:
+            data = yaml.safe_load(dsh_cfg.read_text(encoding="utf-8")) or {}
+            providers = set(((data.get("llm-pi-ai") or {}).get("providers") or {}).keys())
+            allowed = [m.get("provider") for m in
+                       ((data.get("subagent-model-selection") or {}).get("allowedModels") or [])
+                       if isinstance(m, dict)]
+            dangling = {p for p in allowed if p and p not in providers}
+            if dangling:
+                rep.add(g, "warn", "dsh-providers",
+                        f"allowedModels 引用未定义 provider: {sorted(dangling)}",
+                        hint="~/.dsh/settings.yaml：补 provider 定义或删引用")
+        except yaml.YAMLError:
+            pass
+    suffix = "" if not offline else "（离线模式）"
+    rep.add(g, "ok", "models-summary",
+            f"{len(reg.get('models') or [])} 个渠道断言完成{suffix}")
+
+
+# ── (f) App 自管根基线 ──────────────────────────────────────────────────────
+
+def check_app_roots(rep: Report, reg: dict) -> None:
+    g = "app_roots"
+    master_names = {p.name for p in ROOT.iterdir()
+                    if p.is_dir() and (p / "SKILL.md").exists()}
+    for item in reg.get("app_roots") or []:
+        root = Path(os.path.expanduser(str(item["location"])))
+        if not root.is_dir():
+            rep.add(g, "warn", item["name"], f"根不存在: {root}")
+            continue
+        base = item.get("count_baseline") or {}
+        if "entries" in base:
+            n = len([p for p in root.iterdir() if p.name != ".skill-lock.json"])
+            if "must_be_empty" in (item.get("asserts") or []) and n > 0:
+                names = sorted(p.name for p in root.iterdir() if p.name != ".skill-lock.json")
+                rep.add(g, "crit", item["name"],
+                        f"着陆区非空（{n} 个: {names[:5]}…）—— 按 P1/P2 mv 进主库并登记",
+                        hint="mv ~/.agents/skills/<name> ~/projects/dc-skills/ → agent-map 登记 → skills-sync")
+            else:
+                rep.add(g, "ok", item["name"], f"{n} 条目（基线 {base['entries']}）")
+            continue
+        dirs = [p for p in root.iterdir() if p.is_dir()]
+        skill_mds = list(root.rglob("SKILL.md"))
+        counts = {"dirs": len(dirs), "skill_md": len(skill_mds)}
+        drift = {k: (counts[k], base[k]) for k in base if counts.get(k) != base[k]}
+        if drift:
+            detail = "; ".join(f"{k}: {v[0]}≠基线{v[1]}" for k, v in drift.items())
+            rep.add(g, "warn", item["name"], f"计数变化（{detail}）—— App 更新后请同步 registry.yaml")
+        else:
+            rep.add(g, "ok", item["name"], f"计数与基线一致（{counts}）")
+        if "no_name_collision" in (item.get("asserts") or []):
+            hits = sorted({p.parent.name for p in skill_mds} & master_names)
+            if hits:
+                rep.add(g, "crit", item["name"], f"与主库技能重名: {hits}（P3/P5）")
+    rep.add(g, "ok", "app_roots-summary", f"{len(reg.get('app_roots') or [])} 个 App 自管根对账完成")
+
+
+# ── (g) 着陆区（并入 (f) 的 must_be_empty；此处单独成组便于 --only） ──────────
+
+def check_landing(rep: Report, reg: dict) -> None:
+    g = "landing"
+    root = Path(os.path.expanduser("~/.agents/skills"))
+    n = len([p for p in root.iterdir() if p.name != ".skill-lock.json"]) if root.is_dir() else 0
+    if n:
+        rep.add(g, "crit", "agents-landing", f"着陆区非空（{n} 个）—— 规约 P1 要求保持为空")
+    else:
+        rep.add(g, "ok", "agents-landing", "~/.agents/skills 为空 ✅")
+
+
+# ── 输出 ───────────────────────────────────────────────────────────────────
+
+def render(rep: Report, args: argparse.Namespace, started: float) -> int:
+    counts = rep.counts()
+    crit, warn = counts["crit"], counts["warn"]
+    if args.json:
+        print(json.dumps({"counts": counts, "items": rep.items,
+                          "exit": 2 if crit else (1 if warn and (args.check or args.strict) else 0)},
+                         ensure_ascii=False, indent=2))
+    else:
+        mark = {"ok": "✅", "warn": "⚠️", "crit": "🚨"}
+        print(f"\n🩺 assets-doctor · 全资产健康巡检    {datetime.now():%Y-%m-%d %H:%M:%S}"
+              f"  (offline={'y' if args.offline else 'n'} deep={'y' if args.deep else 'n'})")
+        print("=" * 72)
+        for group in GROUPS:
+            if args.only and group not in args.only:
+                continue
+            items = rep.by(group)
+            if not items:
+                continue
+            print(f"\n[{group}]")
+            for i in items:
+                print(f"  {mark[i['level']]} {i['name']:<26} {i['msg']}")
+                if i["hint"]:
+                    print(f"      → {i['hint']}")
+        print("\n" + "-" * 72)
+        print(f"摘要: 🚨 {crit} | ⚠️ {warn} | ✅ {counts['ok']}   "
+              f"耗时 {time.time() - started:.1f}s")
+        if crit or warn:
+            todo = [i["name"] for i in rep.items if i["level"] == "crit"] or \
+                   [i["name"] for i in rep.items if i["level"] == "warn"][:3]
+            print(f"待办: {', '.join(dict.fromkeys(todo))}")
+    if crit:
+        return 2
+    if warn and (args.check or args.strict):
+        return 1
+    return 0
+
+
+def main() -> None:
+    ap = argparse.ArgumentParser(description="全资产健康巡检 + CI 闸门")
+    ap.add_argument("--check", action="store_true", help="CI 模式：⚠️→1 / 🚨→2")
+    ap.add_argument("--strict", action="store_true", help="警告也算失败")
+    ap.add_argument("--json", action="store_true")
+    ap.add_argument("--offline", action="store_true", help="跳过网络检查")
+    ap.add_argument("--only", help="只跑指定组，逗号分隔（contract/farm/cli/mcp/models/app_roots/landing）")
+    ap.add_argument("--deep", action="store_true", help="MCP 真握手（默认关）")
+    args = ap.parse_args()
+    args.only = set(args.only.split(",")) if args.only else None
+    started = time.time()
+
+    reg = load_registry()
+    rep = Report()
+    groups = args.only or set(GROUPS)
+    if "contract" in groups:
+        check_contract(rep)
+    if "farm" in groups:
+        check_farm(rep)
+    if "cli" in groups:
+        check_cli(rep, reg, args.deep)
+    if "mcp" in groups:
+        check_mcp(rep, reg, args.offline, args.deep)
+    if "models" in groups:
+        check_models(rep, reg, args.offline)
+    if "app_roots" in groups or "landing" in groups:
+        check_app_roots(rep, reg)
+    if "landing" in groups:
+        check_landing(rep, reg)
+    sys.exit(render(rep, args, started))
+
+
+if __name__ == "__main__":
+    main()
