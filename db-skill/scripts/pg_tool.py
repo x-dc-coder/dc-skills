@@ -19,6 +19,7 @@ from typing import Any, Dict, List, Optional, Tuple
 # 「候选配置文件名」这一处引擎差异。
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "scripts"))
 from common import choose_limit, shutil_which  # noqa: E402
+from common import fallback_output_dir  # noqa: E402
 from common import resolve_config_path as _resolve_config_path  # noqa: E402
 
 
@@ -146,13 +147,9 @@ def make_output_path(explicit: Optional[str]) -> Path:
         p.parent.mkdir(parents=True, exist_ok=True)
         return p
 
-    # Two-level fallback: cwd/<db-output>/db-skill/ or ~/.claude/skills-output/db-skill/
-    skills_home = Path.home() / ".claude" / "skills"
-    cwd = Path.cwd().resolve()
-    if not str(cwd).startswith(str(skills_home)):
-        root = cwd / "db-output" / "db-skill"
-    else:
-        root = Path.home() / ".claude" / "skills-output" / "db-skill"
+    # Two-level fallback（docs/specs/OUTPUT.md C-1）：基准是主库根而非农场目录——
+    # 经 ~/.claude/skills 软链进入时 resolve() 回到主库，同样走兜底。
+    root = fallback_output_dir("db-skill", "db-output")
     root.mkdir(parents=True, exist_ok=True)
     fd, name = tempfile.mkstemp(prefix="pg-result-", suffix=".json", dir=root)
     os.close(fd)

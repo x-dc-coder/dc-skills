@@ -21,6 +21,9 @@ from pathlib import Path
 from docx import Document
 from docx.oxml.ns import qn
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "scripts"))
+from common import fallback_output_dir  # noqa: E402
+
 
 def extract_comments_data(doc):
     """
@@ -800,13 +803,8 @@ def main():
     if args.output_dir is not None:
         output_dir = Path(args.output_dir)
     else:
-        # Two-level fallback: cwd/<doc-output>/word-extractor/ or ~/.claude/skills-output/word-extractor/
-        skills_home = Path.home() / ".claude" / "skills"
-        cwd = Path.cwd().resolve()
-        if not str(cwd).startswith(str(skills_home)):
-            output_dir = cwd / "doc-output" / "word-extractor"
-        else:
-            output_dir = Path.home() / ".claude" / "skills-output" / "word-extractor"
+        # Two-level fallback（OUTPUT.md C-1）：基准是主库根而非农场目录。
+        output_dir = fallback_output_dir("word-extractor", "doc-output")
     output_dir.mkdir(parents=True, exist_ok=True)
 
     if args.format in ("json", "both"):

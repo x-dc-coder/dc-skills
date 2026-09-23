@@ -9,16 +9,49 @@ from typing import Any, Dict, Optional, Tuple
 #: 环境变量名：显式指定 db-skill 配置文件路径
 DEFAULT_CONFIG_ENV = "DB_SKILL_CONFIG"
 
+#: 主库根（本文件位于 <master>/scripts/）。输出路径判定的唯一基准（OUTPUT.md C-1）：
+#: 经农场软链（~/.claude/skills/<skill> 等）进入时，resolve() 回到主库，判定依然成立。
+MASTER_ROOT = Path(__file__).resolve().parent.parent
 
-def resolve_output_path(input_file: Path | None, skill_name: str, default_name: str) -> Path:
-    """推断输出路径：<项目目录>/thesis-output/<skill-name>/ 或 ~/.claude/skills-output/<skill-name>/"""
+
+def is_under_master(path: Path) -> bool:
+    """path（解析后）是否位于主库根之下。"""
+    try:
+        Path(path).resolve().relative_to(MASTER_ROOT)
+        return True
+    except ValueError:
+        return False
+
+
+def fallback_output_dir(skill_name: str, output_root: str) -> Path:
+    """OUTPUT.md C-1 兜底目录：cwd 在主库内 → ~/.claude/skills-output/<skill_name>/；
+    cwd 在工作项目内 → <cwd>/<output_root>/<skill_name>/。"""
+    if is_under_master(Path.cwd()):
+        return Path.home() / ".claude" / "skills-output" / skill_name
+    return Path.cwd().resolve() / output_root / skill_name
+
+
+def resolve_output_path(
+    input_file: Optional[Path],
+    skill_name: str,
+    default_name: str,
+    output_root: str = "thesis-output",
+) -> Path:
+    """推断输出路径（OUTPUT.md C-1/C-2）。
+
+    1) 输入文件位于某工作项目内——从输入文件向上找含 ``output_root`` 标记目录的
+       祖先（主库自身不算，遇到主库即止）→ ``<项目根>/<output_root>/<skill_name>/``；
+    2) 否则按 cwd 判定（见 :func:`fallback_output_dir`）。
+    """
     if input_file and input_file.is_absolute():
         for parent in input_file.resolve().parents:
-            if (parent / "thesis-output").exists() or (parent / "docs").exists():
-                output_dir = parent / "thesis-output" / skill_name
+            if parent == MASTER_ROOT:
+                break  # 输入在主库内（含经农场软链解析后）：不是工作项目信号
+            if (parent / output_root).is_dir():
+                output_dir = parent / output_root / skill_name
                 output_dir.mkdir(parents=True, exist_ok=True)
                 return output_dir / default_name
-    out = Path.home() / ".claude" / "skills-output" / skill_name
+    out = fallback_output_dir(skill_name, output_root)
     out.mkdir(parents=True, exist_ok=True)
     return out / default_name
 

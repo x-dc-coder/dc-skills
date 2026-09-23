@@ -65,10 +65,13 @@ def find_python(explicit: str | None = None) -> Path | None:
 
 
 def default_out_dir() -> Path:
-    cwd = Path.cwd()
-    if cwd == SKILL_DIR.parent:  # 在 ~/projects/dc-skills 下运行 → 统一兜底目录
+    # OUTPUT.md C-1：基准是主库根（含子目录与经农场软链进入），不是恰好等于主库根
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "scripts"))
+    from common import is_under_master  # noqa: E402
+
+    if is_under_master(Path.cwd()):
         return Path.home() / ".claude" / "skills-output" / "unified-search" / "downloads"
-    return cwd / "unified-search-output" / "downloads"
+    return Path.cwd().resolve() / "unified-search-output" / "downloads"
 
 
 class StdioMCP:
