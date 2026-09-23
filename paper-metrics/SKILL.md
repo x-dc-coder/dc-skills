@@ -6,9 +6,13 @@ description: >
   _run_meta.json，并支持写作契约生成与草稿校验。当用户要求提取论文写作特征指标、生成期刊/会议风格画像或
   语料指标基线、生成写作契约、校验草稿指标、或复核指标可复现性（同输入→同输出、逐字节）时使用。
   **本技能只做测量、不做写作生成**：写作由 thesis-writing（Mode B）消费本技能产物后完成。
-version: 1.0.0
+metadata:
+  family: thesis
+  role: member
+  load-mode: manual
+  version: 1.0.0
+disable-model-invocation: true
 ---
-
 # paper-metrics — 论文写作特征指标层
 
 **一句话**：把"论文的写作特征"变成**可复现、可验证、可解释**的数字，再把数字变成可执行的写作契约与草稿校验。

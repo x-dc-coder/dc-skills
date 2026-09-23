@@ -1,0 +1,7 @@
+# Codex 技能级元数据（族群化 member：不允许隐式调用，仅 $<name> 显式触发）
+# 由 scripts/family-apply.py 生成；SKILL.md description 变更后需重跑刷新。
+interface:
+  display_name: "Design Dataviz"
+  short_description: "数据可视化设计系统：如何构建正确、可访问、优雅的图表/图形/仪表盘/统计卡片，适用于任何输出媒介（HTML"
+policy:
+  allow_implicit_invocation: false

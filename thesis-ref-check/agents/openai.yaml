@@ -1,0 +1,7 @@
+# Codex 技能级元数据（族群化 member：不允许隐式调用，仅 $<name> 显式触发）
+# 由 scripts/family-apply.py 生成；SKILL.md description 变更后需重跑刷新。
+interface:
+  display_name: "Thesis Ref Check"
+  short_description: "论文术语一致性检查（仅术语）：识别关键术语、检测前后变体、生成统一建议与修正报告"
+policy:
+  allow_implicit_invocation: false

@@ -2,8 +2,12 @@
 name: drawio-xml
 description: >
   生成高质量 draw.io 原生 .drawio 图表文件（XML）：SKILL 质量规则 + 官方 MCP server 协同，支持 ER/类图/时序/用例/流程图、泳道图、架构图，交付可继续编辑的文件，也支持截图复刻为可编辑图表。当用户需要 .drawio 文件、可编辑图表或图片转 drawio 时使用；与 diagram-*（Mermaid 渲染 PNG）互补。
+metadata:
+  family: drawing
+  role: member
+  load-mode: manual
+disable-model-invocation: true
 ---
-
 # draw.io 图表生成 Skill（SKILL + MCP 协同）
 
 ## 核心目标

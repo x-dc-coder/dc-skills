@@ -1,9 +1,22 @@
 ---
 name: officecli
 description: Create, analyze, proofread, and modify Office documents (.docx, .xlsx, .pptx) using the officecli CLI tool. Use when the user wants to create, inspect, check formatting, find issues, add charts, or modify Office documents.
+  .docx 高精度提取（word-extractor）同属 docs 族，由本技能路由。
+metadata:
+  family: docs
+  role: entry
+  load-mode: auto
 ---
-
 # officecli
+
+## 族群路由（docs 文档处理入口）
+
+本技能是 **docs 文档处理族群入口**。族内技能为 manual 加载（不进启动清单），命中下表场景时直接 Read 对应 SKILL.md 后按其规程执行；用户显式要求加载整族时依次读本表全部条目。
+
+| 技能 | 用途 | 何时选它 |
+|---|---|---|
+| [`word-extractor`](~/projects/dc-skills/word-extractor/SKILL.md) | .docx 高精度提取 | 提取 Word 全部内容（结构/图片/表格/题注） |
+
 
 AI-friendly CLI for .docx, .xlsx, .pptx. Single binary, no dependencies, no Office installation needed.
 

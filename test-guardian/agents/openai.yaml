@@ -1,0 +1,7 @@
+# Codex 技能级元数据（族群化 member：不允许隐式调用，仅 $<name> 显式触发）
+# 由 scripts/family-apply.py 生成；SKILL.md description 变更后需重跑刷新。
+interface:
+  display_name: "Test Guardian"
+  short_description: "防假绿测试工程规范与双盲对抗质检工具箱：审计测试是否「真绿」（可证伪、非mock自证、不吞异常、无静态布局碰撞）"
+policy:
+  allow_implicit_invocation: false

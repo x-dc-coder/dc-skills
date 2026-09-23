@@ -5,9 +5,22 @@ description: >
   以及"安装插件遇到未知问题"类请求。当用户报告 DSH 插件报错、插件不生效、配置 invalid、
   peer-deps 缺失或需要诊断 ~/.dsh 插件体系时使用。含 plugin-doctor 只读自动检测、标准排障
   流程与修复红线（不自行重启 DSH、不改 shipped 预设）。
+  DSH 插件 UI 优化（dsh-ui-optimization）同属 dshplugin 族，由本技能路由。
+metadata:
+  family: dshplugin
+  role: entry
+  load-mode: auto
 ---
-
 # DSH 插件问题排查（dsh-plugin-troubleshooting）
+
+## 族群路由（dshplugin DSH 插件入口）
+
+本技能是 **dshplugin DSH 插件族群入口**。族内技能为 manual 加载（不进启动清单），命中下表场景时直接 Read 对应 SKILL.md 后按其规程执行；用户显式要求加载整族时依次读本表全部条目。
+
+| 技能 | 用途 | 何时选它 |
+|---|---|---|
+| [`dsh-ui-optimization`](~/projects/dc-skills/dsh-ui-optimization/SKILL.md) | DSH 插件前端优化（薄壳编排） | 优化 DSH client 插件注入的界面/settings 卡片 |
+
 
 > 适用场景：DSH 插件安装失败、配置冲突、服务注册冲突、挂载失败、插件不生效、版本不匹配，以及"安装插件遇到未知问题"类请求。
 > 加载本技能后，先读规则库与文档索引，再按"标准排障流程"执行。

@@ -7,8 +7,12 @@ description: >
   仅当用户【显式指定】使用本技能时（提到 kimi-webbridge / WebBridge / Kimi 浏览器扩展 /
   必须用真实浏览器登录态 / 用我的浏览器打开）才启用。需要真实登录态的网站操作且用户明确要求
   时使用本技能；守护进程处理全部复杂度。
+metadata:
+  family: info
+  role: member
+  load-mode: manual
+disable-model-invocation: true
 ---
-
 # Kimi WebBridge
 
 Control the user's real browser (with their login sessions) via a local daemon at `http://127.0.0.1:10086`.

@@ -1,14 +1,17 @@
 ---
 name: test-guardian
-version: 1.0.0
-whenToUse: 审视既有测试是否真绿、测试防假绿静态门禁、测试分层与工程规范、双Agent双盲测试协作、测试去重与重构
 description: >
   防假绿测试工程规范与双盲对抗质检工具箱：审计测试是否「真绿」（可证伪、非mock自证、不吞异常、无静态布局碰撞）。
   提供 L0-L4 测试金字塔、双盲 RGF（红-绿-反证）闭环协议、AST 静态门禁与 pytest 守卫插件。
   触发场景：测试有效性审计 / 假绿 / fake green / 测试质量 / 可证伪 / 测试分层规范 / 测试重构迁移 / 双Agent测试分离。
   注意：用具体语言编写新业务代码与常规 TDD 纪律归 programming 技能；本技能专注测试有效性审计、防假绿与工程门禁。
+metadata:
+  family: coding
+  role: member
+  load-mode: manual
+  version: 1.0.0
+disable-model-invocation: true
 ---
-
 # Test Guardian（防假绿测试工程规范与质检守卫）
 
 你是一名严格的软件质量与测试工程架构师。你的核心铁律是：

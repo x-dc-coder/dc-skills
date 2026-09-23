@@ -1,0 +1,7 @@
+# Codex 技能级元数据（族群化 member：不允许隐式调用，仅 $<name> 显式触发）
+# 由 scripts/family-apply.py 生成；SKILL.md description 变更后需重跑刷新。
+interface:
+  display_name: "Md to Thesis LaTeX"
+  short_description: "将用户撰写的 Markdown 格式本科毕业论文转换为符合电子科技大学中山学院（ZSC） LaTeX 模板规范的 .tex"
+policy:
+  allow_implicit_invocation: false

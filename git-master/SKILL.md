@@ -1,8 +1,12 @@
 ---
 name: git-master
 description: "MUST USE whenever a task needs a commit or git-history investigation. Covers atomic commits, staging, commit-message style, rebase, squash, fixup/autosquash, blame, bisect, reflog, git log -S/-G, and questions like who wrote this or when was this added. Do not use for ordinary code edits unless the user asks for git work."
+metadata:
+  family: coding
+  role: member
+  load-mode: manual
+disable-model-invocation: true
 ---
-
 # Git Master
 
 Use this skill when the user asks you to operate on Git history or answer a Git-history question. Be exact, conservative, and evidence-led. Read the repository state before you infer anything.

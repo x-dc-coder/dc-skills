@@ -2,9 +2,26 @@
 name: thesis-writing
 description: >
   双模式学术论文写作助手：按用户意图自动选择本科毕设（≥15000 字、六章模板、Web 系统论文）或期刊论文模式，生成带图表/公式占位符的结构化 Markdown 草稿（对接 diagram-* 技能族），并经过 Markdown 规范检查器校验。当用户要求写论文、写毕设、生成论文草稿、整理期刊论文（write a thesis / draft a paper）时使用。
+  论文工作其他环节（术语一致性检查/导出 docx/转 LaTeX/写作特征指标/PDF 阅读）由本技能路由至 thesis 族内技能。
+metadata:
+  family: thesis
+  role: entry
+  load-mode: auto
 ---
-
 # 学术论文正文撰写 Skill (Dual-Mode)
+
+## 族群路由（thesis 论文入口）
+
+本技能是 **thesis 论文族群入口**。族内技能为 manual 加载（不进启动清单），命中下表场景时直接 Read 对应 SKILL.md 后按其规程执行；用户显式要求加载整族时依次读本表全部条目。
+
+| 技能 | 用途 | 何时选它 |
+|---|---|---|
+| [`thesis-ref-check`](~/projects/dc-skills/thesis-ref-check/SKILL.md) | 论文术语一致性检查 | 定稿前术语变体/前后不一检查与修正 |
+| [`thesis-export`](~/projects/dc-skills/thesis-export/SKILL.md) | 论文 Markdown→docx 导出与格式验证 | 导出 Word/导出前格式检查/封面拼接 |
+| [`md-to-thesis-latex`](~/projects/dc-skills/md-to-thesis-latex/SKILL.md) | 毕业论文 md→LaTeX→PDF | 转 LaTeX 排版输出 PDF |
+| [`paper-metrics`](~/projects/dc-skills/paper-metrics/SKILL.md) | 论文写作特征指标层 | 写作特征测量/AI 味量化分析 |
+| [`paper-reader`](~/projects/dc-skills/paper-reader/SKILL.md) | 学术论文 PDF 双引擎阅读 | 读 PDF 论文/转换/总结 |
+
 
 双模式学术稿件生成器。生成结构化 Markdown 初稿，图片使用占位符（对接 `diagram-*` skill 家族），最后用 `check_markdown_spec.py` 校验。
 

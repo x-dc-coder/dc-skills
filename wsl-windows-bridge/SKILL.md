@@ -2,8 +2,12 @@
 name: wsl-windows-bridge
 description: >
   WSL→Windows 跨边界框架：三层调用通道（pythonw.exe 直调无弹窗首选 / cmd.exe fallback / 直接 EXE）+ GPU 资源治理（GpuLimits 单进程配额 + GpuGovernor 跨进程协调防 OOM）。覆盖 GPU 训练/推理、Windows Python 环境、注册表、WMI、COM、Event Log。涉及跨系统调用、Windows 侧程序、GPU 任务或注册表/COM 操作时使用。
+metadata:
+  family: infra
+  role: member
+  load-mode: manual
+disable-model-invocation: true
 ---
-
 # WSL → Windows 桥接 Skill
 
 > **使用方式（渐进式披露）**：本文件是导航页——先读它确定通道与铁律；执行具体操作时按需加载

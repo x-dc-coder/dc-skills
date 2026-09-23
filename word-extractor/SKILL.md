@@ -2,8 +2,12 @@
 name: word-extractor
 description: >
   高精度提取 .docx Word 文档全部内容，保留结构、图片、表格与题注（基于 Word XML 深度解析，图片/表格与段落位置精确对应）。当用户需要读取、提取、分析或转换 Word 文档（论文、开题报告、含图表文档），或提到 提取word/读取docx/分析论文/word内容提取 时使用。
+metadata:
+  family: docs
+  role: member
+  load-mode: manual
+disable-model-invocation: true
 ---
-
 # Word Document Extractor
 
 Extract all content from `.docx` files with high fidelity. Outputs both

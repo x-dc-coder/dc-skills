@@ -2,8 +2,12 @@
 name: thesis-export
 description: >
   论文 Markdown → docx 导出与格式验证工具链（word-production）手册：导出前格式检查（check_markdown_spec）、导出（--engine auto/linux/com）、导出后验证、脚注重排、COM 封面拼接、Word 批注/模板格式提取（doc_intake）。当用户要求导出论文/导出 docx/论文排版/检查格式/验证 docx/提取 Word 格式/提取批注/从模板生成配置/封面拼接/看学校配置时使用；与 thesis-writing（写草稿上游）、word-extractor（提取）分工。
+metadata:
+  family: thesis
+  role: member
+  load-mode: manual
+disable-model-invocation: true
 ---
-
 # 论文导出 Skill：word-production 工具链手册
 
 > **与 thesis-agent 预设的关系**：本 skill 是 word-production **工具链手册**（CLI 命令/退出码/超时表）；

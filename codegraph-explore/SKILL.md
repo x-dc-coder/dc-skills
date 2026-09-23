@@ -2,9 +2,22 @@
 name: codegraph-explore
 description: >
   用 CodeGraph 做代码库符号检索、调用链追踪和变更影响分析。理解大仓代码、定位定义或调用者、评估重构影响、选择测试时使用；一次返回相关源码与调用路径。小仓、配置和 Markdown 仍用 grep/read。
+  git/GitHub 工作流（github-workflow）同属 repo 族，由本技能路由。
+metadata:
+  family: repo
+  role: entry
+  load-mode: auto
 ---
-
 # codegraph-explore — 符号级代码检索与影响面分析
+
+## 族群路由（repo 仓库工程入口）
+
+本技能是 **repo 仓库工程族群入口**。族内技能为 manual 加载（不进启动清单），命中下表场景时直接 Read 对应 SKILL.md 后按其规程执行；用户显式要求加载整族时依次读本表全部条目。
+
+| 技能 | 用途 | 何时选它 |
+|---|---|---|
+| [`github-workflow`](~/projects/dc-skills/github-workflow/SKILL.md) | GitHub-first git 工作流 | git/gh 操作/提交规范/PR/issue/manifest |
+
 
 ## 0. 一句话判据
 

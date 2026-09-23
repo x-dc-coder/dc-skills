@@ -1,0 +1,7 @@
+# Codex 技能级元数据（族群化 member：不允许隐式调用，仅 $<name> 显式触发）
+# 由 scripts/family-apply.py 生成；SKILL.md description 变更后需重跑刷新。
+interface:
+  display_name: "Word Extractor"
+  short_description: "高精度提取 .docx Word 文档全部内容，保留结构、图片、表格与题注（基于 Word XML"
+policy:
+  allow_implicit_invocation: false

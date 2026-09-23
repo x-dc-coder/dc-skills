@@ -1,16 +1,19 @@
 ---
 name: newapi-management
-version: 1.0.0
 description: >
   管理 NewAPI（QuantumNous/new-api fork，如 xiaolfeng/newapi-fix）的渠道与日志：创建/修改/删除/测试渠道、
   查询使用日志并提取会话原文。当用户需要配置 NewAPI 渠道（建渠道、改渠道、批量管理、多Key轮询、
   系统提示词注入、参数/请求头覆写、上游模型同步）、或排查某次对话/会话问题需要拿 NewAPI 日志分析时使用。
   客户端已内置 fork 版本字段类型铁律，调用者只需提供平铺的渠道配置 dict。
 metadata:
+  family: infra
+  role: member
+  load-mode: manual
+  version: 1.0.0
   requires:
     bins: []
+disable-model-invocation: true
 ---
-
 # NewAPI 渠道与日志管理
 
 针对 fork 版 NewAPI（`github.com/QuantumNous/new-api`，镜像如 `xiaolfeng/newapi-fix`）的官方

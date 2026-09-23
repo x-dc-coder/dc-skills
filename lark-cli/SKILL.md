@@ -11,10 +11,12 @@ description: >-
   CLI 安装更新）时使用本技能：先按路由表选域执行 lark-cli <domain>，复杂域先 lark-cli skills read <域>
   获取权威规程；认证、输出契约与高风险操作遵守共享底座规则。
 metadata:
+  family: lark
+  role: entry
+  load-mode: auto
   requires:
     bins: ["lark-cli"]
 ---
-
 # lark-cli — 飞书/Lark 全家桶统一入口（聚合技能）
 
 本技能聚合原 28 个 `lark-*` 独立技能（approval / apps / attendance / base / calendar / contact / doc /

@@ -7,8 +7,12 @@ description: >-
   (shell, filesystem, git, HTTP, existing CLIs) whenever it can complete the task.
   Use only when a visible window needs GUI control those cannot reach. Do not use
   for Orca's embedded browser (`orca-cli`).
+metadata:
+  family: agentops
+  role: member
+  load-mode: manual
+disable-model-invocation: true
 ---
-
 # Computer Use
 
 This discovery stub loads the version-matched guide from the Orca executable used for this session.

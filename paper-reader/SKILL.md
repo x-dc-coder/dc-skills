@@ -4,8 +4,12 @@ description: >
   学术论文 PDF 双引擎对照阅读器 — 四阶段流水线（预检→转换→合并→总结）。
   Marker + MinerU 双引擎并行转换，自动合并、差异对照、文献总结。
   内置 PDF 预检、异常处理三级响应、断点续跑、流水线状态追踪。
+metadata:
+  family: thesis
+  role: member
+  load-mode: manual
+disable-model-invocation: true
 ---
-
 # Paper Reader — 四阶段论文分析流水线
 
 ## 流水线四阶段

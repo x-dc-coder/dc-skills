@@ -1,9 +1,23 @@
 ---
 name: db-skill
 description: High-performance MySQL and PostgreSQL operations for project-local databases with global skill reuse. Use when Codex must run MySQL/PostgreSQL CRUD (insert/update/delete/select), load connection settings from a project config file, enforce bounded result sizes, emit JSON, and use jq plus temp files to avoid context bloat.
+  本机服务运维（NewAPI 网关）与 WSL→Windows 跨边界调用同属 infra 族，由本技能路由。
+metadata:
+  family: infra
+  role: entry
+  load-mode: auto
 ---
-
 # DB Skill
+
+## 族群路由（infra 基础设施运维入口）
+
+本技能是 **infra 基础设施运维族群入口**。族内技能为 manual 加载（不进启动清单），命中下表场景时直接 Read 对应 SKILL.md 后按其规程执行；用户显式要求加载整族时依次读本表全部条目。
+
+| 技能 | 用途 | 何时选它 |
+|---|---|---|
+| [`newapi-management`](~/projects/dc-skills/newapi-management/SKILL.md) | NewAPI 网关渠道/日志运维 | 配置 NewAPI 渠道/排查会话日志 |
+| [`wsl-windows-bridge`](~/projects/dc-skills/wsl-windows-bridge/SKILL.md) | WSL→Windows 跨边界框架 | 调用 Windows 侧程序/GPU 任务/注册表 |
+
 
 ## Supported Databases
 

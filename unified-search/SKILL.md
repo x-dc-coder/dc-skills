@@ -2,9 +2,23 @@
 name: unified-search
 description: >
   统一网页+学术搜索聚合器（10 源：keenable/tavily/firecrawl/bocha/zhipu/arxiv/dblp/semantic_scholar/openalex/ai4scholar），三模式：general（多源+分歧仲裁）、academic（六源并行+论文链接记录）、fetch（单页正文提取），配额感知。内置自愈：NO_PROXY 方括号 IPv6 清洗、arxiv 429 降级 HTML、dblp Anubis PoW 过墙、401/402 熔断、失败源透出。任何需要实时信息、学术论文、网页内容搜索（搜一下/查一下/find papers/search the web）都优先使用本技能，取代内置 web 搜索工具；纯代码/本地问题勿用。
+  真实浏览器控制（kimi-webbridge）与图像理解/截图核验（vision-workflow）同属 info 族，由本技能路由。
+metadata:
+  family: info
+  role: entry
+  load-mode: auto
 ---
-
 # Unified Search
+
+## 族群路由（info 信息获取入口）
+
+本技能是 **info 信息获取族群入口**。族内技能为 manual 加载（不进启动清单），命中下表场景时直接 Read 对应 SKILL.md 后按其规程执行；用户显式要求加载整族时依次读本表全部条目。
+
+| 技能 | 用途 | 何时选它 |
+|---|---|---|
+| [`kimi-webbridge`](~/projects/dc-skills/kimi-webbridge/SKILL.md) | 真实浏览器控制（本地 daemon，带登录态） | 需要登录态/真实浏览器导航点击填表 |
+| [`vision-workflow`](~/projects/dc-skills/vision-workflow/SKILL.md) | 视觉任务编排（Vision MCP） | 图像理解/网页截图核验/OCR/识图 |
+
 
 A single skill that replaces ALL default web search tools. 10 sources, 3 modes,
 quota-aware, with retry and dedup. **Always use this skill first** for any

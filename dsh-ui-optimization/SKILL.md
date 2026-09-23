@@ -6,8 +6,12 @@ description: >
   lazy-CJS 格式、验收闭环红线（锚定当前 URL + vision 核验）。触发：优化 DSH 插件界面、改 client
   插件 UI、lab-monitor 面板美化、插件前端丑、调 DSH 插件样式。美学理论不重复造——按需转调
   design-ui（风格选型）/ design-dataviz（状态色/间距/正确性）/ vision-workflow（截图核验）。
+metadata:
+  family: dshplugin
+  role: member
+  load-mode: manual
+disable-model-invocation: true
 ---
-
 # DSH 插件前端优化
 
 ## 0. 先读什么（顺序）

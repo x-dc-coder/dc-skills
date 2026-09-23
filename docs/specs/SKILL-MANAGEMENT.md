@@ -16,10 +16,12 @@
 │   所有跨项目通用的技能都必须物理位于此处。
 │
 ├─ 农场（第二层）──── 各 Agent 技能目录里的软链接，指向主库
-│   ~/.claude/skills(16)  ~/.grok/skills(16)  ~/.dsh/skills(18)
-│   ~/.zcode/skills(16)   ~/.codex/skills(16)
+│   ~/.claude/skills(32)  ~/.grok/skills(32)  ~/.dsh/skills(32)
+│   ~/.zcode/skills(32)   ~/.codex/skills(32)
 │   dsh 预设：thesis-agent/skills(6)  plugin-specialist/skills(2)
-│   共 90 条软链，由 `~/projects/dc-skills/scripts/skills-sync` 按 agent-map.yaml 物化。
+│   共 168 条软链，由 `~/projects/dc-skills/scripts/skills-sync` 按 agent-map.yaml 物化。
+│   加载分两档：10 个族群入口（load: auto，进模型启动清单）+ 23 个族内技能
+│   （load: manual，不进清单、经 /name 或 $name 显式触发）——见 §4.8。
 │
 └─ App 自管根（只读参考，不进主库）
     ~/.grok/bundled/skills(22)   ~/.codex/skills/.system(6)
@@ -38,6 +40,7 @@
 | `scripts/skills-sync` | 物化农场（补齐缺失软链、回收失联软链、不动真实目录与非主库链接） |
 | `scripts/skillctl`（根级） | 生命周期管理：`lint`（契约+死链体检）、`inventory`（全机清单+自注册漂移）、`inspect`、`remove`（5 阶段隔离移除）、`restore` |
 | `SKILL-AUTHORING-RULES.md` | 技能创作/修改规则（agentskills.io 基线 + 内部更严标准） |
+| `scripts/family-apply.py` | 族群标记物化（member ⇔ manual + openai.yaml，幂等；dry-run 默认，`--apply` 写入） |
 | `SKILL-MANAGEMENT.md` | 本文件：架构与规约 |
 
 日常运维：
@@ -97,6 +100,41 @@ uv run python scripts/skillctl inventory     # 全机清单：主库 vs App 自�
 - 客户端产品名（Claude Code、Codex、Grok）在文档中如实出现不属于品牌化问题；禁止的是把
   厂商名写进本仓库的文件名/目录名/manifest 键。
 
+## 4.8 族群与加载模式（2026-09-24 族群化）
+
+**问题**：33 个技能全量进模型启动清单 ≈ 9,700 字符（Codex 预算 8,000 字符会整体省略技能并告警；CC listing 预算约上下文 1%）。**方案**：技能按族群组织，只有入口进清单，成员按需显式加载。
+
+**10 个族群**（`agent-map.yaml` `families:` 段为唯一事实源）：
+
+| 族群 | 入口（auto） | 成员（manual） |
+|---|---|---|
+| drawing 绘图设计 | diagram | drawio-xml、design-diagram、design-dataviz、design-ui |
+| thesis 论文 | thesis-writing | thesis-ref-check、thesis-export、md-to-thesis-latex、paper-metrics、paper-reader |
+| coding 编程质量 | programming | debugging、git-master、remove-ai-slops、test-guardian |
+| agentops Agent 运维 | orca-cli | orchestration、task-hub、computer-use |
+| info 信息获取 | unified-search | kimi-webbridge、vision-workflow |
+| infra 基础设施运维 | db-skill | newapi-management、wsl-windows-bridge |
+| repo 仓库工程 | codegraph-explore | github-workflow |
+| docs 文档处理 | officecli | word-extractor |
+| lark 飞书协作 | lark-cli | —（28 域已内聚） |
+| dshplugin DSH 插件 | dsh-plugin-troubleshooting | dsh-ui-optimization |
+
+**加载模式语义**：
+
+| 模式 | 进模型启动清单 | 调用方式 | 实现 |
+|---|---|---|---|
+| `load: auto`（入口） | ✅ | 模型按 description 自动触发；`/<name>` 亦可 | 默认行为 |
+| `load: manual`（成员） | ❌ | `/<name>`（CC/Grok/dsh）、`$name`（Codex）、`skill({name})`（opencode） | SKILL.md `disable-model-invocation: true`（CC/Grok/dsh 同键 kebab）+ `agents/openai.yaml` `policy.allow_implicit_invocation: false`（Codex） |
+
+**显式触发整族**：入口技能即触发点——`/drawing`、`/thesis` 等；入口正文含族内路由表（用途/何时选它/规程路径），命中场景直接 Read 对应成员 SKILL.md；Claude Code 还支持 `/drawing /drawing-drawio-xml` 堆叠加载（上限 6 个）。
+
+**维护规则**：
+- 新技能进主库时必须登记族群（`agent-map.yaml` families 段）+ 跑 `scripts/family-apply.py` 补标记；
+- `skills-sync --check` 校验成员标记一致性（member ⇔ manual + openai.yaml，违规即报）；
+- 成员 description 变更后重跑 family-apply 刷新 openai.yaml 短描述；
+- 个别成员要提回 auto：`families.<族>.members: {name: auto}` 映射形式覆写。
+- 注意：manual 成员在 dsh 预设作用域内同样不进模型 catalog（预设无法覆写 frontmatter 级 load-mode）——预设内按需显式调用，属已知取舍。
+
 ## 5. 已知风险与缓解（按优先级）
 
 | # | 风险 | 缓解 | 状态 |
@@ -113,4 +151,5 @@ uv run python scripts/skillctl inventory     # 全机清单：主库 vs App 自�
 ## 6. 变更日志
 
 - **2026-09-23**：全机聚合收编 7 技能（omo 4 + thesis-export + dsh 预设 2）；新增 codex 农场；dsh-plugin-troubleshooting 补 frontmatter；本文件建立；`skillctl inventory` 上线；thesis-agent/plugin-specialist 接入 customSkillDirs；SKILL-AUTHORING-RULES.md 对齐 agentskills.io。
-- **2026-09-24**：`CLAUDE.md`→`AGENT.md` 改名（+两兼容软链，22 处引用修正）；OUTPUT.md 重写（C-1~C-10）并修复 `resolve_output_path`/db-skill/word-extractor/ai4scholar 的输出基准 P0 bug（6 场景实测通过）；.gitignore 补 db-output/doc-output/unified-search-output/.work；B3 增 manual 例外、B3a 增族群元数据三件套；链数修正 74→90；Codex 加固事故入风险台账；新增 P8 命名去品牌化。
+- **2026-09-24（族群化 W2）**：agent-map 新增 families 段（10 族）；base 16→32（成员全部进农场但标 manual）、on_demand 收缩为 1（dsh-plugin-troubleshooting）；9 个入口升级（description 补族级路由触发 + 正文族群路由表）；23 成员标 `metadata.load-mode: manual` + `disable-model-invocation: true` + 生成 Codex `agents/openai.yaml`；新增 `scripts/family-apply.py`（幂等标记器）；skills-sync --check 增加族群一致性校验（反向测试通过）；农场 90→168 链。存量违规顺带清理：3 个顶层 version → metadata.version、test-guardian 顶层 whenToUse 删除。
+- **2026-09-24（W1）**：`CLAUDE.md`→`AGENT.md` 改名（+两兼容软链，22 处引用修正）；OUTPUT.md 重写（C-1~C-10）并修复 `resolve_output_path`/db-skill/word-extractor/ai4scholar 的输出基准 P0 bug（6 场景实测通过）；.gitignore 补 db-output/doc-output/unified-search-output/.work；B3 增 manual 例外、B3a 增族群元数据三件套；链数修正 74→90；Codex 加固事故入风险台账；新增 P8 命名去品牌化。

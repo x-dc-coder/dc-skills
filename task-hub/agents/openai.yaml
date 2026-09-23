@@ -1,0 +1,7 @@
+# Codex 技能级元数据（族群化 member：不允许隐式调用，仅 $<name> 显式触发）
+# 由 scripts/family-apply.py 生成；SKILL.md description 变更后需重跑刷新。
+interface:
+  display_name: "Task Hub"
+  short_description: "本地快捷任务管理与全局任务中心调度：跨会话管理任务、新建任务、编辑任务全字段、智能识别依赖关系、查询待办与就绪任务、更新进度、导"
+policy:
+  allow_implicit_invocation: false

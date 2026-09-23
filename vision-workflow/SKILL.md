@@ -1,8 +1,12 @@
 ---
 name: vision-workflow
 description: 图像理解、网页截图核验、OCR 文字提取、科研绘图验证、剪贴板/会话附件识图与多图/批量图片分析的编排流程。当任务涉及看图、识图、图片内容理解、截图验证、图表解读、批量处理图片、识别剪贴板图片或识别 DSH 会话中发送的图片时使用本技能。
+metadata:
+  family: info
+  role: member
+  load-mode: manual
+disable-model-invocation: true
 ---
-
 # Vision Workflow（视觉任务编排）
 
 本技能编排 Vision MCP 工具（`vision_health` / `describe_image` / `clipboard_image` / `describe_images` / `analyze_screenshot` / `extract_text` / `verify_figure` / `batch_analyze`）。当模型本身无视觉能力时，通过调用这些工具完成视觉任务；当 new-api Bamboo 中继桥已开启图片自动识别时，日常发图由网关层完成，本技能工具聚焦**交叉验证与专业场景**（见下"分流原则"）。

@@ -7,8 +7,12 @@ description: >
   "论文转 latex"、"把 markdown 编译成 pdf"、"生成毕设 pdf"、"论文排版"、
   "把写好的 md 转成论文"，或者用户给出 md 文件要求生成论文时。
   即使只说了"帮我处理论文"或"转成 pdf"，也应该主动使用此 skill。
+metadata:
+  family: thesis
+  role: member
+  load-mode: manual
+disable-model-invocation: true
 ---
-
 # Markdown 转 ZSC 毕业论文 LaTeX Skill
 
 > **使用方式（渐进式披露）**：本文件是导航页——先读它执行工作流；具体要素（图片/表格/代码/公式/参考文献）转换时读

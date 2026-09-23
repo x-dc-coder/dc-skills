@@ -5,8 +5,12 @@ description: >
 compatibility: >
   需要 Bash 工具执行文本分析脚本，需要 Read/Write 工具处理分块文件。
   仅支持 Markdown 格式输入，输出为 Markdown 格式。
+metadata:
+  family: thesis
+  role: member
+  load-mode: manual
+disable-model-invocation: true
 ---
-
 # 论文术语一致性修正
 
 > **职责说明**：本 skill **仅做术语一致性检查**。引用编号检查（连续性、顺序性、唯一性、尾注对应）由 `thesis-writing/scripts/check_markdown_spec.py` 自动覆盖（`_check_reference_continuity` 方法检测 REF_NUMBER_CONTINUITY / DUPLICATE / NOT_START_AT_ONE）。如需检查引用编号，请使用 thesis-writing 的 markdown spec checker：

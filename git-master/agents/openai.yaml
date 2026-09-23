@@ -1,13 +1,7 @@
+# Codex 技能级元数据（族群化 member：不允许隐式调用，仅 $<name> 显式触发）
+# 由 scripts/family-apply.py 生成；SKILL.md description 变更后需重跑刷新。
 interface:
-  display_name: "git-master (omo)"
-  short_description: "Atomic Git commits, history surgery, and source archaeology"
-  search_terms:
-    - "git-master"
-    - "git commit"
-    - "atomic commit"
-    - "rebase"
-    - "squash"
-    - "git blame"
-    - "git bisect"
-    - "history search"
-  default_prompt: "Use $git-master to inspect the repository state, preserve unrelated work, and handle the requested Git operation with atomic grouping, history safety checks, and evidence-backed verification."
+  display_name: "Git Master"
+  short_description: "MUST USE whenever a task needs a commit or git-history"
+policy:
+  allow_implicit_invocation: false
