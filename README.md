@@ -2,7 +2,7 @@
 
 本文档说明本目录下 Python Skill 的统一环境管理方式。
 
-> **跨设备搭建手册**：新设备（Linux/WSL 或 Windows）从零配置环境，见 [CROSS-DEVICE-SETUP.md](CROSS-DEVICE-SETUP.md)。
+> **跨设备搭建手册**：新设备（Linux/WSL 或 Windows）从零配置环境，见 [docs/runbook/CROSS-DEVICE-SETUP.md](docs/runbook/CROSS-DEVICE-SETUP.md)。
 
 > **注意**：本文件为辅助说明文档，不影响 Claude Code/OpenCode 的 Skill 系统。各子目录中的 `SKILL.md`（需含 YAML frontmatter）才是 Skill 的规范定义文件。
 
@@ -12,10 +12,9 @@
 ~/projects/dc-skills/
 ├── README.md              # 本说明文档
 ├── AGENT.md              # 执行约束（cd ~/projects/dc-skills 再 uv run）；CLAUDE.md/AGENTS.md 为兼容软链
-├── ENVIRONMENT.md         # 外部工具依赖登记表（12 工具 + 验证命令 + 声明模板）
-├── OUTPUT.md              # 输出目录兜底规范（两级回退，唯一事实源）
-├── MODELS.md              # Grok 模型渠道、协议、窗口、思考档位与套餐到期
-├── SKILL-AUTHORING-RULES.md # SKILL 开发与修改规则
+├── AGENT.md              # 三条铁律（执行目录/输出/单一副本）；CLAUDE.md、AGENTS.md 为兼容软链
+├── docs/                  # 文档归类：specs（规范）/ arch（登记）/ runbook（手册）/ research（档案）
+│   ├── INDEX.md           # ⭐ 全局文档索引（唯一文档地图）
 ├── pyproject.toml / uv.lock / .venv/   # 统一依赖与虚拟环境（轻量 skill 共享）
 │
 ├── lark-cli/              # 飞书/Lark 聚合技能（23 域统一入口）
@@ -81,7 +80,7 @@ uv run python scripts/skills-sync --check  # 只检查漂移，不修改
 - 各 App 自带技能不收编主库：`~/.grok/bundled/skills/`、`~/.codex/skills/.system/` 与各插件市场缓存由 App 自行管理更新；同名用户技能会覆盖 App 本体，收编等于制造随 App 更新而过期的分叉。
 - 全机技能台账与自注册监控：`uv run python scripts/skillctl inventory`（主库 vs App 自管根、重名与着陆区漂移）。
 
-> 完整管理架构（各 Agent 自注册机制、dsh 发现优先级、管理规约 P1–P7、风险台账）见 **[SKILL-MANAGEMENT.md](SKILL-MANAGEMENT.md)**。
+> 完整管理架构（各 Agent 自注册机制、dsh 发现优先级、管理规约 P1–P8、风险台账）见 **[docs/specs/SKILL-MANAGEMENT.md](docs/specs/SKILL-MANAGEMENT.md)**；文档地图见 [docs/INDEX.md](docs/INDEX.md)。
 
 ## 三类环境策略
 
@@ -115,7 +114,7 @@ cd ~/projects/dc-skills/diagram-er && uv run python -m scripts.cli ...
 ```
 
 这是因为 `-m scripts.cli` 要求 `scripts/` 在 cwd 下；脚本内 `sys.path` 引用顶层 `scripts/common.py`
-（`resolve_output_path`，实现 OUTPUT.md 两级回退）。其 `.venv` 符号链接确保 uv 仍解析到统一环境。
+（`resolve_output_path`，实现 docs/specs/OUTPUT.md 两级回退）。其 `.venv` 符号链接确保 uv 仍解析到统一环境。
 类型路由与使用规范见 `diagram/SKILL.md`。
 
 ## 环境管理命令
@@ -202,7 +201,7 @@ bash ~/projects/dc-skills/paper-reader/scripts/bootstrap.sh
 | `pyyaml` | YAML 解析 |
 | `feedparser` | RSS/Atom 解析 |
 
-Node 工具（非 Python 依赖，完整登记表见 ENVIRONMENT.md）：
+Node 工具（非 Python 依赖，完整登记表见 docs/arch/ENVIRONMENT.md）：
 - `@mermaid-js/mermaid-cli`（mmdc）：用于 diagram 聚合的 sequence 类渲染 Mermaid 到 PNG（推荐用 `npx` 调用，避免全局安装）。
 - `lark-cli`：lark-cli 聚合技能硬依赖（Node 全局安装）。
 - `keenable`：unified-search 硬依赖（安装/认证/MCP 配置见 unified-search/references/keenable-setup.md）。

@@ -31,7 +31,7 @@ metadata: {}
 ## 2. 通用规范（所有类型一致）
 
 1. **执行环境**：遵守 AGENT.md 核心约束——先 `cd ~/projects/dc-skills` 再 `uv run python`（确保解析根 pyproject 环境）；各技能子目录无需自建 .venv，uv 自动向上查找。脚本内 `common.py`（顶层 scripts/）提供 `resolve_output_path`，已在各 CLI 中接入。
-2. **输出路径两级回退**（OUTPUT.md 统一约定，勿改）：
+2. **输出路径两级回退**（docs/specs/OUTPUT.md 统一约定，勿改）：
    - 用户 cwd 在工作项目 → `<项目>/thesis-output/<类型>/<文件名>`
    - cwd 在 `~/projects/dc-skills` 或无明确项目 → `~/.claude/skills-output/<类型>/<文件名>`
 3. **论文风格**：流程图/时序图/ER 系列统一白色背景、纯黑节点、黑白打印友好（细节见各分册）。

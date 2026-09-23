@@ -20,8 +20,8 @@ const REGISTRATION_ROOTS = Array.from(new Set([
   path.join(os.homedir(), '.dsh', 'skills')
 ]));
 const IGNORED_DIRS = new Set([
-  '.git', '.omo', '.codegraph', '.pytest_cache', '.uv-cache', '.venv',
-  'archive', 'scripts', 'node_modules', '__pycache__'
+  '.git', '.omo', '.codegraph', '.pytest_cache', '.uv-cache', '.venv', '.ruff_cache',
+  'archive', 'scripts', 'docs', 'node_modules', '__pycache__'
 ]);
 const RESOURCE_ONLY_DIRS = new Set([
   'diagram-draft', 'diagram-er', 'diagram-ers', 'diagram-flow',
@@ -264,6 +264,10 @@ async function main() {
         registrationIssues.push({ root, skill: entry.name, path: skillPath, issue: 'broken-registration' });
         continue;
       }
+      // 指向文件的软链（如 AGENT.md 的 CLAUDE.md/AGENTS.md 兼容链）不是技能注册，跳过
+      let realStat;
+      try { realStat = fs.statSync(realPath); } catch { continue; }
+      if (!realStat.isDirectory()) continue;
       const skillMdPath = path.join(realPath, 'SKILL.md');
       if (!fs.existsSync(skillMdPath)) {
         registrationIssues.push({ root, skill: entry.name, path: skillPath, realPath, issue: 'missing-SKILL.md' });

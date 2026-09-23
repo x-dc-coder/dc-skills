@@ -373,7 +373,7 @@ uv run python paper-metrics/scripts/validate_draft.py \
 
 ## 输出目录约定
 
-遵循 OUTPUT.md 的两级回退规则：
+遵循 docs/specs/OUTPUT.md 的两级回退规则：
 - 用户在工作项目目录下（cwd 不在 `~/projects/dc-skills`）：输出到 `<cwd>/thesis-output/thesis-writing/`
 - 否则：输出到 `~/.claude/skills-output/thesis-writing/`
 

@@ -3,7 +3,7 @@
 > **定位**：本仓库全部技能运行所需的**外部工具统一登记表**与验证入口。
 > 新增/修改技能引入新工具依赖时：① 登记到下表 → ② 技能 frontmatter 声明
 > `metadata.requires.bins` → ③ 正文引用本文件（勿在技能内自写安装段，避免散落）。
-> 与 SKILL-AUTHORING-RULES.md §5.3（依赖说明）配套使用。
+> 与 ../specs/SKILL-AUTHORING-RULES.md §5.3（依赖说明）配套使用。
 
 ## 验证命令速查（一条命令核对核心依赖）
 
@@ -50,7 +50,7 @@ done
 | drawio | 按需 `npx @next-ai-drawio/mcp-server` | ⚠️ 未注册 | drawio-xml（执行层：会话/预览/编辑门控/导出）；待 `claude mcp add drawio` 后全链路可用 |
 | fiddler / visio | — | ✘ 已清理（2026-08-29） | 孤儿（无技能引用），配置已从 `~/.claude.json` 与 `/home/dc/.mcp.json` 移除 |
 
-## 环境分类（与 SKILL-AUTHORING-RULES.md §1.1 一致）
+## 环境分类（与 ../specs/SKILL-AUTHORING-RULES.md §1.1 一致）
 
 - **A 类（仓库自含）**：uv + pyproject.toml 声明，克隆即用，无需额外安装。
 - **B 类（本机工具）**：上表所列，每台机器安装一次即可。

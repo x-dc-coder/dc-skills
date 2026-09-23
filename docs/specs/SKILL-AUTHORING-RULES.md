@@ -73,7 +73,9 @@ description: >
 - 官方推荐祈使句写法 "Use when …" / "当用户需要……时使用"，可适度"主动"——列出用户不点名领域时也应触发的情形
 - **关键触发词放最前**：Claude Code 的技能 listing 预算仅为上下文 1%，description 超长时先被截断
 
-**规则 B3**：frontmatter 只使用 agentskills.io 规范字段 + `metadata` 扩展。**禁止使用 Claude Code 私有字段**（`when_to_use`、`disable-model-invocation`、`context`、`model`、`paths`、`argument-hint`、`hooks` 等）——它们出了 CC 即失效。各客户端普遍忽略未知字段（不报错），本禁令的目的是**可移植性**而非防报错。
+**规则 B3**：frontmatter 默认只使用 agentskills.io 规范字段 + `metadata` 扩展。**禁止使用 Claude Code 私有调用控制字段**（`when_to_use`、`context`、`model`、`paths`、`hooks` 等）——它们出了 CC 即失效。各客户端普遍忽略未知字段（不报错），本禁令的目的是**可移植性**而非防报错。
+
+**B3 例外（2026-09-24 修订，族群化方案）**：`metadata.load-mode: manual` 的技能**允许双写** `disable-model-invocation: true`——该字段被 Claude Code / Grok / dsh 三家以同一 kebab-case 键名实现（dsh 源码 `parseInvocationPolicy` 只认 kebab；**camelCase 写法会让 dsh 丢弃整个技能文件**），Codex 侧用技能目录下的 `agents/openai.yaml`（`policy.allow_implicit_invocation: false`）实现，均不写在 SKILL.md 顶层。**禁止** camelCase 调用控制键（`disableModelInvocation`/`userInvocable`）与 `whenToUse` 驼峰。若某技能将来要上传 claude.ai 或走 `package_skill.py`，必须先剥离该私有字段（CC 对非规范字段在打包/上传路径硬报错）。
 
 规范字段全集（仅 6 个）：`name`、`description`（以上必需）；`license`、`compatibility`（≤500 字符，环境要求；官方明言多数技能不需要）、`metadata`（string→string map，扩展点）、`allowed-tools`（Experimental，慎用）。注意：**`compatibility` 是规范字段，不在禁止之列**（2026-09-23 修正，旧版规则曾误禁）。
 
@@ -83,10 +85,14 @@ metadata:
   version: "1.0"          # 语义化版本，便于追踪技能变更（规范钦点放 metadata 子键；
                           #   顶层 version 是非规范字段，各端忽略）
   requires-bins: "dot, mmdc"   # 外部依赖声明（字符串值；metadata 规定 string→string，
-                          #   数组形式仅自家工具链可读）。工具名与安装方式见 ENVIRONMENT.md
+                          #   数组形式仅自家工具链可读）。工具名与安装方式见 ../arch/ENVIRONMENT.md
+  family: drawing         # 族群归属（agent-map.yaml families 段的键；standalone 可省）
+  role: entry             # entry=族群入口 / member=族内技能 / standalone=独立技能
+  load-mode: auto         # auto=进模型启动清单（默认）/ manual=仅显式触发（见 B3 例外）
 ```
+- **族群元数据三件套**（`family`/`role`/`load-mode`，2026-09-24 新增）：纯声明、零 token 成本（CC 明言不消费 metadata 内容），供 `skills-sync`/`skillctl` 校验与 agent-map 对账；`load-mode: manual` 的技能按 B3 例外双写 `disable-model-invocation: true`。
 - **触发信息一律写进 `description`**（跨端最大兼容）。顶层 `whenToUse`（驼峰）CC/dsh 之外均不识别，CC 的对应字段是下划线 `when_to_use`——确需分离时仅对 dsh/CC 双写，否则废弃驼峰拼写。
-- 引入新外部工具时**必须**登记到 `ENVIRONMENT.md` 依赖登记表并在此声明。
+- 引入新外部工具时**必须**登记到 `../arch/ENVIRONMENT.md` 依赖登记表并在此声明。
 
 ### 2.2 触发词设计（防冲突）
 
@@ -124,7 +130,7 @@ cd ~/projects/dc-skills && find . -name SKILL.md -not -path "*/node_modules/*" -
 
 **规则 C0（兜底定位，2026-08-29 补充）**：本章为**兜底规则**——技能正文显式指定输出位置（如
 paper-reader 输出到输入 PDF 同级）、用户显式传 `--output` 参数时，**以显式指定为准**；仅当技能
-未显式指明输出目录时按本章两级回退执行。统一约定全文见 `OUTPUT.md`（唯一事实源，AGENT.md
+未显式指明输出目录时按本章两级回退执行。统一约定全文见 `OUTPUT.md`（同目录，唯一事实源，AGENT.md
 与本章均引用它）。
 
 ### 3.1 禁止 /tmp/skills-output
@@ -224,7 +230,7 @@ fontname = "Noto Sans CJK SC"  # 在仅装 SimSun 的机器上方块
 
 **规则 E5**：SKILL.md **必须**列出所有外部二进制依赖及其安装方式（登记表见 `ENVIRONMENT.md`）：
 ```
-依赖：见 ENVIRONMENT.md 依赖登记表
+依赖：见 ../arch/ENVIRONMENT.md 依赖登记表
 - dot (graphviz)：apt install graphviz / brew install graphviz
 - pdftoppm (poppler-utils)：apt install poppler-utils / dnf install poppler-utils
 ```

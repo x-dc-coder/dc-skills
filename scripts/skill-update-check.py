@@ -37,7 +37,10 @@ from datetime import datetime
 from pathlib import Path
 
 SKILLS_ROOT = Path(__file__).resolve().parent.parent
-ENVIRONMENT_MD = SKILLS_ROOT / "ENVIRONMENT.md"
+# 2026-09-24 文档归类：ENVIRONMENT.md 移至 docs/arch/；保留根级回退兼容旧检出
+ENVIRONMENT_MD = SKILLS_ROOT / "docs" / "arch" / "ENVIRONMENT.md"
+if not ENVIRONMENT_MD.exists():
+    ENVIRONMENT_MD = SKILLS_ROOT / "ENVIRONMENT.md"
 
 # ── 依赖登记表（通道驱动；新增依赖只需在此加一行）────────────────────────────
 TRACKED_DEPS: list[dict] = [

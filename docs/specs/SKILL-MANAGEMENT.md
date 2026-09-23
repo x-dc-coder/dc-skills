@@ -16,10 +16,10 @@
 │   所有跨项目通用的技能都必须物理位于此处。
 │
 ├─ 农场（第二层）──── 各 Agent 技能目录里的软链接，指向主库
-│   ~/.claude/skills(12)  ~/.grok/skills(12)  ~/.dsh/skills(18)
-│   ~/.zcode/skills(12)   ~/.codex/skills(12)
+│   ~/.claude/skills(16)  ~/.grok/skills(16)  ~/.dsh/skills(18)
+│   ~/.zcode/skills(16)   ~/.codex/skills(16)
 │   dsh 预设：thesis-agent/skills(6)  plugin-specialist/skills(2)
-│   共 74 条软链，由 scripts/skills-sync 按 agent-map.yaml 物化。
+│   共 90 条软链，由 `~/projects/dc-skills/scripts/skills-sync` 按 agent-map.yaml 物化。
 │
 └─ App 自管根（只读参考，不进主库）
     ~/.grok/bundled/skills(22)   ~/.codex/skills/.system(6)
@@ -36,7 +36,7 @@
 |---|---|
 | `agent-map.yaml` | 唯一事实源：base / on_demand / 各 agent 农场与 extra / dsh 预设挂载 |
 | `scripts/skills-sync` | 物化农场（补齐缺失软链、回收失联软链、不动真实目录与非主库链接） |
-| `scripts/skillctl` | 生命周期管理：`lint`（契约+死链体检）、`inventory`（全机清单+自注册漂移）、`inspect`、`remove`（5 阶段隔离移除）、`restore` |
+| `scripts/skillctl`（根级） | 生命周期管理：`lint`（契约+死链体检）、`inventory`（全机清单+自注册漂移）、`inspect`、`remove`（5 阶段隔离移除）、`restore` |
 | `SKILL-AUTHORING-RULES.md` | 技能创作/修改规则（agentskills.io 基线 + 内部更严标准） |
 | `SKILL-MANAGEMENT.md` | 本文件：架构与规约 |
 
@@ -88,6 +88,15 @@ uv run python scripts/skillctl inventory     # 全机清单：主库 vs App 自�
 
 **P7 格式走 agentskills.io 基线。** frontmatter 只用规范 6 字段 + metadata 扩展；触发信息写进 description；详见 `SKILL-AUTHORING-RULES.md`（2026-09-23 已按规范修订 B1/B2/B3/B3a/A5/B7/B9）。
 
+**P8 命名去厂商品牌化（2026-09-24 用户决策）。** 本仓库自有产物使用 Agent 中立命名：
+- 根目录规则文件为 `AGENT.md`（唯一实体）；`CLAUDE.md`、`AGENTS.md` 是指向它的**兼容软链**
+  （分别供 Claude Code/Grok 与 Codex/opencode 自动加载），改内容只改 AGENT.md。
+- W3 的插件声明层用 `.agent-plugin/`（`marketplace.json`/`plugin.json`）而非 `.claude-plugin/`；
+  因 Codex/Grok 当前只识别 `.claude-plugin/`，以 `.claude-plugin/ -> .agent-plugin/` 软链兼容，
+  待两端支持中立名后移除。插件名一律 `dc-<族群>` 前缀。
+- 客户端产品名（Claude Code、Codex、Grok）在文档中如实出现不属于品牌化问题；禁止的是把
+  厂商名写进本仓库的文件名/目录名/manifest 键。
+
 ## 5. 已知风险与缓解（按优先级）
 
 | # | 风险 | 缓解 | 状态 |
@@ -98,7 +107,10 @@ uv run python scripts/skillctl inventory     # 全机清单：主库 vs App 自�
 | 4 | dsh 出厂 cordis 预设技能 rank 300 覆盖同名农场技能 | `inventory` 重名检查；当前无重名 | ✅ 监控已上线 |
 | 5 | `~/.agents/skills` rank 500 被 dsh 扫描 | P1 + 监控。激进方案（`includeDefaultRoots:false` + customSkillDirs 重建农场根）会连带禁用项目级根，不采用 | ✅ 规约+监控 |
 | 6 | 第三方 vendored 技能（omo 4 个）随上游演进而过期 | vendor 审计源留 `~/.dsh/vendor/omo-skills/`（SOURCE.txt 记录 omo 4.17.1）；更新时重跑清洗流程并比对 | 📌 人工周期任务 |
+| 7 | **加固动作本身写坏客户端配置**（2026-09-24 实例：Codex `[skills] bundled = false` 写成 bool，而 schema 是 table `BundledSkillsConfig { enabled: bool }`，导致 Codex 全量不可用；正确写法 `bundled = { enabled = false }`，`codex doctor` 显示 `✓ config loaded` 为判据） | 任何跨客户端配置改动后必须跑该客户端的 doctor/自检；W3 的 `assets-doctor` 将 `config_loads` 列为固定检查项（CLI 版本通过≠配置可加载） | ✅ 已修复+入库 |
+| 8 | 文档声明与实机漂移（本文件曾写 74 条软链，实机 90 条） | `assets-doctor`（W3）加"文档声明数 vs 实机数"断言；链数以 `find <farm> -maxdepth 1 -type l \| wc -l` 实测为准 | ✅ 本条已修正 |
 
 ## 6. 变更日志
 
 - **2026-09-23**：全机聚合收编 7 技能（omo 4 + thesis-export + dsh 预设 2）；新增 codex 农场；dsh-plugin-troubleshooting 补 frontmatter；本文件建立；`skillctl inventory` 上线；thesis-agent/plugin-specialist 接入 customSkillDirs；SKILL-AUTHORING-RULES.md 对齐 agentskills.io。
+- **2026-09-24**：`CLAUDE.md`→`AGENT.md` 改名（+两兼容软链，22 处引用修正）；OUTPUT.md 重写（C-1~C-10）并修复 `resolve_output_path`/db-skill/word-extractor/ai4scholar 的输出基准 P0 bug（6 场景实测通过）；.gitignore 补 db-output/doc-output/unified-search-output/.work；B3 增 manual 例外、B3a 增族群元数据三件套；链数修正 74→90；Codex 加固事故入风险台账；新增 P8 命名去品牌化。
