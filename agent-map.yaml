@@ -30,47 +30,58 @@
 
 master: /home/dc/projects/dc-skills
 
-# 全局基座：默认进入所有 Agent 农场
+# 全局基座：默认进入所有 Agent 农场。
+# 加载语义（2026-09-24 族群化）：base 内技能分两种加载模式——
+#   entry（族群入口，load: auto）：进模型启动清单，自动触发后按路由表按需读成员 SKILL.md
+#   member（族内技能，load: manual）：不进启动清单（省 token），可 /name 或 $name 显式触发
+# 族群划分见文末 families 段；标记一致性由 skills-sync --check 校验。
 base:
-  - codegraph-explore   # 大仓符号检索/调用链/影响分析
-  - db-skill            # MySQL/PostgreSQL 操作
+  # ── drawing 绘图设计（entry: diagram）──
   - diagram             # 7 类图表统一入口（脚本目录 diagram-* 随主库，不单独成链）
-  - github-workflow     # git/gh 工作流
-  - kimi-webbridge      # 真实浏览器控制
-  - lark-cli            # 飞书全家桶统一入口
-  - unified-search      # 10 源聚合搜索
-  - wsl-windows-bridge  # WSL→Windows 跨边界框架
-  - orca-cli            # Orca worktree/终端操作
-  - orchestration       # Orca worker 编排
-  - task-hub            # 跨会话任务中心
-  - word-extractor      # .docx 高精度提取
-  # 2026-09-23 提升为 base（用户决策：所有 Agent 可识别）：omo vendor 4 技能
-  - debugging           # 系统化调试（oh-my-openagent 4.17.1 vendored）
-  - git-master          # git 进阶操作（oh-my-openagent 4.17.1 vendored）
-  - programming         # 编程任务分流（oh-my-openagent 4.17.1 vendored）
-  - remove-ai-slops     # AI 味代码清除（oh-my-openagent 4.17.1 vendored）
-
-# 按需技能：默认不在任何农场；在对应 agent 的 extra 中列出即启用
-on_demand:
+  - drawio-xml          # .drawio 原生图表
+  - design-diagram      # 内联 SVG 图表规范
+  - design-dataviz      # 数据可视化设计系统
+  - design-ui           # 前端页面设计
+  # ── thesis 论文（entry: thesis-writing）──
   - thesis-writing      # 论文写作（毕设/期刊双模式）
   - thesis-ref-check    # 论文术语一致性检查
   - md-to-thesis-latex  # 毕业论文 md→LaTeX→PDF
   - paper-metrics       # 论文写作特征指标层
   - paper-reader        # 论文 PDF 双引擎阅读（venvs 11GB）
-  - newapi-management   # 本机 NewAPI 网关渠道/日志运维
-  - computer-use        # GUI 驱动（orca computer）
-  - vision-workflow     # 视觉任务编排
-  - design-dataviz      # 数据可视化设计系统
-  - design-diagram      # 内联 SVG 图表规范
-  - design-ui           # 前端页面设计
-  - drawio-xml          # .drawio 原生图表
+  - thesis-export       # 论文导出编排（word-production 工具链手册）
+  # ── coding 编程质量（entry: programming）──
+  - programming         # 编程任务分流（oh-my-openagent 4.17.1 vendored）
+  - debugging           # 系统化调试（omo vendored）
+  - git-master          # git 进阶操作（omo vendored）
+  - remove-ai-slops     # AI 味代码清除（omo vendored）
   - test-guardian       # 测试工程质量规范
+  # ── agentops Agent 运维（entry: orca-cli）──
+  - orca-cli            # Orca worktree/终端操作
+  - orchestration       # Orca worker 编排
+  - task-hub            # 跨会话任务中心
+  - computer-use        # GUI 驱动（orca computer）
+  # ── info 信息获取（entry: unified-search）──
+  - unified-search      # 10 源聚合搜索
+  - kimi-webbridge      # 真实浏览器控制
+  - vision-workflow     # 视觉任务编排
+  # ── infra 基础设施运维（entry: db-skill）──
+  - db-skill            # MySQL/PostgreSQL 操作
+  - newapi-management   # 本机 NewAPI 网关渠道/日志运维
+  - wsl-windows-bridge  # WSL→Windows 跨边界框架
+  # ── repo 仓库工程（entry: codegraph-explore）──
+  - codegraph-explore   # 大仓符号检索/调用链/影响分析
+  - github-workflow     # git/gh 工作流
+  # ── docs 文档处理（entry: officecli）──
   - officecli           # Office 文档 CLI
-  # ---- 2026-09-23 全机聚合收编（原散落于 dsh vendor / dsh 农场 / dsh 预设，见 git log）----
-  # 注：omo 4 技能（debugging/git-master/programming/remove-ai-slops）同日已提升为 base
-  - thesis-export            # 原 ~/.dsh/skills 真实目录：论文导出编排
-  - dsh-ui-optimization      # 原 plugin-specialist 预设：DSH 插件 UI 优化
-  - dsh-plugin-troubleshooting  # 原 plugin-specialist 预设：DSH 插件故障排查
+  - word-extractor      # .docx 高精度提取
+  # ── lark 飞书协作（单体族，28 域已内聚）──
+  - lark-cli            # 飞书全家桶统一入口
+  # ── dshplugin DSH 插件（entry: dsh-plugin-troubleshooting，on_demand+预设作用域）──
+  - dsh-ui-optimization # DSH 插件 UI 优化（member；plugin-specialist 预设亦挂载）
+
+# 按需技能：默认不在任何农场；在对应 agent 的 extra 中列出即启用
+on_demand:
+  - dsh-plugin-troubleshooting  # DSH 插件故障排查；仅 plugin-specialist 预设作用域（dshplugin 族入口）
 
 agents:
   claude-code:
@@ -86,11 +97,7 @@ agents:
   dsh:
     dir: ~/.dsh/skills
     skills: base
-    extra:
-      # omo 4 技能已于 2026-09-23 提升 base（全农场可见）；此处仅留 dsh 侧按需技能
-      - thesis-export
-      # 预设技能在主农场保持可见（dsh-plugin-troubleshooting 仅经 preset 暴露）
-      - dsh-ui-optimization
+    extra: []   # 2026-09-24：thesis-export/dsh-ui-optimization 已随族群化入 base，extra 清空
     presets:
       # 论文族挂 thesis-agent 预设：跨项目的任务维度按需加载
       thesis-agent:
@@ -118,3 +125,41 @@ agents:
     dir: ~/.codex/skills
     skills: base
     extra: []   # 注：~/.codex/skills/.system 为 Codex 自带系统技能，skills-sync 不碰真实目录
+
+# ── 族群（2026-09-24 族群化；token 优化：模型启动清单只剩 9 个 entry）─────────
+# entry   = 族群入口，load: auto，进模型启动清单；正文含族内路由表，触发后按需读成员
+# members = 族内技能，默认 load: manual——不进启动清单（SKILL.md 标 metadata.load-mode:
+#           manual + disable-model-invocation: true；Codex 侧生成 agents/openai.yaml 的
+#           policy.allow_implicit_invocation: false），经 /name 或 $name 显式触发
+# 成员覆写：members: {name: auto} 可把个别成员提回 auto（映射形式）；列表形式全 manual
+families:
+  drawing:
+    entry: diagram
+    members: [drawio-xml, design-diagram, design-dataviz, design-ui]
+  thesis:
+    entry: thesis-writing
+    members: [thesis-ref-check, thesis-export, md-to-thesis-latex, paper-metrics, paper-reader]
+  coding:
+    entry: programming
+    members: [debugging, git-master, remove-ai-slops, test-guardian]
+  agentops:
+    entry: orca-cli
+    members: [orchestration, task-hub, computer-use]
+  info:
+    entry: unified-search
+    members: [kimi-webbridge, vision-workflow]
+  infra:
+    entry: db-skill
+    members: [newapi-management, wsl-windows-bridge]
+  repo:
+    entry: codegraph-explore
+    members: [github-workflow]
+  docs:
+    entry: officecli
+    members: [word-extractor]
+  lark:
+    entry: lark-cli
+    members: []
+  dshplugin:
+    entry: dsh-plugin-troubleshooting   # on_demand + plugin-specialist 预设作用域
+    members: [dsh-ui-optimization]

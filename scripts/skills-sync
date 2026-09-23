@@ -89,6 +89,63 @@ def sync_farm(farm_dir: str, names: set[str], master: Path, check: bool) -> list
     return actions
 
 
+def check_families(m: dict, master: Path) -> list[str]:
+    """族群标记一致性（2026-09-24）：member ⇔ load-mode:manual + disable-model-invocation
+    + Codex openai.yaml（allow_implicit_invocation:false）；entry ⇔ role:entry 且非 manual。
+    返回问题行列表（空=一致）。"""
+    import re as _re
+
+    import yaml as _yaml
+
+    def frontmatter(skill_dir: Path) -> dict:
+        txt = (skill_dir / "SKILL.md").read_text(encoding="utf-8", errors="replace")
+        mt = _re.match(r"^---\r?\n([\s\S]*?)\r?\n---", txt)
+        if not mt:
+            return {}
+        try:
+            return _yaml.safe_load(mt.group(1)) or {}
+        except _yaml.YAMLError:
+            return {"__yaml_error__": True}
+
+    problems: list[str] = []
+    for fname, f in sorted((m.get("families") or {}).items()):
+        entry, members = f.get("entry"), list(f.get("members") or [])
+        for name, role in [(entry, "entry")] + [(x, "member") for x in members]:
+            d = master / name
+            if not d.is_dir():
+                problems.append(f"  ! [{fname}] {role} {name}: 目录缺失")
+                continue
+            fm = frontmatter(d)
+            if fm.get("__yaml_error__") or not fm:
+                problems.append(f"  ! [{fname}] {role} {name}: frontmatter 缺失或 YAML 错误")
+                continue
+            meta = fm.get("metadata") or {}
+            if meta.get("family") != fname or meta.get("role") != role:
+                problems.append(f"  ! [{fname}] {role} {name}: metadata.family/role 应为 {fname}/{role}")
+            dmi = fm.get("disable-model-invocation") is True
+            if role == "member":
+                if meta.get("load-mode") != "manual":
+                    problems.append(f"  ! [{fname}] member {name}: load-mode 应为 manual")
+                if not dmi:
+                    problems.append(f"  ! [{fname}] member {name}: 缺 disable-model-invocation: true")
+                oa = d / "agents" / "openai.yaml"
+                if not oa.exists():
+                    problems.append(f"  ! [{fname}] member {name}: 缺 agents/openai.yaml")
+                else:
+                    try:
+                        od = _yaml.safe_load(oa.read_text(encoding="utf-8")) or {}
+                        if (od.get("policy") or {}).get("allow_implicit_invocation") is not False:
+                            problems.append(f"  ! [{fname}] member {name}: openai.yaml 未禁隐式调用")
+                    except _yaml.YAMLError:
+                        problems.append(f"  ! [{fname}] member {name}: openai.yaml YAML 错误")
+            else:
+                if dmi:
+                    problems.append(f"  ! [{fname}] entry {name}: 不应有 disable-model-invocation")
+                if meta.get("load-mode") == "manual":
+                    problems.append(f"  ! [{fname}] entry {name}: load-mode 不应为 manual")
+    return problems
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="按 agent-map.yaml 物化技能农场")
     ap.add_argument("--check", action="store_true", help="只检查漂移，不修改")
@@ -114,6 +171,16 @@ def main() -> None:
             print(f"[{agent_name}/{preset_name}] {expand(preset['dir'])}")
             for line in sync_farm(preset["dir"], set(preset["skills"]), master, args.check):
                 print(line)
+
+    fam_problems = check_families(m, master)
+    if fam_problems:
+        print("[families] 族群标记一致性问题:")
+        for line in fam_problems:
+            print(line)
+    elif m.get("families"):
+        n_member = sum(len(f.get("members") or []) for f in m["families"].values())
+        print(f"[families] {len(m['families'])} 族 / {n_member} 成员标记一致"
+              "（member ⇔ manual + openai.yaml）")
 
     print("check 模式，未做修改" if args.check else "农场物化完成")
 
