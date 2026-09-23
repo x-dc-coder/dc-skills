@@ -78,6 +78,8 @@ base:
   - lark-cli            # 飞书全家桶统一入口
   # ── dshplugin DSH 插件（entry: dsh-plugin-troubleshooting，on_demand+预设作用域）──
   - dsh-ui-optimization # DSH 插件 UI 优化（member；plugin-specialist 预设亦挂载）
+  # ── meta 仓库元工作（entry: dc-skill-creator）──
+  - dc-skill-creator    # 本仓库技能创建工具（validate/new_skill/check_triggers）
 
 # 按需技能：默认不在任何农场；在对应 agent 的 extra 中列出即启用
 on_demand:
@@ -163,3 +165,6 @@ families:
   dshplugin:
     entry: dsh-plugin-troubleshooting   # on_demand + plugin-specialist 预设作用域
     members: [dsh-ui-optimization]
+  meta:
+    entry: dc-skill-creator   # 仓库元工作：技能创建/校验（dc-skill-creator）
+    members: []
