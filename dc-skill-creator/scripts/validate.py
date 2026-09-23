@@ -128,7 +128,7 @@ def check(skill_dir: Path) -> list[dict]:
     private_hits = sorted(extra_fields & PRIVATE_FIELDS)
     if private_hits:
         bad("R1", "E", f"CC 私有字段禁止出现在顶层: {private_hits}（B3）")
-    other = sorted(extra_fields - PRIVATE_FIELDS - {"version"})
+    other = sorted(extra_fields - PRIVATE_FIELDS - {"version", "disable-model-invocation"})
     if other:
         bad("R1", "W", f"非规范顶层字段: {other}（各端忽略但不可移植）")
     if "version" in fm:
@@ -204,7 +204,10 @@ def check(skill_dir: Path) -> list[dict]:
         if has_py and not (scripts_dir / "__init__.py").exists():
             bad("R5", "E", "A 类技能缺 scripts/__init__.py（规则 A4）")
     elif has_py:
-        bad("R5", "W", "含 .py 但无 .venv 软链：确认是 C 类（系统 Python）并在 README 注明")
+        if (skill_dir / "venvs").is_dir():
+            pass  # B 类：skill 内私有重型 venvs（规则 A1/A2），不需要共享 .venv 软链
+        else:
+            bad("R5", "W", "含 .py 但无 .venv 软链也无 venvs/：确认是 C 类（系统 Python）并在 README 注明")
 
     # R6 外部二进制登记
     bins = meta.get("requires-bins")
@@ -215,18 +218,23 @@ def check(skill_dir: Path) -> list[dict]:
             if b not in registered:
                 bad("R6", "E", f"外部二进制未登记 docs/arch/ENVIRONMENT.md: {b}")
 
-    # R7 import 对照 pyproject（启发）
-    if has_py:
+    # R7 import 对照 pyproject（启发；B 类私有 venv 不参与）
+    if has_py and not (skill_dir / "venvs").is_dir():
         pyproject = (MASTER_ROOT / "pyproject.toml").read_text(encoding="utf-8")
         imports: set[str] = set()
         for py in scripts_dir.glob("*.py"):
             for m in re.finditer(r"^\s*(?:from|import)\s+([a-zA-Z0-9_]+)", py.read_text(encoding="utf-8", errors="replace"), re.M):
                 imports.add(m.group(1))
         stdlib = set(sys.stdlib_module_names)
-        local = {"scripts", "common", "cli"}
-        for mod in sorted(imports - stdlib - local):
-            if f'"{mod}' not in pyproject and f"'{mod}" not in pyproject and mod not in pyproject:
-                bad("R7", "W", f"import 的 {mod!r} 不在 pyproject.toml（若是 stdlib 误报可忽略）")
+        # import 名 ≠ 发行包名的常见映射（pip 名写进 pyproject）
+        alias = {"PIL": "Pillow", "docx": "python-docx", "bs4": "beautifulsoup4",
+                 "yaml": "pyyaml", "cv2": "opencv-python", "sklearn": "scikit-learn"}
+        # 本地模块：同目录脚本互引 + 顶层共享 common/scripts
+        siblings = {p.stem for p in scripts_dir.glob("*.py")} | {"scripts", "common"}
+        for mod in sorted(imports - stdlib - siblings):
+            pkg = alias.get(mod, mod)
+            if f'"{pkg}' not in pyproject and f"'{pkg}" not in pyproject and pkg not in pyproject:
+                bad("R7", "W", f"import 的 {mod!r}（包 {pkg}）不在 pyproject.toml（误报可忽略）")
 
     # R8 agent-map 登记
     if str(name) not in registered_names():

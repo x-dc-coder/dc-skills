@@ -8,7 +8,7 @@ description: >-
   公式/图表/透视表、幻灯片/PPT、任务/待办/清单/任务智能体、画板/Whiteboard、知识库/空间/节点、日程待办摘要。
   用户提到飞书/Lark/Feishu 或上述任一场景（发消息、查日程、约会议室、审批、建表、读写表格、收发邮件、
   读写文档/wiki、云盘文件、会议纪要、妙搭应用、OKR、白板、任务、考勤、通讯录、事件监听、认证登录/授权、
-  CLI 安装更新）时使用本技能：先按路由表选域执行 lark-cli <domain>，复杂域先 lark-cli skills read <域>
+  CLI 安装更新）时使用本技能：先按路由表选域执行 lark-cli {domain}，复杂域先 lark-cli skills read {域}
   获取权威规程；认证、输出契约与高风险操作遵守共享底座规则。
 metadata:
   family: lark
@@ -29,9 +29,9 @@ workflow-meeting-summary / workflow-standup-report），模型目录只保留本
 
 1. **身份先行**：先 `lark-cli whoami` 确认当前身份与登录态。`--as user` 代表用户本人（可操作个人资源），
    `--as bot` 代表应用（仅应用资源，查用户资源返回空成功而非报错）。未登录先 `lark-cli auth login`。
-2. **域规程必读**：每个域都有权威 SKILL.md（内嵌）。执行前先 `lark-cli skills read <域>`（如
+2. **域规程必读**：每个域都有权威 SKILL.md（内嵌）。执行前先 `lark-cli skills read {域}`（如
    `lark-sheets`）获取完整规程与命令矩阵；SKILL.md 引用的子文件用
-   `lark-cli skills read <域>/references/<file>` 读取。内嵌文本中的 `../lark-shared/SKILL.md` 引用
+   `lark-cli skills read {域}/references/<file>` 读取。内嵌文本中的 `../lark-shared/SKILL.md` 引用
    以本技能 §2 共享底座替代（或直接 `lark-cli skills read lark-shared`）。
 3. **输出契约**：默认 `--format json`，成功判断用 `ok == true`（或退出码 0），**不是** `code == 0`
    （成功信封无顶层 code/msg，code 只在错误信封内）。长输出加 `--jq <expr>` 过滤，防上下文膨胀。
@@ -108,7 +108,7 @@ workflow-meeting-summary / workflow-standup-report），模型目录只保留本
 - 认证管理：`lark-cli auth status` / `lark-cli auth login` / `lark-cli auth logout`；`lark-cli whoami`
 - 配置档案：`lark-cli config` / `lark-cli profile`（多档切换用 `--profile`）
 - 升级 CLI：`lark-cli update` —— **内嵌技能随 CLI 升级自动同步，无需单独安装**
-- 技能查看：`lark-cli skills list` / `lark-cli skills list <域>`（列一层）/ `lark-cli skills read <域>`
+- 技能查看：`lark-cli skills list` / `lark-cli skills list <域>`（列一层）/ `lark-cli skills read {域}`
 - 探索 API：`lark-cli schema <service.resource.method>`（参数/类型/scope/示例）；
   `lark-cli api GET|POST <path> [--params <json>] [--data <json>]`（逃生舱）
 - 回退到分散技能模式（如官方恢复独立技能）：`npx skills add larksuite/cli -g -y`（重装 28 个独立 SKILL.md

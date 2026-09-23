@@ -371,7 +371,8 @@ def check_models(rep: Report, reg: dict, offline: bool) -> None:
                 rep.add(g, "crit", name, f"套餐已到期 {exp}（{abs(days)} 天前）")
             elif days <= warn_days:
                 rep.add(g, "warn", name, f"套餐 {days} 天后到期（{exp}）—— 待续费")
-    # DSH provider 悬空引用
+    # DSH provider 引用对账：可解析 = llm-pi-ai.providers ∪ cordis.patch.yml 路由级 provider
+    # （agentrouter/deepseek-official 等经 dsh 插件+路由解析，不在 providers 注册，属正常架构）
     dsh_cfg = Path.home() / ".dsh" / "settings.yaml"
     if dsh_cfg.exists():
         try:
@@ -380,11 +381,37 @@ def check_models(rep: Report, reg: dict, offline: bool) -> None:
             allowed = [m.get("provider") for m in
                        ((data.get("subagent-model-selection") or {}).get("allowedModels") or [])
                        if isinstance(m, dict)]
-            dangling = {p for p in allowed if p and p not in providers}
+            route_providers: set[str] = set()
+            for patch in [Path.home() / ".dsh" / "cordis.patch.yml",
+                          *sorted((Path.home() / ".dsh" / "profiles").glob("*/cordis.patch.yml"))]:
+                if not patch.exists():
+                    continue
+                try:
+                    pdata = yaml.safe_load(patch.read_text(encoding="utf-8")) or []
+                except yaml.YAMLError:
+                    continue
+
+                def _walk(node) -> None:
+                    if isinstance(node, dict):
+                        if node.get("provider"):
+                            route_providers.add(str(node["provider"]))
+                        for v in node.values():
+                            _walk(v)
+                    elif isinstance(node, list):
+                        for v in node:
+                            _walk(v)
+
+                _walk(pdata)
+            resolvable = providers | route_providers
+            dangling = {p for p in allowed if p and p not in resolvable}
             if dangling:
                 rep.add(g, "warn", "dsh-providers",
-                        f"allowedModels 引用未定义 provider: {sorted(dangling)}",
-                        hint="~/.dsh/settings.yaml：补 provider 定义或删引用")
+                        f"allowedModels 引用既不在 providers 也无 cordis 路由: {sorted(dangling)}",
+                        hint="~/.dsh/settings.yaml：补 provider 定义/路由，或删引用")
+            else:
+                rep.add(g, "ok", "dsh-providers",
+                        f"{len(providers)} providers + {len(route_providers - providers)} 路由级"
+                        f"（{'/'.join(sorted(route_providers - providers)) or '无'}）对账完成")
         except yaml.YAMLError:
             pass
     suffix = "" if not offline else "（离线模式）"

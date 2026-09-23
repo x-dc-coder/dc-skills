@@ -87,7 +87,11 @@ models:
     upstream_url: null
     check_cmd: "dsh --version"
     asserts: [provider_refs_resolve]
-    notes: "llm-pi-ai.providers 7 个；allowedModels 引用须 ⊆ providers 键集合"
+    notes: >-
+      llm-pi-ai.providers 7 个；对账口径 = providers ∪ cordis.patch.yml 路由级 provider。
+      agentrouter（dsh-llm-agentrouter 插件，哨兵 baseURL + 围栏改写）与 deepseek-official
+      （兜底路由）只存在于路由层，不在 providers 注册——勿当悬空删除，cordis.patch.yml
+      的 adversary/兜底路由正在用。
 
 # ── MCP 期望矩阵（哪个客户端应见哪些 server）──
 mcp:

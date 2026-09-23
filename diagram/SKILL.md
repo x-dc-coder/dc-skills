@@ -6,7 +6,7 @@ description: >-
   论文级，白底黑字）、终端 ASCII 架构草稿。当用户需要生成 ER 图/实体关系图/E-R 图/模块图/用例图/
   时序图/流程图/架构草稿/ASCII 架构图/系统架构草图等软件工程图表（本科毕设/课程设计论文插图）时
   使用本技能：按路由表识别类型，读对应分册规程，执行脚本生成 PNG/代码；输出统一到
-  <项目>/thesis-output/<类型>/ 或 ~/.claude/skills-output/<类型>/。正式可编辑图（.drawio）走 drawio-xml。
+  {项目}/thesis-output/{类型}/ 或 ~/.claude/skills-output/{类型}/。正式可编辑图（.drawio）走 drawio-xml。
   族内还有 drawio-xml（可编辑 .drawio）、design-diagram（内联 SVG）、design-dataviz（数据可视化）、design-ui（页面设计），由本技能按需路由。
 metadata:
   family: drawing
@@ -47,8 +47,8 @@ metadata:
 
 1. **执行环境**：遵守 AGENT.md 核心约束——先 `cd ~/projects/dc-skills` 再 `uv run python`（确保解析根 pyproject 环境）；各技能子目录无需自建 .venv，uv 自动向上查找。脚本内 `common.py`（顶层 scripts/）提供 `resolve_output_path`，已在各 CLI 中接入。
 2. **输出路径两级回退**（docs/specs/OUTPUT.md 统一约定，勿改）：
-   - 用户 cwd 在工作项目 → `<项目>/thesis-output/<类型>/<文件名>`
-   - cwd 在 `~/projects/dc-skills` 或无明确项目 → `~/.claude/skills-output/<类型>/<文件名>`
+   - 用户 cwd 在工作项目 → `{项目}/thesis-output/{类型}/<文件名>`
+   - cwd 在 `~/projects/dc-skills` 或无明确项目 → `~/.claude/skills-output/{类型}/<文件名>`
 3. **论文风格**：流程图/时序图/ER 系列统一白色背景、纯黑节点、黑白打印友好（细节见各分册）。
 4. **输入格式**：er 用 SQL DDL；ers/module/usecase/sequence 用 JSON；draft 用 graph-easy 描述文本；flow 直接对话生成 Mermaid。
 5. **质量自检**：生成后向用户展示并确认；论文场景注意分辨率（分册有说明）。

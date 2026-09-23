@@ -40,9 +40,26 @@ class TestModes:
             assert set(item) >= {"group", "level", "name", "msg"}
 
     def test_check_exit_semantics(self) -> None:
-        """当前实机有 2 个真实 ⚠️（paper-reader 行数/dsh provider）→ --check 应退 1。"""
-        r = run("--check")
-        assert r.returncode == 1, r.stdout[-500:]
+        """退出码语义单测（合成 Report，不依赖实机状态）：⚠️→1 / 🚨→2 / 全绿→0。"""
+        import argparse
+        mod = _load()
+        rep = mod.Report()
+        rep.add("cli", "ok", "x", "ok")
+        args = argparse.Namespace(check=True, strict=False, json=False, only=None,
+                                offline=False, deep=False)
+        assert mod.render(rep, args, 0.0) == 0
+        rep.add("cli", "warn", "y", "warn")
+        assert mod.render(rep, args, 0.0) == 1
+        rep.add("cli", "crit", "z", "crit")
+        assert mod.render(rep, args, 0.0) == 2
+        args.check = False
+        assert mod.render(rep, args, 0.0) == 2  # 🚨 在任何模式都退 2
+
+    def test_real_machine_check_exit(self) -> None:
+        """实机 --check 退出码必须与报告摘要一致（当前全绿 → 0）。"""
+        r = run("--json", "--check")
+        data = json.loads(r.stdout)
+        assert r.returncode == data["exit"]
 
     def test_strict_is_not_worse_than_check(self) -> None:
         a, b = run("--check"), run("--check", "--strict")

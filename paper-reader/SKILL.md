@@ -3,7 +3,8 @@ name: paper-reader
 description: >
   学术论文 PDF 双引擎对照阅读器 — 四阶段流水线（预检→转换→合并→总结）。
   Marker + MinerU 双引擎并行转换，自动合并、差异对照、文献总结。
-  内置 PDF 预检、异常处理三级响应、断点续跑、流水线状态追踪。
+  内置 PDF 预检、异常处理三级响应、断点续跑、流水线状态追踪。当用户要求读论文/分析 PDF
+  文献/精读对照时使用；纯文本或单页快摘走其他技能。
 metadata:
   family: thesis
   role: member
@@ -124,48 +125,8 @@ paper_reader.py papers/ --backfill-meta
 
 ## 流水线状态文件
 
-`_pipeline_state.json` 跟踪每篇论文的处理进度：
-
-```json
-{
-  "pipeline_version": "2.0",
-  "last_updated": "2026-07-18T15:30:00",
-  "papers": {
-    "2605.05208": {
-      "source": {
-        "url": "https://arxiv.org/abs/2605.05208",
-        "pdf_url": "https://arxiv.org/pdf/2605.05208",
-        "doi": "10.1109/xxx",
-        "arxiv_id": "2605.05208",
-        "source_db": "arxiv",
-        "title_from_source": "MDVRP: A Multi-Depot...",
-        "venue": "Transportation Science",
-        "year": 2026,
-        "authors": ["Lei, H.", "Smith, J."]
-      },
-      "pdf_hash": "sha256:abc123...",
-      "precheck": {"status": "passed", "page_count": 40},
-      "phase1_converted": {
-        "status": "done",
-        "marker_ok": true,
-        "mineru_ok": true,
-        "at": "2026-07-15T10:23:00"
-      },
-      "phase2_merged": {
-        "status": "done",
-        "diff_paragraphs": 66,
-        "images_copied": 22,
-        "at": "2026-07-15T10:23:05"
-      },
-      "phase3_summarized": {
-        "status": "done",
-        "summary_path": "paper-summaries/2605.05208.md",
-        "at": "2026-07-16T09:00:00"
-      }
-    }
-  }
-}
-```
+`_pipeline_state.json` 跟踪每篇论文的处理进度。完整 JSON 示例与字段语义见
+[`references/state-file.md`](references/state-file.md)（调试状态文件、排查断点续跑时读）。
 
 ### 状态字段说明
 
@@ -245,12 +206,8 @@ paper_reader.py <papers_dir> --backfill-meta
 
 **它存在的唯一理由**：`PDF → content_list.json` 这一跳**没有任何独立校验**，而这里会发生两类**静默损坏**（不报错、不告警，直接污染下游指标）。
 
-### 本机实测（《运筹与管理》10 篇中文核心期刊，2026-09-13）
 
-| 损坏类型 | 实测结果 |
-|---|---|
-| **数字丢失（CNKI 全角字体）** | **10/11 篇命中，丢失率 73 %–90 %**（此前估计 ~52 %，实测更严重）。CNKI 把数字编码成全角 `１２.７３`，PDF 文本层里有、转换后消失（MinerU issue #5330） |
-| **英文段空格丢失** | **8 篇命中**：PDF 文本层 **0** 条 15+ 字母长串，canonical 侧 **58** 条 → **空格是转换过程弄丢的**，不是 PDF 本身的问题 |
+两段本机实测数据与单独跑命令见 [`references/textlayer-probe.md`](references/textlayer-probe.md)。
 
 ### 判定规则（`compare_text_layers`，纯函数、可单测）
 
@@ -289,16 +246,6 @@ paper_reader.py <papers_dir> --backfill-meta
 - "本轮"不是客套：树里可能留着**上一次转换**的 MinerU JSON。marker-only 运行、或本轮 MinerU 失败时如果还去扫树，就会把旧文本当作本次证据（实测：旧中文 JSON + 本轮英文合并稿 → 记录出 `zh`）。所以流水线只在传入了本轮 MinerU markdown 时才读同目录 JSON，扫描整棵树只允许 `--backfill-probe` 这类"没有本轮"的调用，并且 `canonical_source` 会写明用的是哪一份。
 - **不要把它说成"指标层读的那份文本"**：这里是**原始** content_list 的全部 text，而 paper-metrics 的 `canonical_text()` 会再丢掉 front_matter / references / keywords 等非正文。所以两层的 `cjk_ratio` **允许不同**，语言标签也不保证一致——paper-metrics 侧为此专门产出 `LANGUAGE_METADATA_MISMATCH` 交叉核对（见其 SKILL）。选 content_list 而不是 markdown 的理由与上面无关，只关乎**能不能看见损坏**：同一篇 PDF 对 `_MERGED.md` 只测出 **2.1%** 数字丢失，对 content_list 是 **55.5%**——markdown 导出保留着 JSON 侧已经丢掉的数字。
 
-### 本机实测（2026-09-14，中文语料 10 篇，比较对象 = content_list）
-
-| 结论 | 数值 |
-|---|---|
-| verdict | **10/10 篇 `warn`**（`DIGIT_LOSS_HIGH` + `UNSPACED_ENGLISH_RUNS`） |
-| 数字丢失率 | **41.8% – 78.2%**（PDF 侧 1094 个数字**全是全角**，CNKI 自定义字体编码） |
-| 空格引入 | 每篇 75–104 条 15+ 字母长串 |
-| 确定性 | 同输入两次运行 JSON **逐字节一致**（10/10） |
-| 与指标层一致 | 语言标签与 `text_metrics.detect_language` **10/10 一致** |
-
 ### 存量语料：`--backfill-probe`
 
 `--resume` 会把状态文件里"已完成"的论文整篇跳过，所以**接入之前就转换好的语料永远拿不到阶段 1.5 证据**（真重跑转换约 6 分钟/篇）。这个入口只读 PDF 自带文本层：不启动引擎、不碰 GPU。
@@ -308,14 +255,6 @@ cd ~/projects/dc-skills && uv run python paper-reader/scripts/paper_reader.py <p
 ```
 
 输出 `scanned/probed/reused/warn/not_measured/no_pdf` 计数：有效记录算 `reused`，源 PDF 找不到的论文计入 `no_pdf` 且不写记录。实测（真实中文语料副本《序定车辆路径问题》）：首次 `probed=1 warn=1`（数字丢失 78.2%），第二次 `reused=1`，`--force` 重新测量。
-
-### 单独跑（离线复核用）
-
-```bash
-cd ~/projects/dc-skills && uv run python paper-reader/scripts/textlayer_probe.py \
-    --pdf paper.pdf --canonical canonical.txt --canonical-source mineru_content_list \
-    --out _textlayer_probe.json
-```
 
 ## 引擎与许可（红线）
 
@@ -393,95 +332,10 @@ cd ~/projects/dc-skills && uv run python paper-reader/scripts/textlayer_probe.py
 `--init --from-manifest` 按 `filename` 匹配，自动填入 `_pipeline_state.json` 的 `source` 字段。
 若论文损坏需要重新下载，`source.url` / `source.pdf_url` 可直接用于定位。
 
-## 文献总结模板
+## 文献总结与合并算法（按需查阅）
 
-总结 md 包含以下结构（Phase 3 由 LLM 基于 MERGED.md 生成）：
-
-```markdown
-# <论文标题>
-
-## 元信息
-| 字段 | 值 |
-|---|---|
-| 作者 | ... |
-| 年份 | ... |
-| 期刊/会议 | ... |
-| **期刊等级** | **CCF-A / CCF-B / CCF-C / SCI一区 / SCI二区 / 顶会 / 预印本** |
-| DOI | ... |
-
-## 一句话摘要
-...
-
-## 研究问题与动机
-...
-
-## 方法论
-...
-
-## 核心贡献
-...
-
-## 实验与结论
-...
-
-## 局限与未来工作
-...
-
-## 与我方研究的关联度
-- 技术相关性：高/中/低
-- 可复用的技术点
-
-## 阅读笔记
-- 亮点
-- 疑问/待深入
-```
-
-期刊等级标注规则：
-- CCF 推荐列表 → `CCF-A` / `CCF-B` / `CCF-C`
-- 中科院分区 → `SCI一区` / `SCI二区` / `SCI三区`
-- 顶会 → 标注会议名 + CCF 等级
-- arXiv 预印本 → `预印本（未发表/在审）`
-
-## 双引擎设计原理
-
-| 引擎 | 出品方 | 强项 | 弱项 |
-|---|---|---|---|
-| **Marker** | Vik Paruchuri | 英文 OCR 准、结构清晰 | 公式 LaTeX 不完整 |
-| **MinerU** | OpenDataLab | 公式 LaTeX 准、表格强 | 偶有 OCR 错位 |
-
-## 合并策略（_MERGED.md）
-
-| 内容类型 | 来源 | 原因 |
-|---|---|---|
-| 正文段落（相似度 ≥ 0.85） | Marker | 英文 OCR 更准 |
-| 公式段落（相似度 < 0.85） | MinerU | 公式更准 |
-| Marker 独有段落 | Marker | 补充通讯信息 |
-| MinerU 独有段落 | MinerU | 保留额外内容 |
-
-### LLM 友好后处理
-
-1. **OCR 错误修复**：ff→f 常见错误自动纠正
-2. **LaTeX 间距修复**：`\mathrm{M i n i m i z e}` → `\mathrm{Minimize}`
-3. **HTML 表格转 Markdown**：`<table>` → `| ... |`
-4. **表格恢复**：从 Marker 恢复被归一化的表格
-5. **图片索引**：末尾列出所有图片路径
-6. **YAML front matter** + 标题 + 摘要 + 目录
-
-## Diff 算法
-
-7 步归一化后再比较（消除格式噪声）：
-1. 统一引号（curly → straight）
-2. 统一标题层级
-3. `<sup>x</sup>` → `^x^`，行内公式提取纯文本
-4. 合并 `$$...$$` 块
-5. 合并连续非空行为段落 + 跨段断行合并
-6. 图片/HTML 表格归一化为占位符
-7. 过滤元信息行
-
-然后用贪心最优配对 + 相似度阈值（0.85）分类：
-- ≥ 0.85 → `[SAME]` 仅标注字符差异
-- < 0.85 → `[DIFF]` 真实内容差异
-- 仅一侧 → `[ONLY-M]` / `[ONLY-U]`
+- Phase 3 文献总结模板全文与期刊等级标注规则： [`references/summary-template.md`](references/summary-template.md)
+- 双引擎设计原理、合并策略（_MERGED.md）与 Diff 算法： [`references/merge-algorithm.md`](references/merge-algorithm.md)
 
 ## 性能预期
 
