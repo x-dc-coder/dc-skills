@@ -29,7 +29,7 @@ REST API 操作工具。**客户端封装了 fork 版本的字段类型铁律**�
 
 - A 类（统一共享 `.venv`），仅依赖 `requests`（已在 skills 项目的 `pyproject.toml`）。
 - 无外部二进制依赖。
-- 执行遵循 CLAUDE.md：`cd ~/projects/dc-skills && uv run python newapi-management/scripts/cli.py ...`
+- 执行遵循 AGENT.md：`cd ~/projects/dc-skills && uv run python newapi-management/scripts/cli.py ...`
 
 ## 凭据发现（优先级从高到低）
 

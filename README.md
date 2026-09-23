@@ -11,7 +11,7 @@
 ```
 ~/projects/dc-skills/
 ├── README.md              # 本说明文档
-├── CLAUDE.md              # 执行约束（cd ~/projects/dc-skills 再 uv run）
+├── AGENT.md              # 执行约束（cd ~/projects/dc-skills 再 uv run）；CLAUDE.md/AGENTS.md 为兼容软链
 ├── ENVIRONMENT.md         # 外部工具依赖登记表（12 工具 + 验证命令 + 声明模板）
 ├── OUTPUT.md              # 输出目录兜底规范（两级回退，唯一事实源）
 ├── MODELS.md              # Grok 模型渠道、协议、窗口、思考档位与套餐到期

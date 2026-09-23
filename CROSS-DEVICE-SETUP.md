@@ -74,8 +74,8 @@ bash ~/projects/dc-skills/paper-reader/scripts/bootstrap.sh
 ```
 
 **Windows / GPU 场景**：paper-reader 通过 WSL 桥接调用 Windows 原生 Python 跑 GPU，
-需按 `CLAUDE.md` 的 GPU 桥接规范单独建 Windows venv（uv 建 `E:\venvs\marker`、`E:\venvs\mineru` 并装 cu128 torch）。
-> 这部分细节见 CLAUDE.md「GPU 桥接」「用 uv 管理 Windows 侧 Python 环境」章节。
+需按 `wsl-windows-bridge` 技能的 GPU 桥接规范单独建 Windows venv（uv 建 `E:\venvs\marker`、`E:\venvs\mineru` 并装 cu128 torch）。
+> 这部分细节见 `wsl-windows-bridge/references/python-channel.md`「GPU 桥接」章节。
 
 ### C 类：外部工具（非 Python，按需安装）
 
@@ -131,8 +131,8 @@ gh auth status            # github-workflow（gh 认证）
 |------|-------------|---------|
 | **行尾** | 无感 | `.gitattributes` 已统一 LF；不要用 `core.autocrlf true` |
 | **符号链接** | `ln -sf ../.venv <skill>/.venv` | 无开发者模式时改用 `uv run --project` 绝对路径模式 |
-| **GPU（paper-reader）** | 不直接用 GPU 训练 | 通过 WSL 桥接 Windows 原生 Python（见 CLAUDE.md「GPU 桥接」） |
-| **环境变量转发** | — | WSL→Windows 子进程需 `WSLENV` 白名单（见 CLAUDE.md） |
+| **GPU（paper-reader）** | 不直接用 GPU 训练 | 通过 WSL 桥接 Windows 原生 Python（见 `wsl-windows-bridge/references/python-channel.md`「GPU 桥接」） |
+| **环境变量转发** | — | WSL→Windows 子进程需 `WSLENV` 白名单（见 `wsl-windows-bridge/references/ops-reference.md`） |
 | **同步方式** | `git pull` | 同左；同机 WSL→Windows 可用 rsync 落盘 |
 
 ---
@@ -143,4 +143,4 @@ gh auth status            # github-workflow（gh 认证）
 - **Windows 上 `.venv` 符号链接失效** → 用 `uv run --project` 绝对路径模式，或 `mklink /J` 建 junction
 - **中文变方框** → 缺中文字体 / texlive-lang-chinese（见外部工具表）
 - **kimi-webbridge 不工作** → 按 `references/operations.md` 的启动/诊断表排查（含陈旧 PID 文件场景）
-- **paper-reader OOM** → 按 `--gpu-fraction` / `--max-workers` 限制并发（见 CLAUDE.md「GPU 多路并发铁律」）
+- **paper-reader OOM** → 按 `--gpu-fraction` / `--max-workers` 限制并发（见 `wsl-windows-bridge/references/python-channel.md`「GPU 多路并发铁律」）

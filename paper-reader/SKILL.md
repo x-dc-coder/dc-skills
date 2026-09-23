@@ -504,7 +504,7 @@ cd ~/projects/dc-skills && uv run python paper-reader/scripts/textlayer_probe.py
 - ③ 批量串行（1 PDF）
 - ④ 设备级协调器（总显存 ≤ 90%）
 
-详见 `/home/dc/CLAUDE.md` "GPU 多路并发铁律"。
+详见 `wsl-windows-bridge/references/python-channel.md`「GPU 多路并发铁律」。
 
 ## 文件
 

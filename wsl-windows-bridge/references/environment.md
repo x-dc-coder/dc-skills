@@ -58,7 +58,7 @@ sudo apt install -y jq
 
 - 需要在 WSL 中调用 Windows 侧能力（EXE / Python / GPU / 系统工具）
 - 关键词: `cmd.exe`、`powershell.exe`、GPU、CUDA、torch、Windows venv、注册表、WMI、COM、Visio、Office
-- **GPU 训练/推理**: 见 `/home/dc/CLAUDE.md` → "GPU 桥接" 章节（单一事实来源）
+- **GPU 训练/推理**: 见 `python-channel.md` → "GPU 桥接" 章节（单一事实来源）
 - **GPU 训练流式输出/后台任务**: 使用 `stream_gpu_windows()`（实时看进度）、`launch_detached()`（后台 + tail -f）、`win-launcher.py`（Job Object 孤儿清理）。详见下方"实时输出与进度条"章节。
 - **关键词**: `stream_gpu_windows`、`launch_detached`、`use_wrapper`、`win-launcher`、`GpuLimits`、`GpuGovernor`、tqdm、进度条、孤儿进程、Job Object
 

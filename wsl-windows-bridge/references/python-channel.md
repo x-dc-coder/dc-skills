@@ -273,7 +273,7 @@ launch_detached(
 
 ### GPU 环境检查 & 规则
 
-> **GPU 相关全部统一在 `/home/dc/CLAUDE.md` → "GPU 桥接" 章节**，此处不再重复。
+> **GPU 相关规范以本文件为唯一事实来源**（历次上游文档已合并至此）。
 > 特别注意 **"GPU 多路并发铁律"**（≥2 个 GPU 子进程时必读，防 OOM 卡死系统）。
 
 快速验证（pythonw.exe 版，无弹窗 + UTF-8）：
@@ -294,7 +294,7 @@ print(r.stdout)
 
 ### 资源限制（多路 GPU 子进程必备）
 
-当一次启动 ≥2 个 Windows GPU 子进程时，**必须**给每个子进程注入显存配额 + CPU 线程约束。规则全文在 `/home/dc/CLAUDE.md` → "GPU 多路并发铁律"，此 skill 提供现成封装。
+当一次启动 ≥2 个 Windows GPU 子进程时，**必须**给每个子进程注入显存配额 + CPU 线程约束。规则全文见本文件「GPU 多路并发铁律」，`wsl-windows-bridge` skill 提供现成封装。
 
 **通用模块**：`~/projects/dc-skills/wsl-windows-bridge/scripts/gpu_safe_subprocess.py`
 
@@ -320,7 +320,7 @@ with acquire_gpu_slot(max_concurrent=2):
 
 模块原理：env var 层注入 `PYTORCH_CUDA_ALLOC_CONF=garbage_collection_threshold:0.7`（PyTorch 实测接受的选项），Python API 层通过 bootstrap 调 `torch.cuda.set_per_process_memory_fraction(0.4)`。
 
-> ⚠️ **不要写** `PYTORCH_CUDA_ALLOC_CONF=per_process_memory_fraction:0.4` —— 这是 Python API 不是 env var，PyTorch 会报 `Unrecognized CachingAllocator option`。详见 CLAUDE.md "GPU 显存配额" 段。
+> ⚠️ **不要写** `PYTORCH_CUDA_ALLOC_CONF=per_process_memory_fraction:0.4` —— 这是 Python API 不是 env var，PyTorch 会报 `Unrecognized CachingAllocator option`。详见本文件 "GPU 显存配额" 段。
 
 ### Windows 侧 Python venv 管理（⭐ uv 唯一，禁止 conda）
 

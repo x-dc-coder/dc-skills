@@ -138,7 +138,7 @@ powershell.exe -Command "
 - **安装 `wslu`**: `wslview` (打开文件), `wslvar` (读 Windows 环境变量)。
 - **用 `wslpath`** 做路径转换。
 - **用 JSON** 输出数据（`ConvertTo-Json`）便于 WSL 侧 `jq` 解析。
-- **GPU 规则**: 统一在 `/home/dc/CLAUDE.md` → "GPU 桥接" 章节。
+- **GPU 规则**: 统一在 `python-channel.md` → "GPU 桥接" 章节。
 - **PyTorch env var**: `PYTORCH_CUDA_ALLOC_CONF` 只接受 `garbage_collection_threshold:0.7`、`max_split_size_mb:N` 等少数选项。`per_process_memory_fraction` 是 **Python API**（`torch.cuda.set_per_process_memory_fraction()`），不是 env var。
 - **无弹窗/HEADLESS**: 全程 pythonw.exe；`run_gpu_windows`/`launch_detached` 已内置强制校验。批量查进程/清理用集中式（一次 PowerShell/常驻代理），别循环调 tasklist/taskkill。
 - **跨边界路径**: bash/Python → Windows 进程必须 `wslpath -w`；Windows → WSL 用 `/mnt/<盘符>/`。worker 内日志/输入路径一律 Windows 格式。

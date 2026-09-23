@@ -124,12 +124,12 @@ cd ~/projects/dc-skills && find . -name SKILL.md -not -path "*/node_modules/*" -
 
 **规则 C0（兜底定位，2026-08-29 补充）**：本章为**兜底规则**——技能正文显式指定输出位置（如
 paper-reader 输出到输入 PDF 同级）、用户显式传 `--output` 参数时，**以显式指定为准**；仅当技能
-未显式指明输出目录时按本章两级回退执行。统一约定全文见 `OUTPUT.md`（唯一事实源，CLAUDE.md
+未显式指明输出目录时按本章两级回退执行。统一约定全文见 `OUTPUT.md`（唯一事实源，AGENT.md
 与本章均引用它）。
 
 ### 3.1 禁止 /tmp/skills-output
 
-**规则 C1**：**绝对禁止**在代码或文档中硬编码 `/tmp/skills-output/<date>/<skill>/` 路径。CLAUDE.md 第 42-43 行明令禁止。
+**规则 C1**：**绝对禁止**在代码或文档中硬编码 `/tmp/skills-output/<date>/<skill>/` 路径。AGENT.md 输出约定明令禁止。
 
 **规则 C2**：所有产出文件的 SKILL **必须**实现两级回退：
 ```python
@@ -160,7 +160,7 @@ def resolve_output_path(input_file, skill_name, default_name):
 
 ### 3.3 输出文件名
 
-**规则 C4**：每个 SKILL 的默认输出文件名**必须**与 CLAUDE.md 第 73-86 行约定表一致，且**必须**包含 skill 标识，避免多 skill 互相覆盖。例：`er-diagram.png`（不是 `diagram.png`）。
+**规则 C4**：每个 SKILL 的默认输出文件名**必须**与 OUTPUT.md 约定表一致，且**必须**包含 skill 标识，避免多 skill 互相覆盖。例：`er-diagram.png`（不是 `diagram.png`）。
 
 **规则 C5**：CLI 参数名**必须**统一为 `--output`（不是 `--out`、`--output-dir`）。保留旧名作为 alias 可接受，但主名必须是 `--output`。
 
@@ -249,7 +249,7 @@ fontname = "Noto Sans CJK SC"  # 在仅装 SimSun 的机器上方块
 
 **规则 F4**：修改代码行为后**必须**同步更新 SKILL.md 中的路径/参数/默认值描述。本次审查发现 5 个 diagram SKILL.md 声明输出 `thesis-output/img/diagram.png`，但代码实际输出 `thesis-output/diagram-er/er-diagram.png`——文档与代码完全脱节。
 
-**规则 F5**：修改输出文件名或路径后**必须**同步更新 CLAUDE.md 第 73-86 行的约定表。
+**规则 F5**：修改输出文件名或路径后**必须**同步更新 OUTPUT.md 的约定表。
 
 ### 6.3 跨 skill 影响
 
@@ -295,7 +295,7 @@ grep -l "<你的触发词>" ~/projects/dc-skills/*/SKILL.md
 
 ### 文档同步
 - [ ] SKILL.md 的路径/参数/默认值与代码一致（grep 对照）
-- [ ] CLAUDE.md 约定表与实际输出文件名一致
+- [ ] OUTPUT.md 约定表与实际输出文件名一致
 - [ ] README.md 环境分类表与实际目录结构一致
 
 ### BREAKING CHANGE（如适用）
