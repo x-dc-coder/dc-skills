@@ -1,6 +1,6 @@
 # agent-map.yaml — 技能农场唯一事实源
 #
-# 主库 ~/projects/dc-skills 是全机唯一物理技能目录（git 仓库，gitcode + github 双远端）。
+# 主库 ~/projects/dc-skills 是全机唯一物理技能目录（git 仓库，远端为 GitHub）。
 # 每个 Agent 只通过自己技能目录里的软链接看到启用技能；未登记的技能对任何 Agent 不可见。
 #
 # 用法：
@@ -10,6 +10,23 @@
 # 启用一个按需技能：把技能名加进对应 agent 的 extra，再跑 skills-sync。
 # 安装器着陆区 ~/.agents/skills（通用技能安装器的默认目标，见 .skill-lock.json）如出现新技能：
 #   mv ~/.agents/skills/<name> ~/projects/dc-skills/ 并在此文件登记，再跑 skills-sync。
+#
+# ── 各 Agent 自注册根与可控配置（2026-09-23 实测；完整机制与风险见 SKILL-MANAGEMENT.md）──
+# claude-code: 自注册 = 插件市场 ~/.claude/plugins/cache + 账号同步 ~/.claude/skills/synced（农场根内，须保持关闭）
+#              可控 = settings.json 的 enabledPlugins/skillOverrides/blockedMarketplaces，CLAUDE_CODE_SYNC_SKILLS=0
+# grok:       自注册 = ~/.grok/bundled/skills（随 App 更新）；可控 = config.toml [skills] ignore/paths/disabled
+# codex:      自注册 = ~/.codex/skills/.system + 插件缓存 ~/.codex/plugins/cache + 模型可触发的 skill-installer
+#              可控 = config.toml [skills] bundled/include_instructions/max_context_tokens（无路径 ignore 能力）
+# dsh:        自注册 = 只装插件不装技能；出厂 cordis 预设自带 2 技能（customSkillDirs rank 300 > 农场 400）
+#              可控 = 各预设 agent.cordis.yml 的 skill-filesystem config（customSkillDirs/includeDefaultRoots）
+# orca:       自注册 = orca skills install 转发社区 skills CLI（npx skills add --global），可写农场目录
+#              可控 = 安装时 --agent universal / --agent <names>；着陆区约定保持为空（skillctl inventory 监控）
+# lark-cli:   自注册 = 28 域技能编译进二进制（lark-cli skills read），随 lark-cli update 走
+# keenable:   无技能自注册（仅 MCP server + managed_deny_tools），无需处理
+#
+# dsh 预设语义：dsh 运行时不扫描 <preset>/skills/，预设 skills 目录须经预设 agent.cordis.yml 的
+#   skill-filesystem.customSkillDirs 接入（rank 300，仅该预设会话可见）。2026-09-23 已为
+#   thesis-agent / plugin-specialist 接入；全会话可见的技能另入 dsh extra（rank 400）。
 
 master: /home/dc/projects/dc-skills
 

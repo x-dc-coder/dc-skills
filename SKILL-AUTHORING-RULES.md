@@ -1,6 +1,8 @@
 # SKILL 开发与修改规则
 
 > 本文档基于 2026-07-19 全量 SKILL 审查（23 个修复项）沉淀的规则。后续新增 SKILL 或修改现有 SKILL 行为时**必须**遵守本文档。违反任意一条都可能导致审查被退回。
+>
+> **规范基线（2026-09-23 修订）**：frontmatter 与目录结构规则对齐 [agentskills.io](https://agentskills.io/specification.md) Agent Skills 开放标准（Anthropic 2025-10 发起，40+ 客户端遵循：Claude Code、Codex、OpenCode、Cursor、Gemini CLI、Grok 等）。凡本文与规范冲突处，以规范的字段全集（6 个）为准；本文的额外约束（行数门禁、触发词防冲突等）是更严的内部标准。
 
 ---
 
@@ -37,10 +39,12 @@ ln -sf ../.venv <skill-name>/.venv
 │   ├── __init__.py       # 必须存在（A 类）
 │   ├── cli.py            # 主入口
 │   └── test_*.py         # 测试（必须）
-├── references/           # 可选：参考文档（SKILL.md 过长时拆分到此）
-├── evals/                # 可选：评估数据
+├── references/           # 可选：按需加载的参考文档（SKILL.md 过长时拆分到此）
+├── assets/               # 可选：静态模板/图片/查找表（与 references/ 的文档区分）
+├── evals/                # 可选：评估数据（触发问句，见规则 B9）
 └── .venv -> ../.venv     # A 类必须
 ```
+文件引用相对 skill 根、只引用一层深。
 
 **规则 A6**：禁止在仓库根目录或 skill 目录内创建 `-workspace/` 形式的临时目录（如 `doubao-vision-workspace/`）。评估产物应放到 `.omo/` 或 gitignored 的临时目录。
 
@@ -59,19 +63,30 @@ description: >
 ---
 ```
 
+`name` 硬约束（agentskills.io 规范，Claude Code/OpenCode/Cursor/Codex 均校验）：
+1-64 字符；仅小写字母/数字/连字符；不得以 `-` 开头或结尾；不得含 `--`；**必须与父目录名一致**。
+
 **规则 B2**：`description` 中**必须**明示触发场景，不可只描述能力。例：✅ "当用户需要生成 ER 图、表结构图时触发" ❌ "生成 ER 图"
 
-**规则 B3**：禁止使用非标准 frontmatter 字段（如 `compatibility`）。OpenCode 可能忽略未知字段。
+`description` 长度与写法（2026-09-23 按 agentskills.io 规范修订）：
+- 硬上限 **1024 字符**（规范口径；替代原"200 词"说法，中文建议 ≤500 字）
+- 官方推荐祈使句写法 "Use when …" / "当用户需要……时使用"，可适度"主动"——列出用户不点名领域时也应触发的情形
+- **关键触发词放最前**：Claude Code 的技能 listing 预算仅为上下文 1%，description 超长时先被截断
 
-**规则 B3a（推荐字段，2026-08-29 补充）**：除 `name`/`description` 必填外，推荐声明以下字段（聚合技能如 lark-cli/diagram 已示范）：
+**规则 B3**：frontmatter 只使用 agentskills.io 规范字段 + `metadata` 扩展。**禁止使用 Claude Code 私有字段**（`when_to_use`、`disable-model-invocation`、`context`、`model`、`paths`、`argument-hint`、`hooks` 等）——它们出了 CC 即失效。各客户端普遍忽略未知字段（不报错），本禁令的目的是**可移植性**而非防报错。
+
+规范字段全集（仅 6 个）：`name`、`description`（以上必需）；`license`、`compatibility`（≤500 字符，环境要求；官方明言多数技能不需要）、`metadata`（string→string map，扩展点）、`allowed-tools`（Experimental，慎用）。注意：**`compatibility` 是规范字段，不在禁止之列**（2026-09-23 修正，旧版规则曾误禁）。
+
+**规则 B3a（推荐字段，2026-08-29 补充；2026-09-23 按规范修订）**：除 `name`/`description` 必填外，推荐声明以下字段：
 ```yaml
-version: 1.0.0            # 语义化版本，便于追踪技能变更
-whenToUse: ...            # 可选：额外路由引导（DSH 支持该字段）
 metadata:
-  requires:
-    bins: ["<工具名>"]    # 外部依赖声明，工具名与安装方式见 ENVIRONMENT.md
+  version: "1.0"          # 语义化版本，便于追踪技能变更（规范钦点放 metadata 子键；
+                          #   顶层 version 是非规范字段，各端忽略）
+  requires-bins: "dot, mmdc"   # 外部依赖声明（字符串值；metadata 规定 string→string，
+                          #   数组形式仅自家工具链可读）。工具名与安装方式见 ENVIRONMENT.md
 ```
-引入新外部工具时**必须**登记到 `ENVIRONMENT.md` 依赖登记表并在此声明。
+- **触发信息一律写进 `description`**（跨端最大兼容）。顶层 `whenToUse`（驼峰）CC/dsh 之外均不识别，CC 的对应字段是下划线 `when_to_use`——确需分离时仅对 dsh/CC 双写，否则废弃驼峰拼写。
+- 引入新外部工具时**必须**登记到 `ENVIRONMENT.md` 依赖登记表并在此声明。
 
 ### 2.2 触发词设计（防冲突）
 
@@ -88,11 +103,18 @@ grep -l "<你的触发词>" ~/projects/dc-skills/*/SKILL.md
 
 **规则 B7**：SKILL.md 主文档**应** ≤ 400 行。超过 400 行时**必须**将参考内容拆到 `references/` 子目录。曾发现某兜底 SKILL 主文档 911 行——已拆分为短主文档 + `references/` 子文档。
 
+口径说明（2026-09-23 对齐 agentskills.io）：官方建议 SKILL.md < 500 行、正文 < 5000 tokens（progressive disclosure：元数据启动即载 → 正文激活时载 → 资源按需）。400 行门禁作为**更严的内部标准**保留，行数只是 token 数的 proxy。
+
 **规则 B7a（行数门禁，2026-08-22 补充）**：提交前必须跑以下检查，任何 SKILL.md 超 400 行即阻塞提交：
 ```bash
 cd ~/projects/dc-skills && find . -name SKILL.md -not -path "*/node_modules/*" -not -path "*/.venv/*" -not -path "./archive/*" -not -path "./.git/*" \
   | xargs wc -l | awk '$1 > 400 && $2 != "total" {print "❌ 超限:", $2, "("$1"行)"; bad=1} END {if (!bad) print "✅ 全部 ≤400 行"}'
 ```
+
+**规则 B9（规范校验与触发评估，2026-09-23 补充）**：
+- 命名冲突零容忍：`name` 必须全仓库唯一——Codex 同名不合并（两个都出现在选择器），Grok 按 name 去重（用户级覆盖 bundled）。新增 SKILL 前跑 `ls ~/projects/dc-skills/ | grep <name>`。
+- Codex 扫 `.agents/skills`（CWD 逐级到 repo 根）且支持 symlink——skills-sync 软链接农场对 Codex 天然可用；每个 skill 的 name 唯一性即兼容性保障。
+- 重要技能（base + 高频 on_demand）在 `evals/` 维护约 20 条 should/shouldn't-trigger 评估问句（官方 optimizing-descriptions 方法论）；有官方校验器 `skills-ref validate`（github.com/agentskills/agentskills）时进 CI，替代等价自研校验。
 
 **规则 B8**：SKILL.md 顶部**应**包含：能力概述、触发场景、依赖说明、快速用法。详细语法/模板/示例放 `references/`。
 

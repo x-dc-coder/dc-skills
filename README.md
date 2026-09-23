@@ -61,7 +61,7 @@
 
 ## 技能农场：全机唯一物理目录 + 各 Agent 软链接
 
-主库是全机唯一物理技能目录（git 仓库，gitcode + github 双远端）。每个 Agent 只通过自己技能目录里的软链接看到启用技能；未登记的技能对任何 Agent 不可见。唯一事实源为根目录 `agent-map.yaml`，由 `scripts/skills-sync` 物化：
+主库是全机唯一物理技能目录（git 仓库，远端为 GitHub）。每个 Agent 只通过自己技能目录里的软链接看到启用技能；未登记的技能对任何 Agent 不可见。唯一事实源为根目录 `agent-map.yaml`，由 `scripts/skills-sync` 物化：
 
 | Agent | 农场目录 | 默认技能 |
 |-------|---------|---------|
@@ -79,6 +79,9 @@ uv run python scripts/skills-sync --check  # 只检查漂移，不修改
 
 - 安装器着陆区 `~/.agents/skills/`（通用技能安装器默认目标）出现新技能时：`mv` 进主库 → 在 `agent-map.yaml` 登记 → 跑 skills-sync。
 - 各 App 自带技能不收编主库：`~/.grok/bundled/skills/`、`~/.codex/skills/.system/` 与各插件市场缓存由 App 自行管理更新；同名用户技能会覆盖 App 本体，收编等于制造随 App 更新而过期的分叉。
+- 全机技能台账与自注册监控：`uv run python scripts/skillctl inventory`（主库 vs App 自管根、重名与着陆区漂移）。
+
+> 完整管理架构（各 Agent 自注册机制、dsh 发现优先级、管理规约 P1–P7、风险台账）见 **[SKILL-MANAGEMENT.md](SKILL-MANAGEMENT.md)**。
 
 ## 三类环境策略
 

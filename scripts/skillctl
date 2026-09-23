@@ -432,6 +432,92 @@ def cmd_restore(args):
     print(f"✅ 技能 [{skill_name}] 已成功秒级原样回滚就绪！\n")
 
 
+# App 自管技能根（各 Agent CLI 自行安装/更新的技能，不在主库管理范围）。
+# 依据 2026-09-23 全机调研结论，详见 SKILL-MANAGEMENT.md。
+APP_OWNED_ROOTS = [
+    ("~/.grok/bundled/skills", "Grok CLI 自带（随 App 更新）"),
+    ("~/.codex/skills/.system", "Codex 自带（随 CLI 更新）"),
+    ("~/.codex/plugins/cache", "Codex 插件市场（codex plugin add）"),
+    ("~/.claude/plugins/cache", "Claude Code 插件市场（claude plugin install）"),
+    ("~/.agents/skills", "社区 skills CLI 着陆区（orca skills install 等，约定保持为空）"),
+]
+
+
+def _list_skill_dirs(root: Path) -> list[str]:
+    """列出根目录下含 SKILL.md 的技能名。"""
+    if not root.is_dir():
+        return []
+    return [e.name for e in sorted(root.iterdir())
+            if e.is_dir() and (e / "SKILL.md").exists()]
+
+
+def cmd_inventory(args):
+    """全机技能清单：主库 vs App 自管根，标记自注册漂移与重名冲突。"""
+    print("\n🗺️  全机技能清单（master + App 自管根）")
+    print("=" * 64)
+
+    master = _list_skill_dirs(SKILLS_ROOT)
+    print(f"\n【主库】{SKILLS_ROOT}  （{len(master)} 个技能）")
+
+    app_skills: dict[str, list[str]] = {}
+    for raw, desc in APP_OWNED_ROOTS:
+        root = Path(os.path.expanduser(raw))
+        if "plugins/cache" in raw:
+            # 插件缓存：递归收集 skills/ 下的 SKILL.md
+            names = ([str(p.parent.relative_to(root)) for p in sorted(root.rglob("SKILL.md"))]
+                     if root.is_dir() else [])
+        else:
+            names = _list_skill_dirs(root)
+        app_skills[raw] = names
+        status = "✅ 空" if not names else f"⚠️ {len(names)} 个"
+        print(f"  {raw:<28} {status:<10} {desc}")
+        if 0 < len(names) <= 12:
+            print(f"      {', '.join(names)}")
+
+    # 检查 1：着陆区必须为空（社区 skills CLI 的落地约定是 mv 进主库并登记）
+    landing = app_skills.get("~/.agents/skills", [])
+    if landing:
+        print(f"\n🚨 着陆区 ~/.agents/skills 非空（{len(landing)} 个）：")
+        print("   按 agent-map.yaml 约定应 mv 进主库并登记，再跑 skills-sync。")
+        print("   Grok 已 ignore 该路径，但 dsh(rank 500)/Codex 仍会扫描到——有重名覆盖风险。")
+
+    # 检查 2：App 自管根与主库重名（同名按各 Agent 优先级裁决，非均等暴露）
+    collisions = []
+    for raw, names in app_skills.items():
+        if raw == "~/.agents/skills":
+            continue
+        for n in names:
+            if n.rsplit("/", 1)[-1] in master:
+                collisions.append((raw, n.rsplit("/", 1)[-1]))
+    if collisions:
+        print("\n⚠️ 重名技能（主库 vs App 自管根，按各 Agent 优先级裁决）：")
+        for raw, n in collisions:
+            print(f"   - {n}  （主库 vs {raw}）")
+    else:
+        print("\n✅ 主库与 App 自管根无重名。")
+
+    # 检查 3：主库技能登记完整性（agent-map.yaml 为唯一事实源）
+    try:
+        import yaml
+        m = yaml.safe_load((SKILLS_ROOT / "agent-map.yaml").read_text(encoding="utf-8"))
+        registered = set(m.get("base") or []) | set(m.get("on_demand") or [])
+        for cfg in (m.get("agents") or {}).values():
+            registered |= set(cfg.get("extra") or [])
+            for preset in (cfg.get("presets") or {}).values():
+                registered |= set(preset.get("skills") or [])
+        unregistered = [s for s in master if s not in registered]
+        if unregistered:
+            print(f"\n⚠️ 主库中未登记技能（对任何 Agent 不可见）: {', '.join(unregistered)}")
+        else:
+            print("✅ 主库技能全部已在 agent-map.yaml 登记。")
+        missing = sorted(s for s in registered if not (SKILLS_ROOT / s).is_dir())
+        if missing:
+            print(f"⚠️ agent-map 登记但主库缺失: {', '.join(missing)}")
+    except Exception as e:  # noqa: BLE001
+        print(f"\n（agent-map.yaml 登记检查跳过: {e}）")
+
+    print("=" * 64 + "\n")
+
 # ── CLI 入口 ─────────────────────────────────────────────────────────────
 
 def main():
@@ -443,6 +529,9 @@ def main():
 
     # lint
     subparsers.add_parser("lint", help="技能契约校验、死链扫描与规范体检")
+
+    # inventory
+    subparsers.add_parser("inventory", help="全机技能清单：主库 vs App 自管根，标记自注册漂移")
 
     # inspect
     p_inspect = subparsers.add_parser("inspect", help="查看单个技能详情与依赖拓扑")
@@ -469,6 +558,8 @@ def main():
 
     if args.command == "lint":
         cmd_lint(args)
+    elif args.command == "inventory":
+        cmd_inventory(args)
     elif args.command == "inspect":
         cmd_inspect(args)
     elif args.command == "sweep-links":
