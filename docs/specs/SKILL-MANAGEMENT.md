@@ -118,6 +118,7 @@ uv run python scripts/skillctl inventory     # 全机清单：主库 vs App 自�
 | docs 文档处理 | officecli | word-extractor |
 | lark 飞书协作 | lark-cli | —（28 域已内聚） |
 | dshplugin DSH 插件 | dsh-plugin-troubleshooting | dsh-ui-optimization |
+| meta 仓库元工作 | dc-skill-creator | —（技能创建/校验工具） |
 
 **加载模式语义**：
 
@@ -134,6 +135,10 @@ uv run python scripts/skillctl inventory     # 全机清单：主库 vs App 自�
 - 成员 description 变更后重跑 family-apply 刷新 openai.yaml 短描述；
 - 个别成员要提回 auto：`families.<族>.members: {name: auto}` 映射形式覆写。
 - 注意：manual 成员在 dsh 预设作用域内同样不进模型 catalog（预设无法覆写 frontmatter 级 load-mode）——预设内按需显式调用，属已知取舍。
+
+**可选声明层 `.agent-plugin/`（2026-09-24 W3）**：`scripts/plugin-catalog.py` 从 agent-map 生成 `.agent-plugin/marketplace.json`（11 个 `dc-<族群>` 插件，skill-bundle 模式指向平铺技能目录），`.claude-plugin/` 为指向它的兼容软链（Codex/Grok 当前只认该名）。本机五农场**不走插件安装**（那会复制文件进 App 缓存，破坏 P3 唯一物理副本）；声明层仅用于原生 `/plugins` 浏览器发现与外发。验证方式：`grok plugin marketplace add ~/projects/dc-skills`（add 成功即 manifest 被接受；本机验证后已 remove）。改族群后重跑 `plugin-catalog.py --apply`，CI 用 `--check`。
+
+**全资产自检（2026-09-24 W3）**：`registry.yaml`（断言式登记：模型渠道可检字段/MCP 期望矩阵/CLI/App 根基线/本地服务；不复制 MODELS.md、ENVIRONMENT.md、agent-map.yaml 的事实）+ `scripts/assets-doctor`（七组检查 a-g，退出码 0/1/2，`--json/--offline/--only/--deep`，只读、不打印密钥）。调度建议：每日 WSL cron 跑 `--check --json` 留档 + SessionStart hook 跑 `--offline`（覆盖 WSL 未运行时段）；systemd 不可用（WSL 无 systemd）。
 
 ## 5. 已知风险与缓解（按优先级）
 
@@ -152,4 +157,5 @@ uv run python scripts/skillctl inventory     # 全机清单：主库 vs App 自�
 
 - **2026-09-23**：全机聚合收编 7 技能（omo 4 + thesis-export + dsh 预设 2）；新增 codex 农场；dsh-plugin-troubleshooting 补 frontmatter；本文件建立；`skillctl inventory` 上线；thesis-agent/plugin-specialist 接入 customSkillDirs；SKILL-AUTHORING-RULES.md 对齐 agentskills.io。
 - **2026-09-24（族群化 W2）**：agent-map 新增 families 段（10 族）；base 16→32（成员全部进农场但标 manual）、on_demand 收缩为 1（dsh-plugin-troubleshooting）；9 个入口升级（description 补族级路由触发 + 正文族群路由表）；23 成员标 `metadata.load-mode: manual` + `disable-model-invocation: true` + 生成 Codex `agents/openai.yaml`；新增 `scripts/family-apply.py`（幂等标记器）；skills-sync --check 增加族群一致性校验（反向测试通过）；农场 90→168 链。存量违规顺带清理：3 个顶层 version → metadata.version、test-guardian 顶层 whenToUse 删除。
+- **2026-09-24（W3）**：新增 `dc-skill-creator` 技能（validate.py 13 规则 E/W 分级 + new_skill.py 脚手架 + check_triggers.py 预检 + 10 项测试，dogfood 自过检；替代被禁用的 Codex .system/skill-creator）；新增 `registry.yaml` + `scripts/assets-doctor`（七组检查，首跑即发现并协助修复：codex 加固事故 schema、ENVIRONMENT.md 3 处登记缺失、officecli 版本漂移、context7 路径；剩余 2 个真实 ⚠️：paper-reader 525 行、dsh 悬空 provider）；新增 `.agent-plugin/marketplace.json` 声明层（plugin-catalog.py 生成 + .claude-plugin 兼容软链，Grok add 验证通过后移除）；ENVIRONMENT.md 补 7 行 agent CLI + officecli 1.0.152；families 增 meta 族（11 族/34 技能）。
 - **2026-09-24（W1）**：`CLAUDE.md`→`AGENT.md` 改名（+两兼容软链，22 处引用修正）；OUTPUT.md 重写（C-1~C-10）并修复 `resolve_output_path`/db-skill/word-extractor/ai4scholar 的输出基准 P0 bug（6 场景实测通过）；.gitignore 补 db-output/doc-output/unified-search-output/.work；B3 增 manual 例外、B3a 增族群元数据三件套；链数修正 74→90；Codex 加固事故入风险台账；新增 P8 命名去品牌化。

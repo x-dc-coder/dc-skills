@@ -1,0 +1,132 @@
+{
+  "name": "dc-skills",
+  "description": "dc-skills 技能农场：11 族群 / 34 技能的插件市场声明层（本机走 skills-sync 软链，本文件供原生 /plugins 发现与外发）",
+  "owner": {
+    "name": "x-dc-coder"
+  },
+  "x-generated-by": "由 scripts/plugin-catalog.py 从 agent-map.yaml 生成，DO NOT EDIT；改族群请改 agent-map 后重跑 --apply",
+  "plugins": [
+    {
+      "name": "dc-agentops",
+      "description": "agentops 族群：入口 orca-cli + 3 个 manual 成员",
+      "source": ".",
+      "strict": false,
+      "skills": [
+        "./orca-cli",
+        "./orchestration",
+        "./task-hub",
+        "./computer-use"
+      ]
+    },
+    {
+      "name": "dc-coding",
+      "description": "coding 族群：入口 programming + 4 个 manual 成员",
+      "source": ".",
+      "strict": false,
+      "skills": [
+        "./programming",
+        "./debugging",
+        "./git-master",
+        "./remove-ai-slops",
+        "./test-guardian"
+      ]
+    },
+    {
+      "name": "dc-docs",
+      "description": "docs 族群：入口 officecli + 1 个 manual 成员",
+      "source": ".",
+      "strict": false,
+      "skills": [
+        "./officecli",
+        "./word-extractor"
+      ]
+    },
+    {
+      "name": "dc-drawing",
+      "description": "drawing 族群：入口 diagram + 4 个 manual 成员",
+      "source": ".",
+      "strict": false,
+      "skills": [
+        "./diagram",
+        "./drawio-xml",
+        "./design-diagram",
+        "./design-dataviz",
+        "./design-ui"
+      ]
+    },
+    {
+      "name": "dc-dshplugin",
+      "description": "dshplugin 族群：入口 dsh-plugin-troubleshooting + 1 个 manual 成员",
+      "source": ".",
+      "strict": false,
+      "skills": [
+        "./dsh-plugin-troubleshooting",
+        "./dsh-ui-optimization"
+      ]
+    },
+    {
+      "name": "dc-info",
+      "description": "info 族群：入口 unified-search + 2 个 manual 成员",
+      "source": ".",
+      "strict": false,
+      "skills": [
+        "./unified-search",
+        "./kimi-webbridge",
+        "./vision-workflow"
+      ]
+    },
+    {
+      "name": "dc-infra",
+      "description": "infra 族群：入口 db-skill + 2 个 manual 成员",
+      "source": ".",
+      "strict": false,
+      "skills": [
+        "./db-skill",
+        "./newapi-management",
+        "./wsl-windows-bridge"
+      ]
+    },
+    {
+      "name": "dc-lark",
+      "description": "lark 族群：入口 lark-cli（单体族）",
+      "source": ".",
+      "strict": false,
+      "skills": [
+        "./lark-cli"
+      ]
+    },
+    {
+      "name": "dc-meta",
+      "description": "meta 族群：入口 dc-skill-creator（单体族）",
+      "source": ".",
+      "strict": false,
+      "skills": [
+        "./dc-skill-creator"
+      ]
+    },
+    {
+      "name": "dc-repo",
+      "description": "repo 族群：入口 codegraph-explore + 1 个 manual 成员",
+      "source": ".",
+      "strict": false,
+      "skills": [
+        "./codegraph-explore",
+        "./github-workflow"
+      ]
+    },
+    {
+      "name": "dc-thesis",
+      "description": "thesis 族群：入口 thesis-writing + 5 个 manual 成员",
+      "source": ".",
+      "strict": false,
+      "skills": [
+        "./thesis-writing",
+        "./thesis-ref-check",
+        "./thesis-export",
+        "./md-to-thesis-latex",
+        "./paper-metrics",
+        "./paper-reader"
+      ]
+    }
+  ]
+}

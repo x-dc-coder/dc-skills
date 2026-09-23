@@ -18,7 +18,7 @@
 | [research/open-source-tech-matrix.md](research/open-source-tech-matrix.md) | research | 开源技术矩阵调研（四组并行） | 追溯选型依据时 | 2026-09-13 | ❌ 历史快照 |
 | [research/remaining-work-2026-09-14.md](research/remaining-work-2026-09-14.md) | research | 收尾工作清单（基于 issue 拉取） | 追溯计划时 | 2026-09-14 | ❌ 历史快照 |
 
-根级其余文件：[../README.md](../README.md)（人的入口：目录总览 + 常用命令）、[../agent-map.yaml](../agent-map.yaml)（技能启用唯一事实源，被 skills-sync/skillctl 读取，**不移动**）。
+根级其余文件：[../README.md](../README.md)（人的入口：目录总览 + 常用命令）、[../agent-map.yaml](../agent-map.yaml)（技能启用唯一事实源，被 skills-sync/skillctl 读取，**不移动**）。、[../registry.yaml](../registry.yaml)（资产健康断言登记，被 assets-doctor 消费，**不移动**）。
 
 ## 目录职责
 
