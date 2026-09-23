@@ -33,14 +33,14 @@
 
 ## 三、② 克隆仓库
 
-仓库地址：`https://github.com/x-dc-coder/CC-Skills.git`（GitHub 主仓；gitcode remote 已停用，勿用于新设备）
+仓库地址：`https://github.com/x-dc-coder/dc-skills.git`（GitHub 主仓，唯一远端）
 
 ```bash
 # Linux / WSL —— 克隆到用户级 skills 目录
-git clone https://github.com/x-dc-coder/CC-Skills.git ~/projects/dc-skills
+git clone https://github.com/x-dc-coder/dc-skills.git ~/projects/dc-skills
 
 # Windows —— 克隆到 Claude Code 读取的 skills 目录（PowerShell）
-git clone https://github.com/x-dc-coder/CC-Skills.git "$env:USERPROFILE\.claude\skills"
+git clone https://github.com/x-dc-coder/dc-skills.git "$env:USERPROFILE\.claude\skills"
 ```
 
 > **注意**：Windows 侧 `C:\Users\<你>\.claude\skills` 必须已有目录（Claude Code 会在首次运行时创建）。
