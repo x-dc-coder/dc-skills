@@ -44,6 +44,14 @@ on_demand:
   - drawio-xml          # .drawio 原生图表
   - test-guardian       # 测试工程质量规范
   - officecli           # Office 文档 CLI
+  # ---- 2026-09-23 全机聚合收编（原散落于 dsh vendor / dsh 农场 / dsh 预设，见 git log）----
+  - debugging                # omo vendor：系统化调试（oh-my-openagent 4.17.1）
+  - git-master               # omo vendor：git 进阶操作（oh-my-openagent 4.17.1）
+  - programming              # omo vendor：编程任务分流（oh-my-openagent 4.17.1）
+  - remove-ai-slops          # omo vendor：AI 味代码清除（oh-my-openagent 4.17.1）
+  - thesis-export            # 原 ~/.dsh/skills 真实目录：论文导出编排
+  - dsh-ui-optimization      # 原 plugin-specialist 预设：DSH 插件 UI 优化
+  - dsh-plugin-troubleshooting  # 原 plugin-specialist 预设：DSH 插件故障排查
 
 agents:
   claude-code:
@@ -59,7 +67,15 @@ agents:
   dsh:
     dir: ~/.dsh/skills
     skills: base
-    extra: []
+    extra:
+      # omo vendor 技能与原 dsh 真实目录技能：收编主库后保持 dsh 侧可见性不变
+      - debugging
+      - git-master
+      - programming
+      - remove-ai-slops
+      - thesis-export
+      # 预设技能在主农场保持可见（dsh-plugin-troubleshooting 仅经 preset 暴露）
+      - dsh-ui-optimization
     presets:
       # 论文族挂 thesis-agent 预设：跨项目的任务维度按需加载
       thesis-agent:
@@ -70,8 +86,20 @@ agents:
           - md-to-thesis-latex
           - paper-metrics
           - paper-reader
+          - thesis-export
+      # 插件开发预设：技能已收编主库，预设根其余资源（RULES.md/docs/scripts）不动
+      plugin-specialist:
+        dir: ~/.dsh/.agent-presets/plugin-specialist/skills
+        skills:
+          - dsh-ui-optimization
+          - dsh-plugin-troubleshooting
 
   zcode:
     dir: ~/.zcode/skills
     skills: base
     extra: []
+
+  codex:
+    dir: ~/.codex/skills
+    skills: base
+    extra: []   # 注：~/.codex/skills/.system 为 Codex 自带系统技能，skills-sync 不碰真实目录
