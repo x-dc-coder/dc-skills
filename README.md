@@ -14,6 +14,7 @@
 ├── CLAUDE.md              # 执行约束（cd ~/projects/dc-skills 再 uv run）
 ├── ENVIRONMENT.md         # 外部工具依赖登记表（12 工具 + 验证命令 + 声明模板）
 ├── OUTPUT.md              # 输出目录兜底规范（两级回退，唯一事实源）
+├── MODELS.md              # Grok 模型渠道、协议、窗口、思考档位与套餐到期
 ├── SKILL-AUTHORING-RULES.md # SKILL 开发与修改规则
 ├── pyproject.toml / uv.lock / .venv/   # 统一依赖与虚拟环境（轻量 skill 共享）
 │
