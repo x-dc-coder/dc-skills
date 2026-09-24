@@ -3,7 +3,7 @@ name: design-diagram
 description: >
   Artifact 内联 SVG 图表绘制规范：架构图、流程图、机制图、状态图、对比图，展示真实机制且在明暗主题下都清晰可读。当一张图能让冷读者直观看到机制（数据流向、组件交互、选项差异、状态流转）而非靠文字拼凑时使用；覆盖何时值得画图、画什么/省略什么，以及内联 SVG 技巧（viewBox 缩放、currentColor 主题、箭头 marker、文本尺寸、网格对齐、图注、自包含）。触发：draw a diagram/架构图/机制图/画个图/inline SVG diagram。
 metadata:
-  family: drawing
+  family: frontend
   role: member
   load-mode: manual
 disable-model-invocation: true

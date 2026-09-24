@@ -128,43 +128,47 @@ agents:
     skills: base
     extra: []   # 注：~/.codex/skills/.system 为 Codex 自带系统技能，skills-sync 不碰真实目录
 
-# ── 族群（2026-09-24 族群化；token 优化：模型启动清单只剩 9 个 entry）─────────
-# entry   = 族群入口，load: auto，进模型启动清单；正文含族内路由表，触发后按需读成员
+# ── 族群（2026-09-24 重分类；2026-09-24 族群化）─────────────────────────
+# 原则（用户 2026-09-24 定调）：不硬凑——不相关的技能宁可单体族；同源/同工作流的聚为族。
+# entry   = 族群入口，load: auto，进模型启动清单；正文含族内路由表
 # members = 族内技能，默认 load: manual——不进启动清单（SKILL.md 标 metadata.load-mode:
 #           manual + disable-model-invocation: true；Codex 侧生成 agents/openai.yaml 的
 #           policy.allow_implicit_invocation: false），经 /name 或 $name 显式触发
 # 成员覆写：members: {name: auto} 可把个别成员提回 auto（映射形式）；列表形式全 manual
 families:
-  drawing:
-    entry: diagram
-    members: [drawio-xml, design-diagram, design-dataviz, design-ui]
-  thesis:
+  thesis:            # 学术论文：写作→检查→导出/排版全流程
     entry: thesis-writing
     members: [thesis-ref-check, thesis-export, md-to-thesis-latex, paper-metrics, paper-reader]
-  coding:
-    entry: programming
-    members: [debugging, git-master, remove-ai-slops, test-guardian]
-  agentops:
+  drawing:           # 图表生成：软件工程图表（drawio-xml 为可编辑格式补充）
+    entry: diagram
+    members: [drawio-xml]
+  frontend:          # 前端设计：2026-08-29 同批创建的设计规范三件套（页面/内联 SVG/数据可视化）
+    entry: design-ui
+    members: [design-diagram, design-dataviz]
+  software:          # 软件工程：omo 4 技能为核心（debugging/git-master/programming/remove-ai-slops，
+    entry: programming   # oh-my-openagent 4.17.1 vendored）+ test-guardian + repo 工程并入
+    members: [debugging, git-master, remove-ai-slops, test-guardian, github-workflow, codegraph-explore]
+  agentops:          # Agent 运维：Orca 编排 + 任务中心 + GUI + 本机 NewAPI 网关
     entry: orca-cli
-    members: [orchestration, task-hub, computer-use]
-  info:
+    members: [orchestration, task-hub, computer-use, newapi-management]
+  info:              # 信息与视觉：搜索/真实浏览器/图像理解
     entry: unified-search
     members: [kimi-webbridge, vision-workflow]
-  infra:
-    entry: db-skill
-    members: [newapi-management, wsl-windows-bridge]
-  repo:
-    entry: codegraph-explore
-    members: [github-workflow]
-  docs:
+  docs:              # 办公文档：Office 创建/分析 + docx 提取
     entry: officecli
     members: [word-extractor]
-  lark:
+  db:                # 数据库（单体族，不硬凑）
+    entry: db-skill
+    members: []
+  bridge:            # WSL→Windows 跨边界框架（单体族；被多族复用的基础框架）
+    entry: wsl-windows-bridge
+    members: []
+  lark:              # 飞书协作（单体族，28 域已内聚）
     entry: lark-cli
     members: []
-  dshplugin:
-    entry: dsh-plugin-troubleshooting   # on_demand + plugin-specialist 预设作用域
+  dshplugin:         # DSH 插件：排查 + UI 优化（plugin-specialist 预设作用域）
+    entry: dsh-plugin-troubleshooting
     members: [dsh-ui-optimization]
-  meta:
-    entry: dc-skill-creator   # 仓库元工作：技能创建/校验（dc-skill-creator）
+  meta:              # 仓库元工作：本仓库技能创建/校验（单体族）
+    entry: dc-skill-creator
     members: []

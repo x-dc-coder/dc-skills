@@ -104,20 +104,22 @@ uv run python scripts/skillctl inventory     # 全机清单：主库 vs App 自�
 
 **问题**：33 个技能全量进模型启动清单 ≈ 9,700 字符（Codex 预算 8,000 字符会整体省略技能并告警；CC listing 预算约上下文 1%）。**方案**：技能按族群组织，只有入口进清单，成员按需显式加载。
 
-**10 个族群**（`agent-map.yaml` `families:` 段为唯一事实源）：
+**12 个族群**（`agent-map.yaml` `families:` 段为唯一事实源；2026-09-24 按用户定调重分类：**不硬凑**——不相关的宁可单体族；同源/同工作流的聚族）：
 
 | 族群 | 入口（auto） | 成员（manual） |
 |---|---|---|
-| drawing 绘图设计 | diagram | drawio-xml、design-diagram、design-dataviz、design-ui |
-| thesis 论文 | thesis-writing | thesis-ref-check、thesis-export、md-to-thesis-latex、paper-metrics、paper-reader |
-| coding 编程质量 | programming | debugging、git-master、remove-ai-slops、test-guardian |
-| agentops Agent 运维 | orca-cli | orchestration、task-hub、computer-use |
-| info 信息获取 | unified-search | kimi-webbridge、vision-workflow |
-| infra 基础设施运维 | db-skill | newapi-management、wsl-windows-bridge |
-| repo 仓库工程 | codegraph-explore | github-workflow |
-| docs 文档处理 | officecli | word-extractor |
-| lark 飞书协作 | lark-cli | —（28 域已内聚） |
+| thesis 学术论文 | thesis-writing | thesis-ref-check、thesis-export、md-to-thesis-latex、paper-metrics、paper-reader |
+| drawing 图表生成 | diagram | drawio-xml |
+| frontend 前端设计 | design-ui | design-diagram、design-dataviz（2026-08-29 同批创建设计规范三件套） |
+| software 软件工程 | programming | debugging、git-master、remove-ai-slops（omo 4.17.1 vendored 核心）、test-guardian、github-workflow、codegraph-explore |
+| agentops Agent 运维 | orca-cli | orchestration、task-hub、computer-use、newapi-management（本机 NewAPI 网关） |
+| info 信息与视觉 | unified-search | kimi-webbridge、vision-workflow |
+| docs 办公文档 | officecli | word-extractor |
+| db 数据库（单体） | db-skill | — |
+| bridge 跨边界框架（单体） | wsl-windows-bridge | — |
+| lark 飞书协作（单体） | lark-cli | —（28 域已内聚） |
 | dshplugin DSH 插件 | dsh-plugin-troubleshooting | dsh-ui-optimization |
+| meta 仓库元工作（单体） | dc-skill-creator | — |
 | meta 仓库元工作 | dc-skill-creator | —（技能创建/校验工具） |
 
 **加载模式语义**：
@@ -178,6 +180,7 @@ hooks = [{ type = "command", command = "cd ~/projects/dc-skills && out=$(/home/d
 
 - **2026-09-23**：全机聚合收编 7 技能（omo 4 + thesis-export + dsh 预设 2）；新增 codex 农场；dsh-plugin-troubleshooting 补 frontmatter；本文件建立；`skillctl inventory` 上线；thesis-agent/plugin-specialist 接入 customSkillDirs；SKILL-AUTHORING-RULES.md 对齐 agentskills.io。
 - **2026-09-24（族群化 W2）**：agent-map 新增 families 段（10 族）；base 16→32（成员全部进农场但标 manual）、on_demand 收缩为 1（dsh-plugin-troubleshooting）；9 个入口升级（description 补族级路由触发 + 正文族群路由表）；23 成员标 `metadata.load-mode: manual` + `disable-model-invocation: true` + 生成 Codex `agents/openai.yaml`；新增 `scripts/family-apply.py`（幂等标记器）；skills-sync --check 增加族群一致性校验（反向测试通过）；农场 90→168 链。存量违规顺带清理：3 个顶层 version → metadata.version、test-guardian 顶层 whenToUse 删除。
+- **2026-09-24（重分类）**：按用户定调重划为 12 族（不硬凑，单体族合法）：拆 drawing（design-* 出走去 frontend 新族，design-ui 升入口）、并 repo 入 software（coding 更名 software，github-workflow/codegraph-explore 转入）、newapi-management 移入 agentops、infra 拆为 db + bridge 两个单体族；同步翻转 3 个角色（design-ui/wsl-windows-bridge member→entry，codegraph-explore entry→member）、更新 4 个入口路由表；修复 family-apply 写入吃换行 bug（13 个 SKILL.md 曾 `---#` 粘连，严格 frontmatter 解析器会丢元数据）并给 validate.py 加粘连检测。
 - **2026-09-24（W3 收尾）**：paper-reader SKILL.md 525→378 行（拆 4 个 references/：state-file/textlayer-probe/summary-template/merge-algorithm，内容无损校验通过）；dc-skill-creator/validate.py 修 3 类误报（dmi 双报/B 类 venvs/PIL 等 import 别名与本地模块）+ 全仓回归扫描揪出 7 个存量违规并修复（4 技能补 scripts/__init__.py、3 技能 description 尖括号改花括号、debugging ≥3）；assets-doctor 修 dsh provider 对账口径（agentrouter/deepseek-official 是 cordis 路由级 provider，非悬空——误报，架构说明写入 registry.yaml）；doctor 达 🚨0/⚠️0/✅27；调度命令定稿入本文。
 - **2026-09-24（W3）**：新增 `dc-skill-creator` 技能（validate.py 13 规则 E/W 分级 + new_skill.py 脚手架 + check_triggers.py 预检 + 10 项测试，dogfood 自过检；替代被禁用的 Codex .system/skill-creator）；新增 `registry.yaml` + `scripts/assets-doctor`（七组检查，首跑即发现并协助修复：codex 加固事故 schema、ENVIRONMENT.md 3 处登记缺失、officecli 版本漂移、context7 路径；剩余 2 个真实 ⚠️：paper-reader 525 行、dsh 悬空 provider）；新增 `.agent-plugin/marketplace.json` 声明层（plugin-catalog.py 生成 + .claude-plugin 兼容软链，Grok add 验证通过后移除）；ENVIRONMENT.md 补 7 行 agent CLI + officecli 1.0.152；families 增 meta 族（11 族/34 技能）。
 - **2026-09-24（W1）**：`CLAUDE.md`→`AGENT.md` 改名（+两兼容软链，22 处引用修正）；OUTPUT.md 重写（C-1~C-10）并修复 `resolve_output_path`/db-skill/word-extractor/ai4scholar 的输出基准 P0 bug（6 场景实测通过）；.gitignore 补 db-output/doc-output/unified-search-output/.work；B3 增 manual 例外、B3a 增族群元数据三件套；链数修正 74→90；Codex 加固事故入风险台账；新增 P8 命名去品牌化。

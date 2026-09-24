@@ -3,7 +3,7 @@ name: db-skill
 description: High-performance MySQL and PostgreSQL operations for project-local databases with global skill reuse. Use when Codex must run MySQL/PostgreSQL CRUD (insert/update/delete/select), load connection settings from a project config file, enforce bounded result sizes, emit JSON, and use jq plus temp files to avoid context bloat.
   本机服务运维（NewAPI 网关）与 WSL→Windows 跨边界调用同属 infra 族，由本技能路由。
 metadata:
-  family: infra
+  family: db
   role: entry
   load-mode: auto
 ---

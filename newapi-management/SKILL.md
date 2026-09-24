@@ -6,7 +6,7 @@ description: >
   系统提示词注入、参数/请求头覆写、上游模型同步）、或排查某次对话/会话问题需要拿 NewAPI 日志分析时使用。
   客户端已内置 fork 版本字段类型铁律，调用者只需提供平铺的渠道配置 dict。
 metadata:
-  family: infra
+  family: agentops
   role: member
   load-mode: manual
   version: 1.0.0

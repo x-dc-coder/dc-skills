@@ -8,27 +8,33 @@
   "plugins": [
     {
       "name": "dc-agentops",
-      "description": "agentops 族群：入口 orca-cli + 3 个 manual 成员",
+      "description": "agentops 族群：入口 orca-cli + 4 个 manual 成员",
       "source": ".",
       "strict": false,
       "skills": [
         "./orca-cli",
         "./orchestration",
         "./task-hub",
-        "./computer-use"
+        "./computer-use",
+        "./newapi-management"
       ]
     },
     {
-      "name": "dc-coding",
-      "description": "coding 族群：入口 programming + 4 个 manual 成员",
+      "name": "dc-bridge",
+      "description": "bridge 族群：入口 wsl-windows-bridge（单体族）",
       "source": ".",
       "strict": false,
       "skills": [
-        "./programming",
-        "./debugging",
-        "./git-master",
-        "./remove-ai-slops",
-        "./test-guardian"
+        "./wsl-windows-bridge"
+      ]
+    },
+    {
+      "name": "dc-db",
+      "description": "db 族群：入口 db-skill（单体族）",
+      "source": ".",
+      "strict": false,
+      "skills": [
+        "./db-skill"
       ]
     },
     {
@@ -43,15 +49,12 @@
     },
     {
       "name": "dc-drawing",
-      "description": "drawing 族群：入口 diagram + 4 个 manual 成员",
+      "description": "drawing 族群：入口 diagram + 1 个 manual 成员",
       "source": ".",
       "strict": false,
       "skills": [
         "./diagram",
-        "./drawio-xml",
-        "./design-diagram",
-        "./design-dataviz",
-        "./design-ui"
+        "./drawio-xml"
       ]
     },
     {
@@ -65,6 +68,17 @@
       ]
     },
     {
+      "name": "dc-frontend",
+      "description": "frontend 族群：入口 design-ui + 2 个 manual 成员",
+      "source": ".",
+      "strict": false,
+      "skills": [
+        "./design-ui",
+        "./design-diagram",
+        "./design-dataviz"
+      ]
+    },
+    {
       "name": "dc-info",
       "description": "info 族群：入口 unified-search + 2 个 manual 成员",
       "source": ".",
@@ -73,17 +87,6 @@
         "./unified-search",
         "./kimi-webbridge",
         "./vision-workflow"
-      ]
-    },
-    {
-      "name": "dc-infra",
-      "description": "infra 族群：入口 db-skill + 2 个 manual 成员",
-      "source": ".",
-      "strict": false,
-      "skills": [
-        "./db-skill",
-        "./newapi-management",
-        "./wsl-windows-bridge"
       ]
     },
     {
@@ -105,13 +108,18 @@
       ]
     },
     {
-      "name": "dc-repo",
-      "description": "repo 族群：入口 codegraph-explore + 1 个 manual 成员",
+      "name": "dc-software",
+      "description": "software 族群：入口 programming + 6 个 manual 成员",
       "source": ".",
       "strict": false,
       "skills": [
-        "./codegraph-explore",
-        "./github-workflow"
+        "./programming",
+        "./debugging",
+        "./git-master",
+        "./remove-ai-slops",
+        "./test-guardian",
+        "./github-workflow",
+        "./codegraph-explore"
       ]
     },
     {

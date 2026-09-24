@@ -3,7 +3,7 @@ name: design-dataviz
 description: >
   数据可视化设计系统：如何构建正确、可访问、优雅的图表/图形/仪表盘/统计卡片，适用于任何输出媒介（HTML artifact、内联 SVG、matplotlib/plotly/d3/Recharts 绘图代码、PNG 等）。在写图表代码、选色、构建 stat tile / dashboard / KPI 行之前先读本技能；提供设计系统无关的方法（表单启发、颜色公式与验证器、标记规范、交互规则）。触发：chart/graph/plot/data viz/可视化/图表/仪表盘/配色。
 metadata:
-  family: drawing
+  family: frontend
   role: member
   load-mode: manual
 disable-model-invocation: true

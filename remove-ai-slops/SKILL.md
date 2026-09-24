@@ -2,7 +2,7 @@
 name: remove-ai-slops
 description: "Remove AI-generated code smells (slop) from branch changes or an explicit file list. Locks behavior with regression tests FIRST, then runs categorized cleanup via parallel subagents in batches of 5, then verifies with quality gates. Covers 10 slop categories: performance equivalences, excessive complexity (object annotations, if/elif chains), oversized modules (250+ pure LOC). MUST USE when asked to remove slop / clean AI code / deslop / strip slop from recent changes."
 metadata:
-  family: coding
+  family: software
   role: member
   load-mode: manual
 disable-model-invocation: true

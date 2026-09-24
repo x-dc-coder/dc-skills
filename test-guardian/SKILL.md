@@ -6,7 +6,7 @@ description: >
   触发场景：测试有效性审计 / 假绿 / fake green / 测试质量 / 可证伪 / 测试分层规范 / 测试重构迁移 / 双Agent测试分离。
   注意：用具体语言编写新业务代码与常规 TDD 纪律归 programming 技能；本技能专注测试有效性审计、防假绿与工程门禁。
 metadata:
-  family: coding
+  family: software
   role: member
   load-mode: manual
   version: 1.0.0

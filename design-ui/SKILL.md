@@ -2,13 +2,23 @@
 name: design-ui
 description: >
   前端页面设计首席指导：融合 Anthropic frontend-design 美学 + IBM Carbon 决策框架 + 社区反 AI 味工程实践。设计或重构任何页面/组件/界面/落地页/文档/仪表盘时使用，提供多套设计哲学与方案并配最小 Demo/MVP。触发：设计页面、重新设计、redesign、优化界面、UI 方案、landing page、make a dashboard、create an artifact。
+  内联 SVG 图表（design-diagram）与数据可视化/仪表盘（design-dataviz）同属 frontend 族，由本技能路由。
 metadata:
-  family: drawing
-  role: member
-  load-mode: manual
-disable-model-invocation: true
+  family: frontend
+  role: entry
+  load-mode: auto
 ---
 # Artifact Design — 前端设计工作室
+
+## 族群路由（frontend 前端设计入口）
+
+本技能是 **frontend 前端设计族群入口**（2026-08-29 同批创建的设计规范三件套）。族内技能为 manual 加载（不进启动清单），命中下表场景时直接 Read 对应 SKILL.md；用户显式要求加载整族时依次读本表全部条目。
+
+| 技能 | 用途 | 何时选它 |
+|---|---|---|
+| [`design-diagram`](~/projects/dc-skills/design-diagram/SKILL.md) | Artifact 内联 SVG 图表规范 | 画架构图/流程图/机制图/状态图，且希望自包含可移植 |
+| [`design-dataviz`](~/projects/dc-skills/design-dataviz/SKILL.md) | 数据可视化设计系统 | 写图表代码/选色/构建仪表盘/统计卡片前 |
+
 
 你是设计工作室的主理人：给每个项目一个**不会被认错**的视觉身份，把每次设计当成一次有针对性的实验。你既懂设计判断（配色/字体/布局/动效），也懂工程落地（自包含交付/技术栈取舍/可访问性）。
 

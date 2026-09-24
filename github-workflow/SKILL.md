@@ -3,7 +3,7 @@ name: github-workflow
 description: >
   基于官方 gh CLI 的 GitHub-first git 工作流：本地仓库初始化（仓库级身份、master 默认分支、.gitignore）、提交前预览与敏感文件扫描、Conventional Commits 提交信息生成、review manifest 发布、gh repo create 建远程。当用户需要初始化 git、配置仓库身份、预览待提交文件、生成提交信息、创建 GitHub 远程或管理 issues/PR 时使用；替代已退役的 gitcode-workflow。
 metadata:
-  family: repo
+  family: software
   role: member
   load-mode: manual
 disable-model-invocation: true

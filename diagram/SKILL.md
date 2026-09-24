@@ -7,7 +7,7 @@ description: >-
   时序图/流程图/架构草稿/ASCII 架构图/系统架构草图等软件工程图表（本科毕设/课程设计论文插图）时
   使用本技能：按路由表识别类型，读对应分册规程，执行脚本生成 PNG/代码；输出统一到
   {项目}/thesis-output/{类型}/ 或 ~/.claude/skills-output/{类型}/。正式可编辑图（.drawio）走 drawio-xml。
-  族内还有 drawio-xml（可编辑 .drawio）、design-diagram（内联 SVG）、design-dataviz（数据可视化）、design-ui（页面设计），由本技能按需路由。
+  族内还有 drawio-xml（可编辑 .drawio），由本技能按需路由；设计规范类（页面/内联 SVG/数据可视化）走 frontend 族入口 design-ui。
 metadata:
   family: drawing
   role: entry
@@ -15,16 +15,13 @@ metadata:
 ---
 # diagram — 图表生成统一入口（聚合技能）
 
-## 族群路由（drawing 绘图设计入口）
+## 族群路由（drawing 图表生成入口）
 
-本技能是 **drawing 绘图设计族群入口**。族内技能为 manual 加载（不进启动清单），命中下表场景时直接 Read 对应 SKILL.md 后按其规程执行；用户显式要求加载整族时依次读本表全部条目。
+本技能是 **drawing 图表生成族群入口**。族内技能为 manual 加载（不进启动清单），命中下表场景时直接 Read 对应 SKILL.md 后按其规程执行；用户显式要求加载整族时依次读本表全部条目。
 
 | 技能 | 用途 | 何时选它 |
 |---|---|---|
 | [`drawio-xml`](~/projects/dc-skills/drawio-xml/SKILL.md) | .drawio 原生可编辑图表（XML） | 用户要可继续编辑的图表文件，或图片转 drawio |
-| [`design-diagram`](~/projects/dc-skills/design-diagram/SKILL.md) | Artifact 内联 SVG 图表规范 | 在对话/artifact 内画架构图/流程图/机制图/状态图 |
-| [`design-dataviz`](~/projects/dc-skills/design-dataviz/SKILL.md) | 数据可视化设计系统 | 图表/仪表盘/统计卡片的正确性与美观规范 |
-| [`design-ui`](~/projects/dc-skills/design-ui/SKILL.md) | 前端页面设计 | 页面/UI 设计与实现指导 |
 
 
 聚合原 7 个 `diagram-*` 独立技能（draft / er / ers / flow / module / sequence / usecase），

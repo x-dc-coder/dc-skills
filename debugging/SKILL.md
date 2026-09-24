@@ -2,7 +2,7 @@
 name: debugging
 description: "MUST USE for any real runtime debugging across ANY language or binary — crashes, silent failures, wrong responses, stuck processes, memory leaks, async misbehavior, unexplained timing, reverse engineering. Hypothesis-driven loop: ≥3 hypotheses, parallel investigation, after 2 failed rounds spawn parallel subagents from orthogonal angles via tools.subagent, confirm root cause, lock with a failing test, fix minimally, QA by USING the system. The HOW lives in references/ — READ THEM."
 metadata:
-  family: coding
+  family: software
   role: member
   load-mode: manual
 disable-model-invocation: true

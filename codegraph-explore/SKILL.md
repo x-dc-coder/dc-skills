@@ -4,9 +4,10 @@ description: >
   用 CodeGraph 做代码库符号检索、调用链追踪和变更影响分析。理解大仓代码、定位定义或调用者、评估重构影响、选择测试时使用；一次返回相关源码与调用路径。小仓、配置和 Markdown 仍用 grep/read。
   git/GitHub 工作流（github-workflow）同属 repo 族，由本技能路由。
 metadata:
-  family: repo
-  role: entry
-  load-mode: auto
+  family: software
+  role: member
+  load-mode: manual
+disable-model-invocation: true
 ---
 # codegraph-explore — 符号级代码检索与影响面分析
 
@@ -26,7 +27,6 @@ metadata:
 实测教训：Vision-MCP `find` 出 1.7 万文件，排除虚拟环境后**真实源码只有 17 个**。）
 
 ---
-
 ## 1. 怎么调（DSH 侧的关键差异）
 
 工具只有 **1 个**：`mcp__codegraph__codegraph_explore`（v1.6.0 已把旧版 8 个工具合并）。
