@@ -112,7 +112,12 @@ def check(skill_dir: Path) -> list[dict]:
     txt = skill_md.read_text(encoding="utf-8", errors="replace")
     fm_text, body = split_frontmatter(txt)
     if not fm_text:
-        bad("B1", "E", "SKILL.md 必须以 YAML frontmatter 开头")
+        # 区分"无 frontmatter"与"闭合行粘连正文"（2026-09-24 事故：---# 标题 会让严格
+        # frontmatter 解析器整体失败——部分客户端直接丢弃 name/description）
+        if re.match(r"^---\r?\n[\s\S]*?\r?\n---[^\s]", txt):
+            bad("B1", "E", "frontmatter 闭合行 --- 后粘连了正文（缺换行）——严格解析器会丢弃整个 frontmatter")
+        else:
+            bad("B1", "E", "SKILL.md 必须以 YAML frontmatter 开头")
         return issues
     try:
         fm = yaml.safe_load(fm_text) or {}

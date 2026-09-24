@@ -141,15 +141,34 @@ def mark_frontmatter(fm: str, family: str, role: str) -> tuple[str, list[str]]:
                     f"  {k}: {v}" for k, v in merged.items()]
                 changes.append("metadata 行内 map → 块形式并合并族群键")
         else:
-            add = [(k, v) for k, v in want.items() if k not in existing]
-            if add:
-                lines[meta_idx + 1:meta_idx + 1] = [f"  {k}: {v}" for k, v in add]
-                changes.append(f"metadata 补键: {', '.join(k for k, _ in add)}")
+            # 既有键：值不同则更新（家族改名/角色翻转）；缺失键：插入
+            updated, added = [], []
+            for k, v in want.items():
+                hit = next((n for n in range(meta_idx + 1, len(lines))
+                            if re.match(rf"^  {re.escape(k)}:", lines[n])), None)
+                if hit is None:
+                    added.append((k, v))
+                elif lines[hit].strip() != f"{k}: {v}":
+                    old_val = lines[hit].strip()
+                    lines[hit] = f"  {k}: {v}"
+                    updated.append(f"{k}: {old_val} → {k}: {v}")
+            if added:
+                lines[meta_idx + 1:meta_idx + 1] = [f"  {k}: {v}" for k, v in added]
+            if updated:
+                changes.append("metadata 更新: " + "; ".join(updated))
+            if added:
+                changes.append(f"metadata 补键: {', '.join(k for k, _ in added)}")
 
-    # member：disable-model-invocation（顶层，kebab）
-    if role == "member" and not any(ln.strip() == "disable-model-invocation: true" for ln in lines):
-        lines.append("disable-model-invocation: true")
-        changes.append("新增 disable-model-invocation: true（CC/Grok/dsh manual-only）")
+    # member：disable-model-invocation（顶层，kebab）；entry：清理降级残留
+    if role == "member":
+        if not any(ln.strip() == "disable-model-invocation: true" for ln in lines):
+            lines.append("disable-model-invocation: true")
+            changes.append("新增 disable-model-invocation: true（CC/Grok/dsh manual-only）")
+    else:
+        stripped = [ln for ln in lines if ln.strip() != "disable-model-invocation: true"]
+        if len(stripped) != len(lines):
+            lines = stripped
+            changes.append("移除 disable-model-invocation（升为 entry，恢复自动触发）")
 
     return "\n".join(lines), changes
 
@@ -195,9 +214,15 @@ def main() -> None:
             new_fm, changes = mark_frontmatter(fm, fname, role)
             new_txt = f"---\n{new_fm}\n---{body}" if changes else txt
 
-            # Codex openai.yaml（仅 member）
+            # Codex openai.yaml（仅 member；entry 升位后清理残留）
             yaml_path = d / "agents" / "openai.yaml"
             oa_change = None
+            if role == "entry" and yaml_path.exists():
+                if args.apply:
+                    yaml_path.unlink()
+                    print(f"    - 删除残留 agents/openai.yaml（升为 entry）")
+                else:
+                    print(f"    - 将删除残留 agents/openai.yaml（升为 entry）")
             if role == "member":
                 want = gen_openai_yaml(name, extract_description(fm))
                 have = yaml_path.read_text(encoding="utf-8") if yaml_path.exists() else None
@@ -216,7 +241,9 @@ def main() -> None:
                 if oa_change:
                     print(f"    - {oa_change}")
                 if args.apply and changes:
-                    skill_md.write_text(new_txt, encoding="utf-8")
+                    # 注意：split_frontmatter 的 m.end() 已消费闭合 --- 后的换行，
+                    # 重构时必须补回，否则 --- 与正文首行粘连（严格 frontmatter 解析器会失败）
+                    skill_md.write_text(f"---\n{new_fm}\n---\n{body}", encoding="utf-8")
             else:
                 print(f"[一致] {name}（{fname}/{role}）")
 
