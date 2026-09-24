@@ -62,7 +62,7 @@ cd ~/projects/dc-skills && uv run python {name}/scripts/cli.py --help
 """
 
 CLI_TEMPLATE = '''#!/usr/bin/env python3
-"""{name} CLI 桩（由 dc-skill-creator 生成；接线 OUTPUT.md 两级回退）。"""
+"""{name} CLI 桩（由 dc-skill-creator 生成；接线 OUTPUT.md 统一产物树）。"""
 
 from __future__ import annotations
 
@@ -71,15 +71,18 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "scripts"))
-from common import fallback_output_dir, resolve_output_path  # noqa: E402
+from common import plan_output  # noqa: E402
 
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="{desc}")
-    ap.add_argument("input", nargs="?", help="输入文件（绝对路径时按 OUTPUT.md C-2 推断项目根）")
-    ap.add_argument("--output", help="显式输出路径/目录（最高优先，OUTPUT.md）")
+    ap.add_argument("input", nargs="?", help="输入文件")
+    ap.add_argument("--output", help="显式输出路径/目录（最高优先，最终产物另存主库审计副本）")
     args = ap.parse_args()
-    # TODO(实现): 调用 resolve_output_path(args.input, "{name}", "<default>.png")
+    # 统一产物树（OUTPUT.md C-1/C-4）：<cwd>/skills-output/<族群>/<技能名>/<时间戳>/
+    plan = plan_output("<family>", "{name}", "<default>.png", explicit=args.output)
+    out = plan.primary
+    # TODO(实现): 生成产物并写入 out；写毕调用 plan.commit() 落审计副本
     raise SystemExit("未实现：替换为真实逻辑")
 
 
@@ -198,7 +201,8 @@ def main() -> None:
     }
     if args.env in ("A", "B"):
         files[d / "scripts" / "__init__.py"] = ""
-        files[d / "scripts" / "cli.py"] = CLI_TEMPLATE.format(name=name, desc=args.desc)
+        files[d / "scripts" / "cli.py"] = CLI_TEMPLATE.format(
+            name=name, desc=args.desc).replace("<family>", args.family or "standalone")
         files[d / "scripts" / f"test_{name.replace('-', '_')}.py"] = TEST_TEMPLATE.format(name=name)
     plan.append(f"SKILL.md（env {args.env}，family={args.family or 'standalone'}）")
     if args.env in ("A", "B"):

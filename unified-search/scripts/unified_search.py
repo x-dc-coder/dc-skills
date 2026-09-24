@@ -82,8 +82,12 @@ _sanitize_no_proxy_env()
 SKILL_DIR = Path(__file__).resolve().parent.parent          # ~/projects/dc-skills/unified-search
 SCRIPT_DIR = Path(__file__).resolve().parent                # .../scripts
 CONFIG_PATH = SKILL_DIR / "config.json"
-DATA_DIR = SKILL_DIR / "data"
-CACHE_DIR = SKILL_DIR / "cache"
+# 全局运行时状态（docs/specs/OUTPUT.md C-8 登记）：跨项目共享的配额/历史/缓存，
+# 不得放技能目录内；按 cwd 拆分会破坏配额感知，故固定全局位置。
+STATE_ROOT = Path(os.environ.get("DC_SKILLS_STATE_DIR",
+                                 Path.home() / ".local" / "state" / "dc-skills"))
+DATA_DIR = STATE_ROOT / "unified-search" / "data"
+CACHE_DIR = STATE_ROOT / "unified-search" / "cache"
 DB_PATH = DATA_DIR / "history.db"
 QUOTA_PATH = DATA_DIR / "quota.json"
 

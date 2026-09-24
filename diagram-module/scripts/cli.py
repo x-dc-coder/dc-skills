@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "scripts"))
-from common import resolve_output_path
+from common import plan_output
 
 try:
     from scripts.module import render_module_diagram
@@ -54,16 +54,14 @@ Examples:
     png = render_module_diagram(json_data, **kwargs)
 
     # 确定输出路径
-    output_path = args.output
-    if output_path is None:
-        output_path = resolve_output_path(Path(args.json_file), "diagram-module", "module-diagram.png")
-    else:
-        output_path = Path(output_path)
+    plan = plan_output("drawing", "diagram-module", "module-diagram.png", explicit=args.output)
+    output_path = plan.primary
 
     # 确保输出目录存在
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     output_path.write_bytes(png)
+    plan.commit()
     print(f"Generated: {output_path}")
 
 

@@ -330,7 +330,7 @@ Unpaywall → 出版商页面 → 可选 Sci-Hub；在校园网出口可借机�
 cd ~/projects/dc-skills
 
 # 逐源体检（一条命令看各源真实状态与降级通道）
-uv run python ~/.claude/skills-output/unified-search/probe_sources2.py nobracket
+uv run python unified-search/scripts/probe_sources2.py nobracket
 
 # 配额 / 真实额度（tavily、firecrawl 走官方 usage 接口）
 uv run python unified-search/scripts/unified_search.py --quota

@@ -115,26 +115,18 @@ archive/
 # 统一 SKILL 输出目录（运行期产物，不提交；规范见 docs/specs/OUTPUT.md）
 # ──────────────────────────────────────────────────────────
 
-# 当 skill 输出到 ~/.claude/skills-output/ 时的兜底目录
+# 统一产物树（OUTPUT.md C-1：<cwd>/skills-output/<族群>/<技能名>/<时间戳>/）——
+# 主库内运行的产物落此处，不提交；含 .work/ 中间产物与 .state/ 跨会话状态
 skills-output/
 
-# unified-search 运行期状态（SQLite 历史 + 配额计数）
-unified-search/data/history.db
-unified-search/data/quota.json
-
-# 当 skill 输出到当前项目目录时的 thesis-output（仅本仓库自身不提交）
+# 旧规则遗留（OUTPUT.md 2026-09-24 大改前产生的目录；新产物不再产生，保留忽略以兼容存量）
 thesis-output/
-
-# 各 skill-output-root 运行期产物（OUTPUT.md §skill-output-root；修复 W1：
-# 此前仅 thesis-output/ 入表，主库内误跑会写进 git 仓库——2026-09-24 补齐）
 db-output/
 doc-output/
 unified-search-output/
-
-# 中间产物统一目录（OUTPUT.md C-5：<输出根>/.work/<skill-name>/）
 .work/
 
-# paper-reader 默认输出目录
+# paper-reader 默认输出目录（输入 PDF 同级四层树，C-13 登记例外，见 issue #27）
 paper-analysis/
 
 # WSL UNC path test artifacts (pytest PID/log files from detached/UNC tests)

@@ -21,7 +21,7 @@ text/html（"Making sure you're not a bot!"）。绕过只需复现浏览器 mai
 用法
 ----
     cd /home/dc/projects/dc-skills && export NO_PROXY='localhost,127.0.0.1,::1' no_proxy='localhost,127.0.0.1,::1'
-    uv run python ~/.claude/skills-output/unified-search/anubis_dblp.py "transformer" -n 5
+    uv run python unified-search/scripts/anubis_dblp.py "transformer" -n 5
 
 仅依赖 httpx（skills venv 已装，无第三方新依赖）。
 """
@@ -63,7 +63,9 @@ BROWSER_UA = (
 
 CACHE_PATH = Path(
     os.environ.get("DBLP_COOKIE_CACHE")
-    or Path(__file__).resolve().with_name("dblp_cookies.json")
+    # 全局运行时状态（docs/specs/OUTPUT.md C-8 登记）：禁放技能/脚本目录内
+    or (Path.home() / ".local" / "state" / "dc-skills" / "unified-search"
+        / "data" / "dblp_cookies.json")
 )
 
 DEFAULT_TIMEOUT = httpx.Timeout(30.0, connect=8.0)

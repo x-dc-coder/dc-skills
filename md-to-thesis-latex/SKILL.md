@@ -55,7 +55,7 @@ disable-model-invocation: true
 ## 4. 目录结构与文件映射
 
 ```
-thesis-output/latex/
+<cwd>/skills-output/thesis/md-to-thesis-latex/<时间戳>/latex/
 ├── main.tex                    # 主文件，引用各章节
 ├── tex/
 │   ├── frontinfo.tex           # 封面信息（2024年起通常注释掉）

@@ -65,13 +65,12 @@ def find_python(explicit: str | None = None) -> Path | None:
 
 
 def default_out_dir() -> Path:
-    # OUTPUT.md C-1：基准是主库根（含子目录与经农场软链进入），不是恰好等于主库根
+    """统一产物树（docs/specs/OUTPUT.md C-1）：
+    <cwd>/skills-output/info/unified-search/<时间戳>/downloads。"""
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "scripts"))
-    from common import is_under_master  # noqa: E402
+    from common import run_dir  # noqa: E402
 
-    if is_under_master(Path.cwd()):
-        return Path.home() / ".claude" / "skills-output" / "unified-search" / "downloads"
-    return Path.cwd().resolve() / "unified-search-output" / "downloads"
+    return run_dir("info", "unified-search") / "downloads"
 
 
 class StdioMCP:

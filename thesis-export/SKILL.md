@@ -72,7 +72,9 @@ python -m thesis_exporter.cli config-help [--json] [--key <点路径>]          
 
 - `--engine auto`（默认）：Linux 优先，按 `STEP_DEPENDENCIES` 自决策
   `mode ∈ {linux, staged, com}`，`--json` 返回 `{mode, out, conditions, plan_s}`
-- 输出路径自动派生：`out/<学校>/<时间戳>/导出.docx`；`--out`/`--output-name` 可覆盖
+- 输出路径自动派生：`out/<学校>/<时间戳>/导出.docx`（自带时间戳，符合 docs/specs/OUTPUT.md
+  C-2 精神；`--out` 可覆写到统一产物树 `<cwd>/skills-output/thesis/thesis-export/<时间戳>/`，
+  最终产物另存主库审计副本）
 - `--cover-doc <docx>`：封面拼接（auto 下触发分阶段 portable + com-extra）
 - `--skip-md-check`：跳过内置格式检查（除非用户明确要求，否则不跳过）
 - `--verify` / `--verify-strict`：导出后自动验证；strict 失败退出码 4

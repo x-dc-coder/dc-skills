@@ -1,59 +1,128 @@
-"""Shared utilities for diagram-* / db-skill skills."""
+"""Shared utilities for diagram-* / db-skill skills + 统一产物树（OUTPUT.md）。"""
 
 from __future__ import annotations
 
 import os
+import re
+import shutil
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
 #: 环境变量名：显式指定 db-skill 配置文件路径
 DEFAULT_CONFIG_ENV = "DB_SKILL_CONFIG"
 
-#: 主库根（本文件位于 <master>/scripts/）。输出路径判定的唯一基准（OUTPUT.md C-1）：
+#: 主库根（本文件位于 <master>/scripts/）。输出路径判定与审计副本的唯一基准。
 #: 经农场软链（~/.claude/skills/<skill> 等）进入时，resolve() 回到主库，判定依然成立。
 MASTER_ROOT = Path(__file__).resolve().parent.parent
 
+#: 统一产物树根目录名（OUTPUT.md C-1）
+OUTPUT_ROOT_NAME = "skills-output"
 
-def is_under_master(path: Path) -> bool:
-    """path（解析后）是否位于主库根之下。"""
+#: 时间戳格式（OUTPUT.md C-2：进程级单次，无冒号保证 Windows 安全）
+TIMESTAMP_FMT = "%Y%m%d-%H%M%S"
+
+_RUN_TS: Optional[str] = None
+
+
+def is_under(path: Path, root: Path) -> bool:
+    """path（解析后）是否位于 root 之下。"""
     try:
-        Path(path).resolve().relative_to(MASTER_ROOT)
+        Path(path).resolve().relative_to(Path(root).resolve())
         return True
     except ValueError:
         return False
 
 
-def fallback_output_dir(skill_name: str, output_root: str) -> Path:
-    """OUTPUT.md C-1 兜底目录：cwd 在主库内 → ~/.claude/skills-output/<skill_name>/；
-    cwd 在工作项目内 → <cwd>/<output_root>/<skill_name>/。"""
-    if is_under_master(Path.cwd()):
-        return Path.home() / ".claude" / "skills-output" / skill_name
-    return Path.cwd().resolve() / output_root / skill_name
+def is_under_master(path: Path) -> bool:
+    """path（解析后）是否位于主库根之下。"""
+    return is_under(path, MASTER_ROOT)
 
 
-def resolve_output_path(
-    input_file: Optional[Path],
-    skill_name: str,
-    default_name: str,
-    output_root: str = "thesis-output",
-) -> Path:
-    """推断输出路径（OUTPUT.md C-1/C-2）。
+def run_timestamp() -> str:
+    """进程级单次时间戳（一个 CLI 进程的所有落盘共享）。"""
+    global _RUN_TS
+    if _RUN_TS is None:
+        _RUN_TS = datetime.now().strftime(TIMESTAMP_FMT)
+    return _RUN_TS
 
-    1) 输入文件位于某工作项目内——从输入文件向上找含 ``output_root`` 标记目录的
-       祖先（主库自身不算，遇到主库即止）→ ``<项目根>/<output_root>/<skill_name>/``；
-    2) 否则按 cwd 判定（见 :func:`fallback_output_dir`）。
+
+def skill_family(skill_name: str) -> str:
+    """从主库 <skill_name>/SKILL.md 的 metadata.family 读族群（OUTPUT.md C-3）。
+    脚本目录（无 SKILL.md）回落约定：diagram-* → drawing；其余 → standalone。"""
+    skill_md = MASTER_ROOT / skill_name / "SKILL.md"
+    if skill_md.is_file():
+        m = re.match(r"^---\r?\n([\s\S]*?)\r?\n---", skill_md.read_text(encoding="utf-8"))
+        if m:
+            fm_line = re.search(r"^\s+family:\s*(\S+)", m.group(1), re.M)
+            if fm_line:
+                return fm_line.group(1).strip().strip('"\'')
+    if skill_name.startswith("diagram-"):
+        return "drawing"
+    return "standalone"
+
+
+def output_root(cwd: Optional[Path] = None) -> Path:
+    """统一产物树根：<cwd>/skills-output（OUTPUT.md C-1）。"""
+    return (Path(cwd) if cwd else Path.cwd()).resolve() / OUTPUT_ROOT_NAME
+
+
+def run_dir(family: str, skill_name: str, ts: Optional[str] = None,
+            cwd: Optional[Path] = None) -> Path:
+    """本次运行目录：<cwd>/skills-output/<family>/<skill_name>/<ts>/（自动创建）。"""
+    d = output_root(cwd) / family / skill_name / (ts or run_timestamp())
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def audit_dir(family: str, skill_name: str, ts: Optional[str] = None) -> Path:
+    """主库审计副本目录：<master>/skills-output/<family>/<skill_name>/<ts>/（C-4）。"""
+    d = MASTER_ROOT / OUTPUT_ROOT_NAME / family / skill_name / (ts or run_timestamp())
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+class OutputPlan:
+    """一次运行的产物计划（OUTPUT.md C-1/C-4）。
+
+    primary：主产物路径（显式 --output 或统一树）；audit：主库审计副本路径
+    （主产物已在主库统一树内时为 None，不重复拷贝）。commit() 在落盘后调用。
     """
-    if input_file and input_file.is_absolute():
-        for parent in input_file.resolve().parents:
-            if parent == MASTER_ROOT:
-                break  # 输入在主库内（含经农场软链解析后）：不是工作项目信号
-            if (parent / output_root).is_dir():
-                output_dir = parent / output_root / skill_name
-                output_dir.mkdir(parents=True, exist_ok=True)
-                return output_dir / default_name
-    out = fallback_output_dir(skill_name, output_root)
-    out.mkdir(parents=True, exist_ok=True)
-    return out / default_name
+
+    def __init__(self, primary: Path, audit: Optional[Path]) -> None:
+        self.primary = primary
+        self.audit = audit
+
+    def commit(self) -> Path:
+        """最终产物落盘后调用：按需复制审计副本到主库统一树，返回主路径。"""
+        if self.audit and self.primary.is_file():
+            self.audit.parent.mkdir(parents=True, exist_ok=True)
+            if self.audit.resolve() != self.primary.resolve():
+                shutil.copy2(self.primary, self.audit)
+        return self.primary
+
+
+def plan_output(family: str, skill_name: str, default_name: str,
+                explicit: Optional[str] = None,
+                cwd: Optional[Path] = None) -> OutputPlan:
+    """规划一次产物落点（OUTPUT.md C-1/C-4）。
+
+    - explicit（--output）为文件路径时主产物=该路径；为目录时主产物=该目录/default_name
+    - 默认主产物 = <cwd>/skills-output/<family>/<skill_name>/<ts>/default_name
+    - 主产物不在主库统一树内时，audit = <master>/skills-output/<family>/<skill_name>/<ts>/
+    """
+    ts = run_timestamp()
+    if explicit:
+        p = Path(explicit).expanduser()
+        primary = p if p.suffix else p / default_name
+        primary.parent.mkdir(parents=True, exist_ok=True)
+        audit = audit_dir(family, skill_name, ts) / primary.name
+        return OutputPlan(primary, audit)
+    primary = run_dir(family, skill_name, ts, cwd) / default_name
+    primary.parent.mkdir(parents=True, exist_ok=True)
+    audit = None if is_under(primary, MASTER_ROOT / OUTPUT_ROOT_NAME) \
+        else audit_dir(family, skill_name, ts) / default_name
+    return OutputPlan(primary, audit)
 
 
 # ─── db-skill 共享实现（mysql_tool.py / pg_tool.py 原先各自复制一份）───────────

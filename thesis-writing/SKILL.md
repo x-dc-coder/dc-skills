@@ -390,8 +390,7 @@ uv run python paper-metrics/scripts/validate_draft.py \
 
 ## 输出目录约定
 
-遵循 docs/specs/OUTPUT.md 的两级回退规则：
-- 用户在工作项目目录下（cwd 不在 `~/projects/dc-skills`）：输出到 `<cwd>/thesis-output/thesis-writing/`
-- 否则：输出到 `~/.claude/skills-output/thesis-writing/`
-
-可用 `--output` 显式覆盖。profiler 的 `_domain_profile.{json,md}` 默认写入同一输出目录。
+遵循 docs/specs/OUTPUT.md 统一产物树（C-1/C-4）：
+- 默认：`<cwd>/skills-output/thesis/thesis-writing/<时间戳>/<文件名>`（`<cwd>` 即运行时的当前目录）
+- 显式 `--output` 优先（如直接写论文项目目录）；最终产物另存 `<master>/skills-output/` 审计副本
+- checker 的 findings 与 profiler 的 `_domain_profile.{json,md}` 同树（profiler `--out` 为必填，指向该运行目录）

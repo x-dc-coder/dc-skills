@@ -1,82 +1,67 @@
-# SKILL 输出目录规范（OUTPUT.md）—— 兜底规则
+# SKILL 输出目录规范（OUTPUT.md）—— 统一产物树
 
-> **定位：兜底（fallback）规则，非强制覆盖。** 仅当技能**未显式指明输出目录**时生效：
-> - 技能正文显式指定输出位置 → **以技能为准**（如 paper-reader 输出到输入 PDF 同级的
->   `paper-analysis/`；用户显式传 `--output <dir>` 参数 → 以参数为最高优先）；
-> - 技能未显式指明 → 按下文两级回退规则执行。
+> **定位：唯一事实源。** 所有 SKILL 的文件产物（最终产物、中间产物、跨会话状态）默认落入
+> **统一产物树**；显式指定（`--output` / 技能正文）优先，但最终产物始终在主库留审计副本。
+> 代码实现：`scripts/common.py` 的 `plan_output` / `run_dir` / `audit_dir` / `commit_final`。
 >
-> 代码实现：CLI 脚本统一调用 `~/projects/dc-skills/scripts/common.py` 的 `resolve_output_path` /
-> `fallback_output_dir`（diagram 家族、db-skill、word-extractor、unified-search 已接入）。
-> 2026-09-24 修订：判定基准修正为**主库根**（C-1），删除 `docs/` 启发式（C-2），
-> 新增中间产物（C-5）、临时文件（C-6）、防覆盖（C-7）、跨设备（C-9）条款。
+> 2026-09-24 大改：废弃「类型目录两级回退」与 `~/.claude/skills-output/` 兜底；
+> 统一为 `<cwd>/skills-output/<族群>/<技能名>/<时间戳>/`。
 
-## C-1 两级回退规则（按优先级）
+## C-1 统一输出树（单一规则，无兜底分叉）
 
-判定基准是**主库根** `~/projects/dc-skills`（解析后的物理路径）。经农场软链
-（`~/.claude/skills/<skill>` 等）进入时，`Path.cwd().resolve()` 回到主库，同样判定为
-“主库内”，走兜底——不会把产物写进农场目录，也不会写进 git 仓库。
+所有产物默认落在**当前工作目录**下的统一文件夹：
 
-| 优先级 | 条件 | 输出位置 | 示例 |
-|---|---|---|---|
-| 1 | 用户 cwd 在工作项目目录（cwd 不在主库内） | `<工作项目目录>/<skill-output-root>/<skill-name>/<filename>` | `/home/dc/projects/MyThesis/thesis-output/diagram-er/er-diagram.png` |
-| 2（兜底） | cwd 在主库内（含经农场软链）或无明确工作项目 | `~/.claude/skills-output/<skill-name>/<filename>` | `~/.claude/skills-output/diagram-er/er-diagram.png` |
+```
+<cwd>/skills-output/<族群>/<技能名>/<YYYYMMDD-HHMMSS>/
+```
 
-有绝对路径输入文件的技能（diagram 家族）：先从输入文件向上查找**项目根标记**（见 C-2），
-命中则用该项目根走优先级 1；未命中再按 cwd 判定。
-
-## C-2 项目根标记（替代原 docs/ 启发式）
-
-项目根的显式标记 = 该目录下已存在对应的 `<skill-output-root>` 目录（如 `thesis-output/`）。
-从输入文件向上逐级查找，**遇到主库根即止**（主库内的同名目录不是项目信号）。
-
-- ❌ 删除原 `docs/` 启发式：`docs/` 是极常见目录名，曾把输出写进技能自己的示例目录
-  （`diagram-er/docs/`），且反向漏判真实项目。
-- 输入文件不在任何带标记的项目内 → 按 C-1 的 cwd 规则处理。
-
-## C-3 skill-output-root 与 skill-name 口径
-
-- 优先级 1 的**最后一段恒为技能名**（脚本目录名，如 `diagram-er`）；`<skill-output-root>`
-  才是类型目录。
-- 优先级 2 的最后一段同样恒为技能名。
-
-| 技能族 | root | 示例 |
+| 段 | 取值 | 示例 |
 |---|---|---|
-| 论文类（diagram 各子类型、thesis-*、md-to-thesis-latex） | `thesis-output/` | `thesis-output/diagram-er/` |
-| 数据库（db-skill） | `db-output/` | `db-output/db-skill/` |
-| 文档提取（word-extractor、paper-reader） | `doc-output/` | `doc-output/word-extractor/` |
-| 其他 | `<skill-name>-output/` | `officecli-output/` |
+| `<cwd>` | 运行技能时的当前目录（工作项目或主库） | `~/projects/MyThesis` |
+| `<族群>` | agent-map.yaml `families:` 的键（= SKILL.md `metadata.family`） | `thesis`、`drawing`、`db` |
+| `<技能名>` | 技能目录名；diagram-* 用子类型目录名 | `thesis-writing`、`diagram-er` |
+| `<时间戳>` | 本次运行的目录，格式见 C-2 | `20260924-143022` |
 
-## C-4 输出文件名约定（避免互相覆盖）
+- 主库内运行（`cwd` = `~/projects/dc-skills`）同样落 `<master>/skills-output/…`，已入 `.gitignore`，仓库永远干净
+- `~/.claude/skills-output/` **已废弃**，不再产生新内容；存量目录保留至用户确认后清理
 
-| Skill | 输出文件名 |
-|---|---|
-| diagram（er 类） | `er-diagram.png` |
-| diagram（ers 类） | `ers-diagram.png` |
-| diagram（module 类） | `module-diagram.png` |
-| diagram（sequence 类） | `sequence-diagram.png` |
-| diagram（usecase 类） | `usecase-diagram.png` |
-| diagram（flow 类） | `flow.mmd` / `flow.png` |
-| diagram（draft 类） | `draft-<basename>.png/svg/html`（**必须含 draft 前缀**，禁止裸 `diagram.png`） |
-| thesis-writing | `第X章-章节名.md` / `full-thesis.md` |
-| md-to-thesis-latex | `main.tex`（`thesis-output/latex/` 下） |
-| thesis-ref-check | `<stem>_修正版.md` + `_state/`（可保留中间产物，见 C-5） |
-| thesis-export | `out/<学校>/<时间戳>/导出.docx` |
-| word-extractor | `<basename>.md` + `images/` |
-| paper-reader | `paper-analysis/<pdf_stem>/`（例外：输入 PDF 同级，不走两级回退） |
-| db-skill | 按 `--output` 显式参数为准 |
+## C-2 时间戳（每次运行独立目录）
 
-## C-5 中间产物目录
+- 格式 `YYYYMMDD-HHMMSS`（本地时间；无冒号，Windows 安全；字典序即时间序）
+- **进程级单次**：一个 CLI 进程的多次落盘共享同一时间戳目录；两次调用 = 两个目录
+- 时间戳目录天然防覆盖；不再需要 `--reuse` / `latest.json` 机制（C-7 旧条款废止）
+- 清理策略：产物可按时间戳目录整批清理；用户资产类（论文正文、总结）豁免自动清理
 
-- 中间产物统一落 **`<输出根>/.work/<skill-name>/`**（与最终产物同根，便于整体打包/清理）；
-  `.work/` 已在主库 `.gitignore` 登记，各工作项目自行决定是否忽略。
-- 需要跨会话保留的中间产物（如 `thesis-ref-check/_state/`）视为**半永久资产**，须在
-  SKILL.md 明示保留窗口与清理方式。
-- ❌ 禁止在技能目录内、仓库根、或 `/tmp` 持久化中间产物。
+## C-3 族群与技能名口径
 
-## C-6 临时文件与受控 /tmp 例外
+- `<族群>` 以 `agent-map.yaml` `families:` 段为唯一事实源；单体族（db/bridge/lark/meta）同样占一层，保持结构一致
+- `<技能名>` 默认 = 技能目录名；**diagram 家族特例**：用子类型脚本目录名（`diagram-er`/`diagram-ers`/`diagram-module`/`diagram-sequence`/`diagram-usecase`/`diagram-draft`），因为六类图表共用 `diagram` 技能入口但产物不同
+- 新技能登记族群后才能正确落盘（`family-apply` 已把 `metadata.family` 写入每个 SKILL.md）
 
-- 临时文件必须用 `tempfile` / `$TMPDIR`，**生命周期绑定进程**，退出即删
-  （`debugging` 技能的 journal + cleanup 纪律为正面范式）。
+## C-4 最终产物与审计副本
+
+- **默认**：最终产物落 C-1 目录；若 `cwd` 不在主库内，落盘后**自动复制审计副本**到
+  `<master>/skills-output/<族群>/<技能名>/<时间戳>/`（`commit_final()`）——主库 skills-output
+  是全机产物审计轨迹，与主产物位置重复时不去重拷贝
+- **显式 `--output <目录>`**：最终产物落指定目录（用户/项目指定优先），**审计副本仍然生成**
+- 审计副本只复制**最终产物**；中间产物与状态不复制
+- paper-reader 例外：见 C-13
+
+## C-5 中间产物
+
+- 同一运行的中间产物落 **`<时间戳>/.work/`**（与最终产物同根，整批清理/打包）
+- 示例：`diagram-ers` 的 graphviz `.dot`、`diagram-sequence` 的 mmdc 临时 `.mmd`、
+  `db-skill` 查询结果、`newapi-management` 落盘前的中间 JSON
+
+## C-6 跨会话状态
+
+- 需要跨运行保留的状态（非本次产物）落 **`<cwd>/skills-output/<族群>/<技能名>/.state/<语料标识>/`**，
+  `<语料标识>` = 输入文件名去扩展名（如论文 stem）；**SKILL.md 必须写明保留窗口与清理方式**
+- 已登记：`thesis-ref-check` 的术语表/修改日志（`.state/<论文stem>/term_glossary.md` 等）
+
+## C-7 临时文件与受控 /tmp 例外
+
+- 进程级临时文件必须用 `tempfile`/`$TMPDIR`，退出即删（`debugging` 的 journal 纪律为正面范式）
 - 需要 `/tmp` 持久的场景实行**登记制**，当前登记两例：
 
 | 位置 | 使用者 | 理由 | 清理时机 |
@@ -84,38 +69,67 @@
 | `/tmp/gpu-logs/` | wsl-windows-bridge | inotify 需 Linux 本地 FS（WSL#4739） | 随任务结束 |
 | `/tmp/dsh-repo/` | dsh-plugin-troubleshooting | 官方仓库离线克隆 | `git pull` 前手工确认 |
 
-## C-7 防覆盖与复用/清理
+## C-8 全局运行时状态登记制
 
-- 默认名**必须含技能标识或输入 basename**（C-4 表即最低要求）。
-- 同一会话多次执行的产物（如 db-skill 的结果文件）：必须提供 `--reuse` 或写入固定
-  `latest.json`，并在会话结束清理随机名文件——禁止用 `mkstemp` 随机名当最终产物无限堆积。
-- 输出根允许整体删除：产物须可从输入重现；**用户资产类**（论文正文、总结、修正稿）
-  显式豁免。
+跨项目共享的技能自身簿记（非用户产物）可留在技能目录外登记的固定位置，**不得放技能目录内**：
 
-## C-8 与 AGENT.md 的衔接
+| 位置 | 使用者 | 内容 |
+|---|---|---|
+| `~/.local/state/dc-skills/unified-search/` | unified-search | `history.db`、`quota.json`、`dblp_cookies.json`（全局配额/历史，按 cwd 拆分会破坏配额感知） |
+| `~/.cache/gpu-governor/` | wsl-windows-bridge | 设备级 GPU 协调 ledger（跨进程，非技能产物） |
+| `<项目>/.git/…` | github-workflow | review manifest 在 git 内部命名空间（`github-workflow-review.json`、`candidates/`） |
 
-`AGENT.md`（本文件上级目录的根级文件，`CLAUDE.md`/`AGENTS.md` 为其兼容软链）只保留**三条铁律摘要 +
-指向本文件**；本文件是输出规范的唯一全文。技能 SKILL.md 引用输出规则时引用本文件条款号
-（如 C-5），不引用行号。
+## C-9 文件名约定（防覆盖）
 
-## C-9 跨设备路径
+时间戳目录内用**固定名**（目录已隔离，无需文件名带时间戳）：
+
+| Skill | 输出文件名 |
+|---|---|
+| diagram / er | `er-diagram.png` |
+| diagram / ers | `ers-diagram.png` |
+| diagram / module | `module-diagram.png` |
+| diagram / sequence | `sequence-diagram.png` |
+| diagram / usecase | `usecase-diagram.png` |
+| diagram / flow | `flow.mmd` / `flow.png` |
+| diagram / draft | `draft-<basename>.png/svg/html`（**必须 draft- 前缀**） |
+| thesis-writing | `第X章-章节名.md` / `full-thesis.md` |
+| md-to-thesis-latex | `main.tex`（`<ts>/latex/` 下） |
+| thesis-ref-check | `<stem>_修正版.md` + `<stem>_术语修改报告.md` |
+| thesis-export | `导出.docx`（工具链自带 `out/<学校>/<时间戳>/`，符合本规范精神） |
+| word-extractor | `<basename>.md` + `<basename>.json`（不产 images/） |
+| db-skill | `<ts>/mysql-result.json` / `pg-result.json`（固定名，禁 mkstemp 随机名） |
+
+## C-10 安装/脚手架类动作豁免
+
+往**用户项目源码树**写入的动作不是"产物"，不适用本规范：
+- `test-guardian` 的 `pytest_test_guard.py`/`conftest.py` 安装
+- `programming` 脚手架的 `new-script.py`（默认落 cwd，由用户决定去留）
+- `officecli` 直接操作用户文档（save/close 落用户指定路径）
+
+## C-11 跨设备路径
 
 - WSL 侧读写 Windows 盘一律用 `/mnt/<盘符>/...`，**禁止** `wsl$` / `wsl.localhost` UNC
-  （历史 UNC 乱码文件事故的根因）。
-- Windows 侧默认值（`E:\venvs\marker` 等）**必须可被 CLI 参数/环境变量覆盖**，并在
-  `ENVIRONMENT.md` 登记。
+- Windows 侧默认值（`E:\venvs\marker` 等）必须可被 CLI 参数/环境变量覆盖，并在 `docs/arch/ENVIRONMENT.md` 登记
 
-## C-10 禁止事项
+## C-12 禁止事项
 
-- ❌ 固定文件名互相覆盖（如所有 diagram 类都叫 `diagram.png`）
-- ❌ `/tmp/skills-output/<date>/` 永久堆积
-- ❌ 技能目录内 `-workspace` 孤儿目录
-- ❌ **在技能目录内生成任何产物**（项目根标记遇到主库即止，从机制上阻断）
-- ❌ 用 `docs/` 等通用目录名作项目根启发式
-- ❌ 把随机临时名当成最终产物
+- ❌ 硬编码 `~/.claude/skills-output`（已废弃）或任何本规范外的兜底目录
+- ❌ 绕过 `common.py` 自拼输出路径（validate R10 门禁）
+- ❌ 在技能目录内生成任何文件（`data/`、`cache/`、`output/`、`-workspace/` 均禁止；全局状态走 C-8 登记）
+- ❌ `mkstemp` 随机名当最终产物（时间戳目录已防覆盖）
+- ❌ `/tmp/skills-output/<date>/` 式永久堆积
+- ❌ UNC 路径（C-11）
+
+## C-13 已登记例外
+
+| 例外 | 内容 | 状态 |
+|---|---|---|
+| paper-reader | 产物落输入 PDF 同级四层树（`paper-conversion/paper-merged/paper-summaries/`）+ 断点状态 | 待收编，见 issue #27 |
+| C-7 /tmp 两例 | gpu-logs、dsh-repo | 长期 |
+| C-8 全局状态三例 | unified-search state、gpu-governor、.git manifest | 长期 |
+| C-10 安装/脚手架 | 写用户项目源码树 | 长期 |
 
 ## 显式指定优先（本文件不覆盖的场景）
 
-1. 技能正文写明输出位置（如 paper-reader → 输入 PDF 同级 `paper-analysis/<pdf_stem>/`）
-2. 用户或调用方显式传入 `--output` / `--output-dir` 参数
-3. 项目内 `docs/rules/` 或任务上下文明确指定
+1. 用户或调用方显式传入 `--output` / `--output-dir`（最终产物落指定处，审计副本仍生成，C-4）
+2. 项目内 `docs/rules/` 或任务上下文明确指定

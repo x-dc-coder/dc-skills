@@ -72,7 +72,7 @@ if __name__ == "__main__":
 
 def main(
     name: str = typer.Argument(help="Script name (without .py extension)"),
-    output: Path | None = typer.Option(None, "--output", "-o", help="Output path. Default: OS temp directory."),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output path. Default: current directory."),
     deps: list[str] = typer.Option([], "--deps", "-d", help="Dependencies to include (repeat --deps for each)."),
     py: str = typer.Option("3.13", "--py", help="Minimum Python version."),
 ) -> None:
@@ -83,9 +83,9 @@ def main(
     if output is not None:
         dest = Path(output)
     else:
-        tmp_dir = Path(tempfile.gettempdir()) / "uv-scripts"
-        tmp_dir.mkdir(exist_ok=True)
-        dest = tmp_dir / filename
+        # 脚手架动作（OUTPUT.md C-10 豁免）：默认落当前目录，由用户决定去留；
+        # 不再落 OS temp（退出即失，且不可预期）。
+        dest = Path.cwd() / filename
 
     dep_list = deps or []
     if dep_list:

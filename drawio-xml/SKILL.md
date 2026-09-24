@@ -158,6 +158,7 @@ python3 scripts/check-quality.py <输出文件.drawio>
 
 ## 交付格式
 
-- 文件保存为 `<项目>/<名称>.drawio`（UTF-8）
+- 文件保存到 `<cwd>/skills-output/drawing/drawio-xml/<时间戳>/<名称>.drawio`（UTF-8；
+  docs/specs/OUTPUT.md C-1，`--output` 可指定到项目目录，最终产物另存主库审计副本）
 - 回复中给出：文件路径、图表统计（节点/边数）、类型说明、打开方式提示
 - 用户用 Windows 打开 WSL 文件：`\\wsl.localhost\<发行版>\<路径>` 或先拷贝到 Windows 侧

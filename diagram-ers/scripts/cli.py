@@ -18,7 +18,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "scripts"))
-from common import resolve_output_path
+from common import plan_output
 
 from scripts.renderer import render_er_diagram
 
@@ -108,14 +108,12 @@ Examples:
             kwargs["scale"] = args.scale
         png = render_er_diagram(json_data, **kwargs)
 
-    output_path = args.output
-    if output_path is None:
-        output_path = resolve_output_path(Path(args.json_file), "diagram-ers", "ers-diagram.png")
-    else:
-        output_path = Path(output_path)
+    plan = plan_output("drawing", "diagram-ers", "ers-diagram.png", explicit=args.output)
+    output_path = plan.primary
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_bytes(png)
+    plan.commit()
     print(f"Generated: {output_path}")
 
 

@@ -18,7 +18,7 @@
 
 3. **生成 ER 图**
    - 使用本项目的 CLI 工具生成 PNG 图片
-   - 输出路径：`~/.claude/skills-output/diagram-er/er-diagram.png`（默认，可自定义）
+   - 输出路径：`<cwd>/skills-output/drawing/diagram-er/<时间戳>/er-diagram.png`（默认，`--output` 可自定义）
 
 ## 目录结构
 
@@ -26,7 +26,7 @@
 docs/er/
 ├── sql/       # SQL DDL 文件
 
-~/.claude/skills-output/diagram-er/   # 生成的 ER 图 PNG（默认输出目录）
+<cwd>/skills-output/drawing/diagram-er/<时间戳>/   # 生成的 ER 图 PNG（默认输出目录）
 ```
 
 ## SQL 文件规范
@@ -59,7 +59,7 @@ uv run python -m scripts.cli \
   --sql-file docs/er/sql/<table_name>.sql
 ```
 
-当输入文件使用**绝对路径**时，CLI 会自动推断项目目录（向上查找包含 `docs/` 或 `thesis-output/` 的目录），默认输出到 `<项目目录>/thesis-output/diagram-er/er-diagram.png`。如使用相对路径或无法推断，则回退到 `~/.claude/skills-output/diagram-er/er-diagram.png`。如需自定义路径：
+产物默认落**统一产物树**（docs/specs/OUTPUT.md C-1）：`<cwd>/skills-output/drawing/diagram-er/<时间戳>/er-diagram.png`——`<cwd>` 即运行时的当前目录，无项目推断、无兜底分叉。如需自定义路径：
 
 ```bash
 cd ~/projects/dc-skills/diagram-er

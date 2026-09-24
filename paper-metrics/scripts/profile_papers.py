@@ -2605,8 +2605,10 @@ def main() -> None:
         description="Profile a paper-analysis/ corpus for the paper-metrics journal mode.",
     )
     parser.add_argument("--corpus", required=True, help="paper-analysis/ directory")
-    parser.add_argument("--out", "--output", dest="out", required=True,
-                        help="output directory for _domain_profile.{json,md} + metric artifacts")
+    parser.add_argument("--out", "--output", dest="out", default=None,
+                        help="output directory for _domain_profile.{json,md} + metric artifacts "
+                             "(default: unified tree <cwd>/skills-output/thesis/paper-metrics/<timestamp>/, "
+                             "docs/specs/OUTPUT.md C-1)")
     parser.add_argument("--min-papers", type=int, default=3,
                         help="warn if fewer papers are found (default: 3)")
     parser.add_argument("--no-section-metrics", action="store_true",
@@ -2614,6 +2616,11 @@ def main() -> None:
     parser.add_argument("--verify", action="store_true",
                         help="re-run into a temp dir and assert fingerprints are byte-identical")
     args = parser.parse_args()
+    if args.out is None:
+        sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "scripts"))
+        from common import run_dir  # noqa: E402
+        args.out = run_dir("thesis", "paper-metrics")
+
 
     corpus = Path(args.corpus).resolve()
     if not corpus.is_dir():

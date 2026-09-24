@@ -16,7 +16,8 @@ from typing import Any, Dict, List, Optional, Tuple
 # 「候选配置文件名」这一处引擎差异。
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "scripts"))
 from common import choose_limit, shutil_which  # noqa: E402
-from common import fallback_output_dir  # noqa: E402
+from common import plan_output  # noqa: E402
+from common import OutputPlan  # noqa: E402
 from common import resolve_config_path as _resolve_config_path  # noqa: E402
 
 
@@ -180,19 +181,11 @@ def ensure_jsonable_row(row: Dict[str, Any]) -> Dict[str, Any]:
     return out
 
 
-def make_output_path(explicit: Optional[str]) -> Path:
-    if explicit:
-        p = Path(explicit).expanduser().resolve()
-        p.parent.mkdir(parents=True, exist_ok=True)
-        return p
-
-    # Two-level fallback（docs/specs/OUTPUT.md C-1）：基准是主库根而非农场目录——
-    # 经 ~/.claude/skills 软链进入时 resolve() 回到主库，同样走兜底。
-    root = fallback_output_dir("db-skill", "db-output")
-    root.mkdir(parents=True, exist_ok=True)
-    fd, name = tempfile.mkstemp(prefix="mysql-result-", suffix=".json", dir=root)
-    os.close(fd)
-    return Path(name)
+def plan_result_output(explicit: Optional[str]) -> OutputPlan:
+    """查询结果落点（docs/specs/OUTPUT.md C-1/C-4/C-9）：
+    <cwd>/skills-output/db/db-skill/<时间戳>/mysql-result.json（固定名，禁随机名）；
+    explicit（--output）优先，最终产物另存主库审计副本。"""
+    return plan_output("db", "db-skill", f"mysql-result.json", explicit=explicit)
 
 
 def jq_preview(path: Path, jq_filter: str) -> Tuple[bool, str]:
@@ -234,7 +227,8 @@ def run_sql(args: argparse.Namespace) -> int:
         return 2
 
     conn, driver = connect_mysql(cfg["mysql"])
-    output_path = make_output_path(args.output) if read_mode else None
+    result_plan = plan_result_output(args.output) if read_mode else None
+    output_path = result_plan.primary if result_plan else None
 
     try:
         cur = conn.cursor(dictionary=True) if driver == "mysql-connector-python" else conn.cursor()
@@ -256,6 +250,9 @@ def run_sql(args: argparse.Namespace) -> int:
             }
             with output_path.open("w", encoding="utf-8") as f:
                 json.dump(payload, f, ensure_ascii=False, separators=(",", ":"))
+
+            if result_plan:
+                result_plan.commit()
 
             result = {
                 "ok": True,

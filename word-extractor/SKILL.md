@@ -34,7 +34,7 @@ uv run python word-extractor/scripts/extract_docx.py <input.docx> -o <output-dir
 ```
 
 Options:
-- `-o, --output-dir`: Where to save outputs (default: `<cwd>/doc-output/word-extractor/` or `~/.claude/skills-output/word-extractor/`)
+- `-o, --output-dir`: Where to save outputs (default: `<cwd>/skills-output/docs/word-extractor/<时间戳>/`)
 - `-f, --format`: `json`, `markdown`, or `both` (default: `both`)
 
 ### 2. Read the outputs

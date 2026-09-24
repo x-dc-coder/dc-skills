@@ -20,6 +20,7 @@ disable-model-invocation: true
 2. **唯一写入口**：所有写操作**一律经由 `taskctl`**，严禁 Agent 自行直接编辑 `tasks/*.md`，以确保事件流、时间推导与 Git 提交的完整性。
 3. **全局调用路径**：
    - 默认 Hub 位置：`/home/dc/projects/task-hub`（可通过环境变量 `TASKHUB_DIR` 覆盖）。
+     外部资产库，不适用 docs/specs/OUTPUT.md 产物树（任务数据非 SKILL 产物）。
    - 任何目录下统一执行：
      ```bash
      python3 /home/dc/projects/task-hub/taskctl <子命令> [参数...]

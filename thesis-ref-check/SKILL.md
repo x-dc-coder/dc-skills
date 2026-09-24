@@ -45,9 +45,10 @@ grep -n '^# ' <论文文件>               # 一级标题位置
 
 ### 阶段二：扫描生成术语表
 
-创建 `_state/` 目录（与论文文件同目录），包含两个状态文件：
+创建状态目录 `<cwd>/skills-output/thesis/thesis-ref-check/.state/<论文stem>/`（docs/specs/OUTPUT.md C-6：
+跨会话状态收编统一产物树；`<论文stem>` = 论文文件名去扩展名），包含两个状态文件：
 
-#### 状态文件 1: `_state/term_glossary.md`
+#### 状态文件 1: `.state/<论文stem>/term_glossary.md`
 
 记录论文中的关键术语及其所有变体：
 
@@ -120,9 +121,13 @@ grep -n '^# ' <论文文件>               # 一级标题位置
 1. **合并修正后的章节**：按顺序合并所有 `_state/chapterX_fixed.md`
 2. **生成修改报告**：基于 `_state/changes_log.md` 生成用户可读的报告
 
-**输出文件：**
+**输出文件**（落 `<cwd>/skills-output/thesis/thesis-ref-check/<时间戳>/`，docs/specs/OUTPUT.md C-1/C-9；
+`--output` 可指定到论文项目目录，最终产物另存主库审计副本）：
 - `<原文件名>_修正版.md`：修正后的完整论文
 - `<原文件名>_术语修改报告.md`：详细的术语修改说明
+
+**状态保留窗口**（C-6 要求）：`.state/<论文stem>/` 随论文修订周期保留，论文定稿提交后
+可随 `<时间戳>` 目录一并清理；跨论文不复用。
 
 ## 修改报告格式
 

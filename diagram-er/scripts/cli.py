@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "scripts"))
-from common import resolve_output_path
+from common import plan_output
 
 try:
     from scripts.parser import ddl_to_model
@@ -29,15 +29,13 @@ def main() -> None:
 
     png = render_diagram_png(model, scale=args.scale, downsample_output=args.downsample)
 
-    output_path = args.output
-    if output_path is None:
-        output_path = resolve_output_path(Path(args.sql_file), "diagram-er", "er-diagram.png")
-    else:
-        output_path = Path(output_path)
+    plan = plan_output("drawing", "diagram-er", "er-diagram.png", explicit=args.output)
+    output_path = plan.primary
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_bytes(png)
 
+    plan.commit()
     print(f"Generated: {output_path}")
 
 

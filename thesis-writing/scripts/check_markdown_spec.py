@@ -2,6 +2,11 @@
 from __future__ import annotations
 
 import argparse
+
+import sys
+from pathlib import Path as _Path
+sys.path.insert(0, str(_Path(__file__).resolve().parent.parent.parent / "scripts"))
+from common import plan_output  # noqa: E402
 import json
 import re
 from dataclasses import dataclass
@@ -1526,7 +1531,10 @@ def main() -> None:
         help="写作模式：undergraduate=本科毕设（默认），journal=期刊/会议论文",
     )
     parser.add_argument("--strict", action="store_true", help="将 WARN 也视为失败")
-    parser.add_argument("--output", "-o", default=None, help="输出目录（默认：输出到 stdout）")
+    parser.add_argument("--always-write", action="store_true",
+                        help="无 --output 时也落盘到统一产物树（默认仅 stdout）")
+    parser.add_argument("--output", "-o", default=None,
+                        help="输出目录（默认：统一产物树 <cwd>/skills-output/thesis/thesis-writing/<时间戳>/，docs/specs/OUTPUT.md C-1）")
     args = parser.parse_args()
 
     path = Path(args.md).resolve()
@@ -1535,15 +1543,17 @@ def main() -> None:
 
     findings, notes = check_markdown(path, mode=args.mode)
 
-    if args.output:
-        out_dir = Path(args.output).resolve()
-        out_dir.mkdir(parents=True, exist_ok=True)
-        out_path = out_dir / f"{path.stem}_findings.json"
+    if args.output or args.always_write:
+        plan = plan_output("thesis", "thesis-writing", f"{path.stem}_findings.json",
+                           explicit=args.output)
+        out_path = plan.primary
+        out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(
             json.dumps([{"level": f.level, "line": f.line, "code": f.code, "message": f.message} for f in findings],
                        ensure_ascii=False, indent=2),
             encoding="utf-8",
         )
+        plan.commit()
         print(f"[md-check] wrote findings → {out_path}")
         return
 

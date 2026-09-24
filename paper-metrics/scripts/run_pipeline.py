@@ -217,7 +217,7 @@ def main() -> int:
     )
     ap.add_argument("--papers", required=True, type=Path,
                     help="directory containing the source PDFs")
-    ap.add_argument("--out", "--output", dest="out", required=True, type=Path,
+    ap.add_argument("--out", "--output", dest="out", default=None, type=Path,
                     help="output directory for the five metric artifacts")
     ap.add_argument("--analysis-dir", type=Path, default=None,
                     help="canonical corpus dir; overrides auto-detection "
@@ -235,6 +235,11 @@ def main() -> int:
     ap.add_argument("--dry-run", action="store_true",
                     help="print the commands without executing them")
     args = ap.parse_args()
+
+    if args.out is None:
+        sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "scripts"))
+        from common import run_dir  # noqa: E402
+        args.out = run_dir("thesis", "paper-metrics")
 
     papers_dir = args.papers.resolve()
     out_dir = args.out.resolve()

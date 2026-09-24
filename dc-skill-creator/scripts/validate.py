@@ -270,13 +270,24 @@ def check(skill_dir: Path) -> list[dict]:
         if any(k in str(desc) for k in ("通用", "兜底", "fallback")) and "仅当" not in str(desc):
             bad("R9", "W", "兜底/通用技能须含 B6 优先级声明（“仅当其他专用 skill 无法满足时使用”）")
 
-    # R10 输出路径
-    hard = re.findall(r"/tmp/skills-output", txt)
-    if hard:
-        bad("R10", "E", f"硬编码 /tmp/skills-output ×{len(hard)}（docs/specs/OUTPUT.md C-10）")
-    if has_py and not re.search(r'"--output', "\n".join(p.read_text(encoding="utf-8", errors="replace") for p in scripts_dir.glob("*.py"))):
-        if re.search(r"\.(png|jpg|svg|md|json|docx|pdf|tex)\b", body):
-            bad("R10", "W", "疑似有产物但 CLI 无 --output 参数（OUTPUT.md 实现条款）")
+    # R10 输出路径（docs/specs/OUTPUT.md 统一产物树）
+    for pat, msg in [
+        (r"/tmp/skills-output", "硬编码 /tmp/skills-output（C-12 禁止）"),
+        (r"~/?\.claude/skills-output|/home/[^/\s]+/\.claude/skills-output",
+         "硬编码已废弃的 ~/.claude/skills-output（2026-09-24 起废止，C-12）"),
+    ]:
+        hits = re.findall(pat, txt)
+        if hits:
+            bad("R10", "E", f"{msg} ×{len(hits)}")
+    if has_py:
+        py_all = "\n".join(p.read_text(encoding="utf-8", errors="replace")
+                           for p in scripts_dir.glob("*.py"))
+        # 自拼产物路径（绕过 common.py）：出现 skills-output 字面量或手写 cwd/家目录拼接
+        if "skills-output" in py_all and "plan_output" not in py_all and "run_dir" not in py_all:
+            bad("R10", "E", "出现 skills-output 字面量但未调 plan_output/run_dir（C-12 禁绕过 common.py）")
+        if not re.search(r'"--output', py_all) and re.search(
+                r"\.(png|jpg|svg|md|json|docx|pdf|tex)\b", body):
+            bad("R10", "W", "疑似有产物但 CLI 无 --output 参数（OUTPUT.md C-4）")
 
     # R11 孤儿目录与污染文件
     for p in skill_dir.rglob("*"):

@@ -16,7 +16,7 @@ import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "scripts"))
-from common import resolve_output_path
+from common import plan_output
 
 
 def _json_to_mermaid(data: dict) -> str:
@@ -144,11 +144,8 @@ Examples:
         input_file = Path(args.mmd_file)
 
     # 确定输出路径
-    output_path = args.output
-    if output_path is None:
-        output_path = resolve_output_path(input_file, "diagram-sequence", "sequence-diagram.png")
-    else:
-        output_path = Path(output_path)
+    plan = plan_output("drawing", "diagram-sequence", "sequence-diagram.png", explicit=args.output)
+    output_path = plan.primary
 
     # 确保输出目录存在
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -167,6 +164,7 @@ Examples:
 
     # 渲染
     _render_mmd(mmd_text, str(output_path), bg=args.bg, scale=args.scale, fmt=args.format)
+    plan.commit()
     print(f"Generated {args.format.upper()}: {output_path}")
 
 

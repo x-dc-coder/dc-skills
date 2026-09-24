@@ -61,7 +61,7 @@ uv run --project ~/projects/dc-skills python ~/projects/dc-skills/github-workflo
 - **stdout 是纯 JSON**，日志/进度走 stderr —— 读取结果时**勿用 `2>&1` 混流**。
 - 长输出会截断：重定向到文件后分段读：
   ```bash
-  uv run --project ~/projects/dc-skills python ~/projects/dc-skills/github-workflow/scripts/github_bootstrap.py preview --project . --json > /tmp/gw_preview.json 2>/tmp/gw_preview.err
+  uv run --project ~/projects/dc-skills python ~/projects/dc-skills/github-workflow/scripts/github_bootstrap.py preview --project . --json > "$TMPDIR/gw_preview.json" 2>"$TMPDIR/gw_preview.err"
   ```
   安全扫描在 `safety_scan` 字段，候选输入在 `diff_excerpt` / `files_by_kind` / `type_hints` / `scope_hints`。
 

@@ -22,7 +22,7 @@ from docx import Document
 from docx.oxml.ns import qn
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "scripts"))
-from common import fallback_output_dir  # noqa: E402
+from common import plan_output  # noqa: E402
 
 
 def extract_comments_data(doc):
@@ -800,24 +800,29 @@ def main():
     data = extract_all(args.input)
 
     base_name = Path(args.input).stem
-    if args.output_dir is not None:
-        output_dir = Path(args.output_dir)
-    else:
-        # Two-level fallback（OUTPUT.md C-1）：基准是主库根而非农场目录。
-        output_dir = fallback_output_dir("word-extractor", "doc-output")
+    # 统一产物树（docs/specs/OUTPUT.md C-1/C-4）：显式 --output-dir 优先；
+    # 默认 <cwd>/skills-output/docs/word-extractor/<时间戳>/，最终产物另存主库审计副本。
+    explicit_dir = args.output_dir
+    md_plan = plan_output("docs", "word-extractor", f"{base_name}.md",
+                          explicit=explicit_dir)
+    json_plan = plan_output("docs", "word-extractor", f"{base_name}.json",
+                            explicit=explicit_dir)
+    output_dir = md_plan.primary.parent
     output_dir.mkdir(parents=True, exist_ok=True)
 
     if args.format in ("json", "both"):
-        json_path = output_dir / f"{base_name}.json"
+        json_path = json_plan.primary
         with open(json_path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
+        json_plan.commit()
         print(f"  JSON: {json_path}")
 
     if args.format in ("markdown", "both"):
         md = generate_markdown(data)
-        md_path = output_dir / f"{base_name}.md"
+        md_path = md_plan.primary
         with open(md_path, "w", encoding="utf-8") as f:
             f.write(md)
+        md_plan.commit()
         print(f"  Markdown: {md_path}")
 
     # Print summary

@@ -147,8 +147,8 @@ uv run python scripts/skillctl inventory     # 全机清单：主库 vs App 自�
 ```bash
 # ── 1. 每日全量巡检（cron；WSL 需先起 cron 服务）──
 sudo service cron start
-mkdir -p ~/.claude/skills-output/assets-doctor
-(crontab -l 2>/dev/null; echo '0 9 * * * cd ~/projects/dc-skills && /home/dc/.local/bin/uv run python scripts/assets-doctor --check --json >> ~/.claude/skills-output/assets-doctor/daily.jsonl 2>&1') | crontab -
+mkdir -p ~/.local/state/dc-skills/assets-doctor
+(crontab -l 2>/dev/null; echo '0 9 * * * cd ~/projects/dc-skills && /home/dc/.local/bin/uv run python scripts/assets-doctor --check --json >> ~/.local/state/dc-skills/assets-doctor/daily.jsonl 2>&1') | crontab -
 
 # ── 2. Windows 侧兜底（覆盖 WSL 未开机时段；PowerShell）──
 schtasks /Create /TN "dc-skills-doctor" /SC DAILY /ST 09:00 /F ^

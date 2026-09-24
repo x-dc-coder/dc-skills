@@ -39,10 +39,10 @@ uv run --directory ~/projects/dc-skills python scripts/github_issues.py ...
 
 ## 核心约束：输出目录
 
-所有 SKILL 的文件输出遵循 `OUTPUT.md`（docs/specs/OUTPUT.md，**唯一事实源**）的两级回退规则：
-显式指定（`--output`）优先；否则工作项目内落 `<项目>/<skill-output-root>/<skill-name>/`，
-主库内（含经农场软链进入）兜底 `~/.claude/skills-output/<skill-name>/`。禁止固定名互相覆盖、
-`/tmp/skills-output/` 堆积、技能目录内产物。CLI 统一调用 `scripts/common.py::resolve_output_path`。
+所有 SKILL 的文件输出遵循 `OUTPUT.md`（docs/specs/OUTPUT.md，**唯一事实源**）的统一产物树规则：
+默认落 `<cwd>/skills-output/<族群>/<技能名>/<时间戳>/`；显式指定（`--output`）优先，最终产物另存
+`<master>/skills-output/` 审计副本。禁止固定名互相覆盖、`/tmp/skills-output/` 堆积、技能目录内
+产物。CLI 统一调用 `scripts/common.py` 的 `plan_output` / `commit_final`。
 
 ## 三条铁律（摘要）
 
