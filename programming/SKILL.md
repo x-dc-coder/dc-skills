@@ -1,6 +1,11 @@
 ---
 name: programming
-description: "MUST USE for ANY work on .py .pyi .rs .ts .tsx .mts .cts .go files. One philosophy: strict types, modern stacks (Pydantic v2 / serde+thiserror / Zod / gin+sqlc+pgx), parse-don't-validate, exhaustive match, typed errors, no any/unwrap/panic, 250 LOC ceiling, TDD, consumer-routed logging. See references/. Triggers: writing/editing Python/Rust/TypeScript/Go, new project, gin, sqlc/pgx, unsafe Rust/miri, oversized file, refactor, TDD, structured logging. 调试（debugging）、git 进阶（git-master）、AI 味清除（remove-ai-slops）、测试质量（test-guardian）、git/gh 工作流（github-workflow）、代码库理解（codegraph-explore）同属 software 族，由本技能路由。"
+description: >
+  software 族入口。当用户要 commit、提交、rebase、squash、blame、bisect、查谁写的，读 git-master；
+  初始化仓库、gh、PR、issue、preview、publish，读 github-workflow；崩溃、静默失败、结果错误、内存泄漏、卡死，读 debugging；
+  任意语言的调用链、谁在调用、大仓影响面，读 codegraph-explore；假绿、测试门禁，读 test-guardian；
+  代码 deslop、去掉代码里的 AI 味，读 remove-ai-slops。论文的 AI 腔不在这里。写或改 .py/.pyi/.rs/.ts/.tsx/.mts/.cts/.go 时也先读本技能。
+  哲学：Pydantic v2、serde+thiserror、Zod、gin+sqlc+pgx，parse-don't-validate，250 行，TDD。
 metadata:
   family: software
   role: entry
@@ -14,12 +19,14 @@ metadata:
 
 | 技能 | 用途 | 何时选它 |
 |---|---|---|
-| [`debugging`](~/projects/dc-skills/debugging/SKILL.md) | 系统化调试（假设驱动闭环） | 任何真实运行时故障：崩溃/静默失败/内存/时序 |
-| [`git-master`](~/projects/dc-skills/git-master/SKILL.md) | git 进阶操作 | 提交规范/历史调查/rebase/bisect/blame |
+| [`debugging`](~/projects/dc-skills/debugging/SKILL.md) | 系统化调试（假设驱动闭环） | 崩溃、静默失败、结果错误、卡死、内存泄漏、时序异常。不限语言 |
+| [`git-master`](~/projects/dc-skills/git-master/SKILL.md) | 已有仓库的本地 git | commit、提交、暂存、rebase、squash、fixup、blame、bisect、reflog、谁写的。提交信息沿用该仓库既有风格 |
+| [`github-workflow`](~/projects/dc-skills/github-workflow/SKILL.md) | GitHub 仓库生命周期 | 初始化仓库、gh repo、PR、issue、preview、publish。这些流程里的提交信息用该技能的 Conventional Commits |
 | [`remove-ai-slops`](~/projects/dc-skills/remove-ai-slops/SKILL.md) | AI 味代码清除 | 清理分支改动中的 AI 生成代码味 |
-| [`test-guardian`](~/projects/dc-skills/test-guardian/SKILL.md) | 测试防假绿规范与双盲质检 | 审计测试是否真绿/测试分层与工程门禁 |
-| [`github-workflow`](~/projects/dc-skills/github-workflow/SKILL.md) | GitHub-first git 工作流 | git/gh 操作/提交规范/PR/issue/manifest |
-| [`codegraph-explore`](~/projects/dc-skills/codegraph-explore/SKILL.md) | CodeGraph 代码库符号检索 | 理解大仓/定位定义或调用者/评估重构影响 |
+| [`test-guardian`](~/projects/dc-skills/test-guardian/SKILL.md) | 测试防假绿规范与双盲质检 | 审计测试是否真绿、测试分层与工程门禁 |
+| [`codegraph-explore`](~/projects/dc-skills/codegraph-explore/SKILL.md) | 任意语言的符号、调用链、影响面 | 理解大仓、定位定义或调用者、评估重构影响。不限 .py/.rs/.ts/.go。小仓、配置、Markdown 不要读它 |
+
+一次提交只打开 git-master 或 github-workflow 其中一个。查本地历史、在已有仓库里提交，打开 git-master。要初始化仓库、建远端、走 preview/publish 或处理 PR/issue，打开 github-workflow。
 
 
 You are a lazy senior engineer — lazy meaning efficient, never careless. **The best code is the code never written; the code you do write is type-strict, stack-first, async-correct, and architecturally honest about size.**

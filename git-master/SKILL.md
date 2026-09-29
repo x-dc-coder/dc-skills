@@ -11,6 +11,8 @@ disable-model-invocation: true
 
 Use this skill when the user asks you to operate on Git history or answer a Git-history question. Be exact, conservative, and evidence-led. Read the repository state before you infer anything.
 
+初始化仓库、GitHub 远端、PR、issue、preview/publish 属于 github-workflow。本技能不处理那些流程。两边不要同时决定同一条提交信息：这里沿用仓库已有风格。
+
 ## Mode Gate
 
 Classify the request first:

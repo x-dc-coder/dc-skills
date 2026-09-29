@@ -11,8 +11,8 @@
 ## 写法对照
 
 - ❌ "生成 ER 图"（只描述能力，无触发场景）
-- ✅ "当用户需要生成 ER 图/实体关系图/E-R 图/表结构图时使用；输出 er-diagram.png 到
-  thesis-output/；多实体关系图走 ers 类型"（能力 + 触发词 + 边界）
+- ✅ "当用户需要生成 ER 图/实体关系图/E-R 图/表结构图时使用。产物落
+  skills-output/drawing/diagram-er/ 下的时间戳目录。多实体关系图走 ers 类型"（能力 + 触发词 + 边界）
 - ❌ "This skill does diagram generation"（陈述式，CC 官方不推荐）
 - ✅ "Use when the user asks for ER/module/usecase/sequence diagrams or ASCII drafts"（祈使句）
 

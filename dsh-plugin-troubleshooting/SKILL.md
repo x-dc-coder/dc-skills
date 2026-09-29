@@ -5,7 +5,7 @@ description: >
   以及"安装插件遇到未知问题"类请求。当用户报告 DSH 插件报错、插件不生效、配置 invalid、
   peer-deps 缺失或需要诊断 ~/.dsh 插件体系时使用。含 plugin-doctor 只读自动检测、标准排障
   流程与修复红线（不自行重启 DSH、不改 shipped 预设）。
-  DSH 插件 UI 优化（dsh-ui-optimization）同属 dshplugin 族，由本技能路由。
+  当用户要美化 DSH 插件界面、conversation.view、lab-monitor 面板，或说插件前端丑时，读 dsh-ui-optimization。
 metadata:
   family: dshplugin
   role: entry

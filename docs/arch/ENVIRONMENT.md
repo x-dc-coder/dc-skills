@@ -53,7 +53,7 @@ done
 | keenable | Claude Code（`~/.claude.json`） | ✔ | unified-search（源之一，可 CLI 可 MCP） |
 | codegraph | Claude Code（`~/.claude.json`） | ✔ | 技能仓库 `.codegraph` 项目索引（代码检索） |
 | context7 | Claude Code 插件 | ✔ | 无技能引用（孤儿，保留） |
-| browser（Playwright） | DSH 插件（`cordis.patch.yml`，`playwright-mcp --headless`） | ✔ | **浏览器自动化默认通道**（`mcp__browser__*`，24 工具）；kimi-webbridge 仅在用户显式指定时使用；用法见 `~/.dsh/knowledge/browser-mcp-guide.md` |
+| browser（Playwright） | DSH 插件（`cordis.patch.yml`，`playwright-mcp --headless`） | ✔ | 宿主有该 MCP 且不需要登录态时的浏览器通道（`mcp__browser__*`）。通道选择见 kimi-webbridge；工具用法见 `~/.dsh/knowledge/browser-mcp-guide.md` |
 | drawio | 按需 `npx @next-ai-drawio/mcp-server` | ⚠️ 未注册 | drawio-xml（执行层：会话/预览/编辑门控/导出）；待 `claude mcp add drawio` 后全链路可用 |
 | fiddler / visio | — | ✘ 已清理（2026-08-29） | 孤儿（无技能引用），配置已从 `~/.claude.json` 与 `/home/dc/.mcp.json` 移除 |
 

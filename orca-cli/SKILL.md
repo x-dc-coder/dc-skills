@@ -8,7 +8,7 @@ description: >-
   agent", "Orca browser", "orca artifacts", or "share skills". Prefer it over raw git
   worktree, ad hoc PTYs, or Computer Use when Orca state is involved. Use Computer Use only
   when a visible window needs GUI control that a CLI, filesystem, or API cannot do.
-  Orca 生态的多 agent 编排（orchestration）、跨会话任务中心（task-hub）、可见窗口 GUI 驱动（computer-use）、本机 NewAPI 网关运维（newapi-management）同属 agentops 族，由本技能路由。
+  Orca 生态的多 agent 编排（orchestration）、跨会话任务中心（task-hub：新建任务、待办）、可见窗口 GUI 驱动（computer-use）、本机 NewAPI 网关运维（newapi-management）同属 agentops 族，由本技能路由。
 metadata:
   family: agentops
   role: entry

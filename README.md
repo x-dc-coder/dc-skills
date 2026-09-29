@@ -20,7 +20,7 @@
 ├── lark-cli/              # 飞书/Lark 聚合技能（23 域统一入口）
 │   ├── SKILL.md           # 路由表 + 共享底座 + 维护命令
 │   └── resources/         # CLI 不内嵌的机器资源（scripts/创意资产/模板）
-├── diagram/               # 图表聚合技能（7 类统一入口）
+├── diagram/               # 图表聚合入口。flow 在 references/flow.md，没有 diagram-flow 目录
 │   ├── SKILL.md           # 路由表 + 通用规范
 │   └── references/        # 各类型规程分册（er/ers/module/usecase/sequence/flow/draft）
 │
@@ -32,7 +32,6 @@
 ├── diagram-sequence/      # UML 时序图脚本目录（mmdc 渲染）
 ├── diagram-usecase/       # UML 用例图脚本目录
 ├── diagram-draft/         # ASCII 架构草稿（graph-easy render.sh，无 Python）
-├── diagram-flow/          # Mermaid 流程图（纯代码输出，无脚本）
 │
 ├── design-ui/             # 前端页面设计（原 artifact-design）
 ├── design-diagram/        # Artifact 内联 SVG 图表（原 artifact-diagramming）
@@ -114,7 +113,7 @@ cd ~/projects/dc-skills/diagram-er && uv run python -m scripts.cli ...
 ```
 
 这是因为 `-m scripts.cli` 要求 `scripts/` 在 cwd 下；脚本内 `sys.path` 引用顶层 `scripts/common.py`
-（`resolve_output_path`，实现 docs/specs/OUTPUT.md 两级回退）。其 `.venv` 符号链接确保 uv 仍解析到统一环境。
+（`plan_output`，实现 docs/specs/OUTPUT.md C-1）。其 `.venv` 符号链接确保 uv 仍解析到统一环境。
 类型路由与使用规范见 `diagram/SKILL.md`。
 
 ## 环境管理命令

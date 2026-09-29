@@ -2,6 +2,6 @@
 # 由 scripts/family-apply.py 生成；SKILL.md description 变更后需重跑刷新。
 interface:
   display_name: "Kimi Webbridge"
-  short_description: "Kimi WebBridge 控制用户【真实】浏览器（本地守护进程 127.0.0.1:10086，带用户登录态）："
+  short_description: "Kimi WebBridge 控制用户真实浏览器（本地守护进程，带登录态）"
 policy:
   allow_implicit_invocation: false

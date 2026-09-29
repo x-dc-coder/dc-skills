@@ -1,7 +1,9 @@
 ---
 name: db-skill
-description: High-performance MySQL and PostgreSQL operations for project-local databases with global skill reuse. Use when Codex must run MySQL/PostgreSQL CRUD (insert/update/delete/select), load connection settings from a project config file, enforce bounded result sizes, emit JSON, and use jq plus temp files to avoid context bloat.
-  本机服务运维（NewAPI 网关）与 WSL→Windows 跨边界调用同属 infra 族，由本技能路由。
+description: >
+  项目内 MySQL / PostgreSQL 的查询与写入。当用户要跑 CRUD、从项目配置读取连接、
+  限制返回行数、把结果落成 JSON 时使用。NewAPI 网关读 newapi-management
+  （入口是 orca-cli）。WSL 调用 Windows、GPU、注册表读 wsl-windows-bridge。
 metadata:
   family: db
   role: entry
@@ -9,14 +11,14 @@ metadata:
 ---
 # DB Skill
 
-## 族群路由（infra 基础设施运维入口）
+## 别的入口
 
-本技能是 **infra 基础设施运维族群入口**。族内技能为 manual 加载（不进启动清单），命中下表场景时直接 Read 对应 SKILL.md 后按其规程执行；用户显式要求加载整族时依次读本表全部条目。
+本族没有成员。下面两件事有自己的技能，不要用数据库脚本去处理：
 
-| 技能 | 用途 | 何时选它 |
-|---|---|---|
-| [`newapi-management`](~/projects/dc-skills/newapi-management/SKILL.md) | NewAPI 网关渠道/日志运维 | 配置 NewAPI 渠道/排查会话日志 |
-| [`wsl-windows-bridge`](~/projects/dc-skills/wsl-windows-bridge/SKILL.md) | WSL→Windows 跨边界框架 | 调用 Windows 侧程序/GPU 任务/注册表 |
+| 请求 | 去读 |
+|---|---|
+| NewAPI 渠道、会话日志 | `~/projects/dc-skills/newapi-management/SKILL.md` |
+| WSL 调用 Windows、GPU、注册表、COM | `~/projects/dc-skills/wsl-windows-bridge/SKILL.md` |
 
 
 ## Supported Databases

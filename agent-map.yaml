@@ -36,54 +36,55 @@ master: /home/dc/projects/dc-skills
 #   member（族内技能，load: manual）：不进启动清单（省 token），可 /name 或 $name 显式触发
 # 族群划分见文末 families 段；标记一致性由 skills-sync --check 校验。
 base:
-  # ── drawing 绘图设计（entry: diagram）──
+  # ── drawing（entry: diagram；design-* 属于 frontend，不在本族）──
   - diagram             # 7 类图表统一入口（脚本目录 diagram-* 随主库，不单独成链）
-  - drawio-xml          # .drawio 原生图表
-  - design-diagram      # 内联 SVG 图表规范
-  - design-dataviz      # 数据可视化设计系统
+  - drawio-xml          # .drawio 原生图表（member）
+  # ── frontend（entry: design-ui）──
   - design-ui           # 前端页面设计
-  # ── thesis 论文（entry: thesis-writing）──
+  - design-diagram      # 内联 SVG 图表规范（member）
+  - design-dataviz      # 数据可视化设计系统（member）
+  # ── thesis（entry: thesis-writing）──
   - thesis-writing      # 论文写作（毕设/期刊双模式）
   - thesis-ref-check    # 论文术语一致性检查
   - md-to-thesis-latex  # 毕业论文 md→LaTeX→PDF
   - paper-metrics       # 论文写作特征指标层
   - paper-reader        # 论文 PDF 双引擎阅读（venvs 11GB）
   - thesis-export       # 论文导出编排（word-production 工具链手册）
-  # ── coding 编程质量（entry: programming）──
+  # ── software（entry: programming；codegraph / github 是成员，不是入口）──
   - programming         # 编程任务分流（oh-my-openagent 4.17.1 vendored）
   - debugging           # 系统化调试（omo vendored）
-  - git-master          # git 进阶操作（omo vendored）
+  - git-master          # 已有仓库的本地 git（omo vendored）
   - remove-ai-slops     # AI 味代码清除（omo vendored）
   - test-guardian       # 测试工程质量规范
-  # ── agentops Agent 运维（entry: orca-cli）──
+  - codegraph-explore   # 任意语言的大仓符号检索（member）
+  - github-workflow     # GitHub 仓库生命周期（member）
+  # ── agentops（entry: orca-cli；newapi 是成员）──
   - orca-cli            # Orca worktree/终端操作
   - orchestration       # Orca worker 编排
   - task-hub            # 跨会话任务中心
   - computer-use        # GUI 驱动（orca computer）
-  # ── info 信息获取（entry: unified-search）──
+  - newapi-management   # 本机 NewAPI 网关（member）
+  # ── info（entry: unified-search）──
   - unified-search      # 10 源聚合搜索
   - kimi-webbridge      # 真实浏览器控制
   - vision-workflow     # 视觉任务编排
-  # ── infra 基础设施运维（entry: db-skill）──
-  - db-skill            # MySQL/PostgreSQL 操作
-  - newapi-management   # 本机 NewAPI 网关渠道/日志运维
+  # ── db（单体入口）──
+  - db-skill            # 只处理 MySQL/PostgreSQL
+  # ── bridge（单体入口，不归 db-skill）──
   - wsl-windows-bridge  # WSL→Windows 跨边界框架
-  # ── repo 仓库工程（entry: codegraph-explore）──
-  - codegraph-explore   # 大仓符号检索/调用链/影响分析
-  - github-workflow     # git/gh 工作流
-  # ── docs 文档处理（entry: officecli）──
+  # ── docs（entry: officecli）──
   - officecli           # Office 文档 CLI
   - word-extractor      # .docx 高精度提取
-  # ── lark 飞书协作（单体族，28 域已内聚）──
+  # ── lark（单体族，28 域已内聚）──
   - lark-cli            # 飞书全家桶统一入口
-  # ── dshplugin DSH 插件（entry: dsh-plugin-troubleshooting，on_demand+预设作用域）──
-  - dsh-ui-optimization # DSH 插件 UI 优化（member；plugin-specialist 预设亦挂载）
-  # ── meta 仓库元工作（entry: dc-skill-creator）──
+  # ── dshplugin（entry 与 member 都在 base，否则成员没有自动入口）──
+  - dsh-plugin-troubleshooting  # DSH 插件故障排查（entry，auto）
+  - dsh-ui-optimization         # DSH 插件 UI 优化（member；plugin-specialist 预设亦挂载）
+  # ── meta（entry: dc-skill-creator）──
   - dc-skill-creator    # 本仓库技能创建工具（validate/new_skill/check_triggers）
 
-# 按需技能：默认不在任何农场；在对应 agent 的 extra 中列出即启用
+# 按需技能：默认不进任何农场。目前为空；新的按需技能写在这里，再放进某个 agent 的 extra。
 on_demand:
-  - dsh-plugin-troubleshooting  # DSH 插件故障排查；仅 plugin-specialist 预设作用域（dshplugin 族入口）
 
 agents:
   claude-code:

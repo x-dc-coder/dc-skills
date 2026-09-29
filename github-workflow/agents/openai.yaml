@@ -2,6 +2,6 @@
 # 由 scripts/family-apply.py 生成；SKILL.md description 变更后需重跑刷新。
 interface:
   display_name: "Github Workflow"
-  short_description: "基于官方 gh CLI 的 GitHub-first git 工作流：本地仓库初始化（仓库级身份、master"
+  short_description: "基于官方 gh CLI 的 GitHub 仓库生命周期"
 policy:
   allow_implicit_invocation: false

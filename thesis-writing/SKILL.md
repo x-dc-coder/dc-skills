@@ -1,8 +1,9 @@
 ---
 name: thesis-writing
 description: >
-  双模式学术论文写作助手：按用户意图自动选择本科毕设（≥15000 字、六章模板、Web 系统论文）或期刊论文模式，生成带图表/公式占位符的结构化 Markdown 草稿（对接 diagram-* 技能族），并经过 Markdown 规范检查器校验。当用户要求写论文、写毕设、生成论文草稿、整理期刊论文（write a thesis / draft a paper）时使用。
-  论文工作其他环节（术语一致性检查/导出 docx/转 LaTeX/写作特征指标/PDF 阅读）由本技能路由至 thesis 族内技能。
+  双模式学术论文写作：本科毕设（≥15000 字、六章、Web 系统）或期刊论文。当用户要写论文、写毕设、生成论文草稿、整理期刊论文（write a thesis / draft a paper）时使用。
+  读论文 PDF、MinerU/Marker 转换走 paper-reader，不要改用 App 自带的 pdf 技能。生成毕设 PDF、排版、封面拼接走 md-to-thesis-latex 或 thesis-export，不是读 PDF。术语检查、导出 docx、转 LaTeX 走族内成员。论文 AI 腔走 paper-metrics，不是代码 deslop。
+  插图走 diagram 技能的类型（er/ers/module/usecase/sequence/flow），没有名为 diagram-er 的独立技能。
 metadata:
   family: thesis
   role: entry
@@ -23,7 +24,7 @@ metadata:
 | [`paper-reader`](~/projects/dc-skills/paper-reader/SKILL.md) | 学术论文 PDF 双引擎阅读 | 读 PDF 论文/转换/总结 |
 
 
-双模式学术稿件生成器。生成结构化 Markdown 初稿，图片使用占位符（对接 `diagram-*` skill 家族），最后用 `check_markdown_spec.py` 校验。
+双模式学术稿件生成器。生成结构化 Markdown 初稿，图片使用占位符（出图时读 diagram 技能，按类型 er/ers/module/usecase/sequence/flow 执行），最后用 `check_markdown_spec.py` 校验。
 
 ## 适用范围
 
@@ -79,7 +80,7 @@ metadata:
 1. 读取 `references/undergrad-example-output.md` 作为写作风格参考
 2. 按大纲顺序逐章生成 Markdown 内容
 3. **所有图片均使用占位符**，不直接生成图片。占位符格式见下文"图片占位符规范"
-4. 每章完成后写入 `thesis-output/thesis-writing/第X章-章节名.md`
+4. 每章完成后写入 `<cwd>/skills-output/thesis/thesis-writing/<时间戳>/第X章-章节名.md`
 5. 每章完成后询问用户：
    - 确认，继续下一章
    - 需要修改（指出具体修改点后重新生成）
@@ -88,7 +89,7 @@ metadata:
 
 ### 阶段四：合并与质量检查
 
-1. 将所有章节合并为 `thesis-output/thesis-writing/full-thesis.md`
+1. 将所有章节合并为 `<cwd>/skills-output/thesis/thesis-writing/<时间戳>/full-thesis.md`
 2. **执行 Markdown 规范检查**（必须）：
    ```bash
    cd ~/projects/dc-skills && uv run python thesis-writing/scripts/check_markdown_spec.py \
@@ -211,9 +212,9 @@ profiler 是纯 Python 脚本（stdlib 实现，**零第三方依赖、零 LLM t
 
 | 期刊图片类型 | 对接 skill | 备注 |
 |-------------|-----------|------|
-| 方法/框架总览图 | `diagram-flow` | Mermaid 分层架构图 |
-| 神经网络结构图 | `diagram-flow` | Mermaid 分层 subgraph 模型图 |
-| 算法流程图 | `diagram-flow` | Mermaid 流程图 |
+| 方法/框架总览图 | diagram 类型 `flow` | Mermaid 分层架构图 |
+| 神经网络结构图 | diagram 类型 `flow` | Mermaid 分层 subgraph 模型图 |
+| 算法流程图 | diagram 类型 `flow` | Mermaid 流程图 |
 | 实验结果图（折线/柱状/热力/散点） | 无 diagram skill | 占位符描述 matplotlib/seaborn 调用，用户后续渲染 |
 | 消融对比表 / 硬件对比表 | 直接 Markdown 表格 | 不需 diagram skill |
 
@@ -292,7 +293,7 @@ uv run python paper-metrics/scripts/validate_draft.py \
 
 ## 图片占位符规范（两模式共享）
 
-论文初稿中**所有图片均使用文字占位符**，实际图片在后续阶段由专门的 diagram skill 生成。
+论文初稿中**所有图片均使用文字占位符**。出图时 Read `~/projects/dc-skills/diagram/SKILL.md`，按下表类型执行。类型名不是技能名。
 
 ### 占位符格式
 
@@ -309,24 +310,24 @@ uv run python paper-metrics/scripts/validate_draft.py \
 
 **Mode A（本科毕设）** — 详见 `references/undergrad-image-spec.md`：
 
-| 占位符中的图片类型 | 后续调用 Skill | 所需输入 |
+| 占位符中的图片类型 | diagram 类型 | 所需输入 |
 |-------------------|---------------|---------|
-| 用例图 | `diagram-usecase` | JSON 文件（actor + usecases） |
-| E-R 图（单表含属性） | `diagram-er` | SQL DDL 文件 |
-| E-R 图（多实体关系，不含属性） | `diagram-ers` | JSON 文件（entities + relations） |
-| 功能模块图 / 系统功能结构图 | `diagram-module` | JSON 文件（tree 结构） |
-| 流程图（业务流程 / 系统流程） | `diagram-flow` | 直接生成 Mermaid 代码 |
-| 时序图（模块交互） | `diagram-sequence` | JSON 文件（participants + messages） |
+| 用例图 | `usecase` | JSON 文件（actor + usecases） |
+| E-R 图（单表含属性） | `er` | SQL DDL 文件 |
+| E-R 图（多实体关系，不含属性） | `ers` | JSON 文件（entities + relations） |
+| 功能模块图 / 系统功能结构图 | `module` | JSON 文件（tree 结构） |
+| 流程图（业务流程 / 系统流程） | `flow` | 直接生成 Mermaid 代码 |
+| 时序图（模块交互） | `sequence` | JSON 文件（participants + messages） |
 | 界面截图 | 不适用 | 需实际运行系统后手动截图 |
 
 **Mode B（期刊论文）** — 详见 `references/journal-image-spec.md`：
 
-| 占位符中的图片类型 | 后续调用 Skill | 所需输入 |
+| 占位符中的图片类型 | diagram 类型 | 所需输入 |
 |-------------------|---------------|---------|
-| 方法总览图 / 系统架构图 | `diagram-flow` | 文字描述（层名 + 数据流） |
-| 神经网络结构图 | `diagram-flow` | 文字描述（层名 + 维度 + 连接） |
-| 算法流程图 / 业务流程 | `diagram-flow` | 直接生成 Mermaid 代码 |
-| 概念示意图 / 分类法图 | `diagram-flow`（或手绘） | 文字描述 |
+| 方法总览图 / 系统架构图 | `flow` | 文字描述（层名 + 数据流） |
+| 神经网络结构图 | `flow` | 文字描述（层名 + 维度 + 连接） |
+| 算法流程图 / 业务流程 | `flow` | 直接生成 Mermaid 代码 |
+| 概念示意图 / 分类法图 | `flow`（或手绘） | 文字描述 |
 | 实验结果图（折线/柱状/热力/散点） | 不适用（用户后续用 matplotlib 渲染） | 数据文件路径 + 轴/系列说明 |
 | 实验对比表 / 消融表 / 超参表 | 不适用（直接写 Markdown 表格） | - |
 
@@ -335,9 +336,9 @@ uv run python paper-metrics/scripts/validate_draft.py \
 当后续调用 diagram skill 生成图片后，**必须按以下规则替换占位符**，确保不残留任何占位符内容：
 
 1. **整段删除**：删除整个引用块（包括 `> [图X-Y ...]` 和 `> 描述：...` 所有行）
-2. **替换为 Markdown 图片语法**：`![图X-Y 标题](thesis-output/thesis-writing/img/图X-Y_标题.png)`
-3. **路径规范**：所有图片统一放到 `thesis-output/thesis-writing/img/` 目录下（相对项目根目录，非 cwd 相对）
-4. **diagram skill 输出对接**：diagram skill 默认输出到 `thesis-output/<skill-name>/`，引用时需指向实际输出路径，或将图片复制到 `thesis-output/thesis-writing/img/`
+2. **替换为 Markdown 图片语法**：`![图X-Y 标题](img/图X-Y_标题.png)`（相对本章 Markdown）
+3. **路径规范**：图片放在 `<cwd>/skills-output/thesis/thesis-writing/<时间戳>/img/`。`<cwd>` 是运行技能时的当前目录
+4. **diagram 输出对接**：落盘目录以 diagram 技能为准（drawing 下的脚本目录名，不是 `er` 这类短名）。引用该文件，或复制到本次运行目录的 `img/`。
 5. **替换后检查清单**：
    - [ ] 全文搜索 `> \[图`，确认无残留
    - [ ] 全文搜索 `> 描述：`，确认无残留
@@ -346,7 +347,7 @@ uv run python paper-metrics/scripts/validate_draft.py \
 
 **错误示例**（残留描述）：
 ```markdown
-![图3-1 系统功能结构图](thesis-output/thesis-writing/img/图3-1_系统功能结构图.png)
+![图3-1 系统功能结构图](img/图3-1_系统功能结构图.png)
 > 描述：树状结构图，顶层为...    <-- 错误！必须整段删除
 ```
 
@@ -354,7 +355,7 @@ uv run python paper-metrics/scripts/validate_draft.py \
 ```markdown
 如图3-1所示，系统采用分层架构设计。
 
-![图3-1 系统功能结构图](thesis-output/thesis-writing/img/图3-1_系统功能结构图.png)
+![图3-1 系统功能结构图](img/图3-1_系统功能结构图.png)
 
 从图3-1可以看出，系统主要包含前台和后台两大子系统...
 ```

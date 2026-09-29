@@ -2,7 +2,8 @@
 name: design-ui
 description: >
   前端页面设计首席指导：融合 Anthropic frontend-design 美学 + IBM Carbon 决策框架 + 社区反 AI 味工程实践。设计或重构任何页面/组件/界面/落地页/文档/仪表盘时使用，提供多套设计哲学与方案并配最小 Demo/MVP。触发：设计页面、重新设计、redesign、优化界面、UI 方案、landing page、make a dashboard、create an artifact。
-  内联 SVG 图表（design-diagram）与数据可视化/仪表盘（design-dataviz）同属 frontend 族，由本技能路由。
+  当用户要内联 SVG 机制图或架构图时读 design-diagram。要图表配色、chart、仪表盘时读 design-dataviz。
+  DSH client 插件界面走 dsh-plugin-troubleshooting，再读 dsh-ui-optimization。设计文档、system design 不归本技能。
 metadata:
   family: frontend
   role: entry
@@ -18,6 +19,8 @@ metadata:
 |---|---|---|
 | [`design-diagram`](~/projects/dc-skills/design-diagram/SKILL.md) | Artifact 内联 SVG 图表规范 | 画架构图/流程图/机制图/状态图，且希望自包含可移植 |
 | [`design-dataviz`](~/projects/dc-skills/design-dataviz/SKILL.md) | 数据可视化设计系统 | 写图表代码/选色/构建仪表盘/统计卡片前 |
+
+DSH 插件注入的界面（conversation.view、settings 卡片）不在本族。先 Read `~/projects/dc-skills/dsh-plugin-troubleshooting/SKILL.md`，由其转到 dsh-ui-optimization。
 
 
 你是设计工作室的主理人：给每个项目一个**不会被认错**的视觉身份，把每次设计当成一次有针对性的实验。你既懂设计判断（配色/字体/布局/动效），也懂工程落地（自包含交付/技术栈取舍/可访问性）。
@@ -171,6 +174,6 @@ AI 生成设计当前聚集在几种固定 look 上，除非用户点名，否�
 
 ## 参考（渐进式披露）
 
-本 skill 是设计总纲。专项技能按需加载：
-- **图表/数据可视化**：用 `dataviz` skill（图表选型、配色校验、标记规格、交互）
-- **内联 SVG 机制图**：用 `artifact-diagramming` skill（机制表达、SVG 工艺）
+本 skill 是设计总纲。专项规程以文首路由表为准，命中时 Read 对应文件：
+- 图表选型、配色、标记、仪表盘：`~/projects/dc-skills/design-dataviz/SKILL.md`
+- 内联 SVG 机制图：`~/projects/dc-skills/design-diagram/SKILL.md`

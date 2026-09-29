@@ -10,7 +10,7 @@
 | [../AGENT.md](../AGENT.md) | 规约 | 三条铁律：执行目录（cd 主库再 uv run）、输出位置（指向 OUTPUT.md）、单一物理副本。`CLAUDE.md`/`AGENTS.md` 为其兼容软链 | 每次会话开始；Agent 自动加载 | 2026-09-24 | ✅ 执行约束 |
 | [specs/SKILL-AUTHORING-RULES.md](specs/SKILL-AUTHORING-RULES.md) | spec | 技能开发/修改的强制规则（A1–F7、B1–B9）与提交前清单 | 新建或改技能行为前 | 2026-09-24 | ✅ 开发规范 |
 | [specs/SKILL-MANAGEMENT.md](specs/SKILL-MANAGEMENT.md) | spec | 主库/农场/项目级三层架构、P1–P8 规约、各 Agent 自注册机制、风险台账 | 动 `agent-map.yaml`、排查注册漂移时 | 2026-09-24 | ✅ 管理架构 |
-| [specs/OUTPUT.md](specs/OUTPUT.md) | spec | 输出位置兜底规范（C-1~C-10：两级回退、项目根标记、文件名约定、中间产物、临时文件、跨设备） | 实现/审计任何文件产出前 | 2026-09-24 | ✅ 输出规范 |
+| [specs/OUTPUT.md](specs/OUTPUT.md) | spec | 输出位置规范（C-1 统一产物树：族群/技能名/时间戳、显式 --output、审计副本） | 实现/审计任何文件产出前 | 2026-09-29 | ✅ 输出规范 |
 | [arch/ENVIRONMENT.md](arch/ENVIRONMENT.md) | arch | 外部工具/MCP 依赖登记表 + 版本基线 + 验证命令 | 引入新外部依赖、跨设备验证时 | 2026-09-22 | ✅ 依赖登记 |
 | [arch/MODELS.md](arch/MODELS.md) | arch | Grok 模型渠道/协议/窗口/思考档位/套餐到期（含 Codex/Claude/DSH 渠道位置索引） | 配模型或排查模型行为时 | 2026-09-24 | ✅ 模型登记 |
 | [runbook/CROSS-DEVICE-SETUP.md](runbook/CROSS-DEVICE-SETUP.md) | runbook | 新设备从零搭建（Linux/WSL/Windows 双侧） | 新机器部署时 | 2026-09-24 | — |

@@ -1,5 +1,5 @@
 
-# Mermaid 流程图生成 Skill
+# Mermaid 流程图
 
 ## 核心目标
 

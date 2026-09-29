@@ -6,7 +6,7 @@ description: >-
   论文级，白底黑字）、终端 ASCII 架构草稿。当用户需要生成 ER 图/实体关系图/E-R 图/模块图/用例图/
   时序图/流程图/架构草稿/ASCII 架构图/系统架构草图等软件工程图表（本科毕设/课程设计论文插图）时
   使用本技能：按路由表识别类型，读对应分册规程，执行脚本生成 PNG/代码；输出统一到
-  `{cwd}/skills-output/drawing/{子类型}/{时间戳}/`（docs/specs/OUTPUT.md C-1）。正式可编辑图（.drawio）走 drawio-xml。
+  `{cwd}/skills-output/drawing/{脚本目录}/{时间戳}/`（docs/specs/OUTPUT.md C-1）。正式可编辑图（.drawio）走 drawio-xml。
   族内还有 drawio-xml（可编辑 .drawio），由本技能按需路由；设计规范类（页面/内联 SVG/数据可视化）走 frontend 族入口 design-ui。
 metadata:
   family: drawing
@@ -42,10 +42,10 @@ metadata:
 
 ## 2. 通用规范（所有类型一致）
 
-1. **执行环境**：遵守 AGENT.md 核心约束——先 `cd ~/projects/dc-skills` 再 `uv run python`（确保解析根 pyproject 环境）；各技能子目录无需自建 .venv，uv 自动向上查找。脚本内 `common.py`（顶层 scripts/）提供 `resolve_output_path`，已在各 CLI 中接入。
+1. **执行环境**：遵守 AGENT.md 核心约束——先 `cd ~/projects/dc-skills` 再 `uv run python`（确保解析根 pyproject 环境）；各技能子目录无需自建 .venv，uv 自动向上查找。脚本内 `common.py`（顶层 scripts/）提供 `plan_output`，已在各 CLI 中接入。
 2. **输出路径统一产物树**（docs/specs/OUTPUT.md C-1，勿改）：
-   - 默认 → `{cwd}/skills-output/drawing/{子类型}/{时间戳}/{文件名}`（cwd 即运行时当前目录，无推断无兜底）
-   - 显式 `--output` 优先；主库内运行落 `<master>/skills-output/`，最终产物另存主库审计副本
+   - 默认 → `{cwd}/skills-output/drawing/{脚本目录}/{时间戳}/{文件名}`。脚本目录名见 OUTPUT.md C-3：`diagram-er`、`diagram-ers`、`diagram-module`、`diagram-sequence`、`diagram-usecase`、`diagram-draft`，不是类型短名。`flow` 只出 Mermaid，不落这个目录
+   - 显式 `--output` 优先；最终产物另存主库 `skills-output/` 审计副本
 3. **论文风格**：流程图/时序图/ER 系列统一白色背景、纯黑节点、黑白打印友好（细节见各分册）。
 4. **输入格式**：er 用 SQL DDL；ers/module/usecase/sequence 用 JSON；draft 用 graph-easy 描述文本；flow 直接对话生成 Mermaid。
 5. **质量自检**：生成后向用户展示并确认；论文场景注意分辨率（分册有说明）。
@@ -56,9 +56,9 @@ metadata:
 2. 读对应分册 `references/<type>.md` 获取输入规范、命令参数、注意事项（含示例）
 3. 准备输入（SQL / JSON / 描述文本）
 4. 在对应脚本目录执行命令生成 PNG/代码
-5. 按两级回退规则输出，展示给用户
+5. 按第 2 节的产物树写出文件，展示给用户
 
 ## 4. 备注
 
 - 兼容：原 `diagram-*` 7 个独立技能已聚合，如需找回某类型的完整原文见对应分册（内容一致）
-- 互补路由：正式可编辑图表（.drawio 文件、截图复刻）→ `drawio-xml`；图表设计规范（选型/配色/标记）→ `design-dataviz`
+- 互补路由：可编辑 .drawio 读 `~/projects/dc-skills/drawio-xml/SKILL.md`。图表选型、配色、标记读 `~/projects/dc-skills/design-dataviz/SKILL.md`。页面设计读 `~/projects/dc-skills/design-ui/SKILL.md`。

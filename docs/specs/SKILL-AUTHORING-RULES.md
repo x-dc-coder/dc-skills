@@ -16,7 +16,7 @@
 |------|------|----------|------|
 | **A 统一共享** | 含 Python 脚本，依赖轻量（Pillow/sqlglot/psycopg2 等已在 pyproject.toml） | `.venv -> ../.venv` 符号链接 | diagram-er, db-skill, word-extractor |
 | **B 独立重型** | 含 GPU 模型权重或大型独立依赖（>1GB） | skill 内 `venvs/` 目录，加入 `.gitignore` | paper-reader |
-| **C 无统一 venv** | 纯代码生成 / 调外部二进制 / 使用系统 Python | 无 `.venv` 符号链接 | diagram-flow, wsl-windows-bridge |
+| **C 无统一 venv** | 纯代码生成 / 调外部二进制 / 使用系统 Python | 无 `.venv` 符号链接 | kimi-webbridge, wsl-windows-bridge |
 
 **规则 A1**：声明为 A 类的 SKILL **必须**创建 `.venv -> ../.venv` 符号链接，否则 `uv run` 在 skill 子目录内会找不到依赖。
 ```bash
@@ -128,41 +128,13 @@ cd ~/projects/dc-skills && find . -name SKILL.md -not -path "*/node_modules/*" -
 
 ## 三、输出路径约定
 
-**规则 C0（兜底定位，2026-08-29 补充）**：本章为**兜底规则**——技能正文显式指定输出位置（如
-paper-reader 输出到输入 PDF 同级）、用户显式传 `--output` 参数时，**以显式指定为准**；仅当技能
-未显式指明输出目录时按本章两级回退执行。统一约定全文见 `OUTPUT.md`（同目录，唯一事实源，AGENT.md
-与本章均引用它）。
+**规则 C0**：技能正文显式指定输出位置（如 paper-reader 写到输入 PDF 同级），或用户传 `--output` 时，以显式指定为准。未指定时只用同目录 `OUTPUT.md`（唯一事实源）：`<cwd>/skills-output/<族群>/<技能名>/<时间戳>/`。diagram 的中间段是脚本目录名（OUTPUT.md C-3），不是类型短名。
 
-### 3.1 禁止 /tmp/skills-output
+### 3.1 禁止旧路径
 
-**规则 C1**：**绝对禁止**在代码或文档中硬编码 `/tmp/skills-output/<date>/<skill>/` 路径。AGENT.md 输出约定明令禁止。
+**规则 C1**：禁止硬编码 `/tmp/skills-output/`。禁止再写 `thesis-output/`、`db-output/`、`doc-output/`、`<技能名>-output/`、`~/.claude/skills-output/`，以及已废止的两级回退。
 
-**规则 C2**：所有产出文件的 SKILL **必须**实现两级回退：
-```python
-def resolve_output_path(input_file, skill_name, default_name):
-    if input_file and input_file.is_absolute():
-        # 优先：从输入文件推断项目目录
-        parent = find_project_root(input_file)
-        if parent:
-            return parent / "<skill-output-root>" / skill_name / default_name
-    # 兜底：cwd 检测
-    cwd = Path.cwd()
-    if cwd.is_relative_to(Path.home() / ".claude" / "skills"):
-        return Path.home() / ".claude" / "skills-output" / skill_name / default_name
-    else:
-        return cwd / "<skill-output-root>" / skill_name / default_name
-```
-
-**规则 C3**：优先复用 `scripts/common.py` 中的 `resolve_output_path` 函数，不可在每个 skill 内重复实现（本次 TODO-C1 已提取 5 个 diagram skill 的共享实现）。
-
-### 3.2 skill-output-root 命名
-
-| SKILL 类型 | skill-output-root | 示例 |
-|-----------|------------------|------|
-| 论文类（diagram-*、thesis-*、md-to-thesis-latex） | `thesis-output/` | `thesis-output/diagram-er/er-diagram.png` |
-| 数据库类（db-skill） | `db-output/` | `db-output/db-skill/result.json` |
-| 文档提取类（word-extractor、paper-reader） | `doc-output/` | `doc-output/word-extractor/<basename>.md` |
-| 其他 | `<skill-name>-output/` | `unified-search-output/result.json` |
+**规则 C3**：路径计算复用 `scripts/common.py` 的 `plan_output` / `commit_final`。不要在单个技能里再写一套目录算法。
 
 ### 3.3 输出文件名
 
@@ -170,7 +142,7 @@ def resolve_output_path(input_file, skill_name, default_name):
 
 **规则 C5**：CLI 参数名**必须**统一为 `--output`（不是 `--out`、`--output-dir`）。保留旧名作为 alias 可接受，但主名必须是 `--output`。
 
-**规则 C6**：所有产出文件的 CLI **必须**支持 `--output <dir>` 显式覆盖回退逻辑，优先级最高。
+**规则 C6**：所有产出文件的 CLI 必须支持 `--output <dir>`，用来覆盖默认产物树，优先级最高。
 
 ---
 
@@ -253,7 +225,7 @@ fontname = "Noto Sans CJK SC"  # 在仅装 SimSun 的机器上方块
 
 ### 6.2 文档同步
 
-**规则 F4**：修改代码行为后**必须**同步更新 SKILL.md 中的路径/参数/默认值描述。本次审查发现 5 个 diagram SKILL.md 声明输出 `thesis-output/img/diagram.png`，但代码实际输出 `thesis-output/diagram-er/er-diagram.png`——文档与代码完全脱节。
+**规则 F4**：修改代码行为后必须同步更新 SKILL.md 中的路径、参数和默认值。路径以 `OUTPUT.md` 为准。
 
 **规则 F5**：修改输出文件名或路径后**必须**同步更新 OUTPUT.md 的约定表。
 
@@ -287,7 +259,7 @@ grep -l "<你的触发词>" ~/projects/dc-skills/*/SKILL.md
 
 ### 代码
 - [ ] 无 `/tmp/skills-output` 硬编码（grep 验证）
-- [ ] 实现了两级回退输出路径（或复用 `scripts/common.py`）
+- [ ] 产物走 `scripts/common.py` 的 `plan_output`（OUTPUT.md C-1），或技能正文写明的显式路径
 - [ ] `--output` 参数支持显式覆盖
 - [ ] 无硬编码单一字体（有回退链）
 - [ ] 无硬编码绝对路径
@@ -332,7 +304,7 @@ grep -l "<你的触发词>" ~/projects/dc-skills/*/SKILL.md
 2. 创建目录 + SKILL.md（frontmatter + 触发场景 + 依赖说明）
 3. 创建 `scripts/__init__.py` + `scripts/cli.py`
 4. 创建 `.venv` 符号链接（A 类）
-5. 实现 `--output` 参数 + 两级回退（复用 `scripts/common.py`）
+5. 实现 `--output` 参数，默认路径走 `plan_output`（OUTPUT.md C-1）
 6. 写 pytest 测试
 7. 更新 README.md 环境分类表
 8. grep 检查触发词冲突

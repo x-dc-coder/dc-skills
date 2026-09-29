@@ -59,6 +59,27 @@ class TestValidate:
 
 
 class TestNewSkill:
+    def test_member_scaffold_is_hidden_before_family_apply(self) -> None:
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location("new_skill", SCRIPTS / "new_skill.py")
+        assert spec is not None and spec.loader is not None
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        block, invocation = mod.frontmatter_flags("drawing")
+        text = mod.SKILL_TEMPLATE.format(
+            name="x", desc="做 X。当用户需要 Y 时使用。",
+            family_block=block, invocation=invocation, title="X")
+        assert "disable-model-invocation: true" in text
+        assert "load-mode: manual" in text
+        block, invocation = mod.frontmatter_flags(None)
+        text = mod.SKILL_TEMPLATE.format(
+            name="x", desc="做 X。当用户需要 Y 时使用。",
+            family_block=block, invocation=invocation, title="X")
+        assert "disable-model-invocation" not in text
+        assert "load-mode: auto" in text
+
+
     def test_dry_run_writes_nothing(self) -> None:
         before = {p.name for p in ROOT.iterdir()}
         r = run(SCRIPTS / "new_skill.py", "probe-skill-xyz",

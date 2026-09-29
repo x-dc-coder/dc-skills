@@ -5,7 +5,7 @@
   <name>/SKILL.md          frontmatter 占位（name/description/metadata.version/
                            family/role/load-mode）+ heading 骨架（对齐 B8）
   <name>/scripts/          __init__.py（A 类必需）+ cli.py 桩（含 --output 与
-                           resolve_output_path 接线，对齐 OUTPUT.md C-1/C-3）
+                           plan_output 接线，对齐 OUTPUT.md C-1/C-3）
   <name>/scripts/test_*.py pytest 桩（R13）
   <name>/.venv -> ../.venv（A 类；规则 A1）
 登记（文本级最小侵入，保留原注释缩进）：
@@ -34,7 +34,7 @@ description: >
   {desc}
 metadata:
   version: "0.1"
-{family_block}---
+{family_block}{invocation}---
 
 # {title}
 
@@ -168,6 +168,16 @@ def insert_family_member(yaml_text: str, family: str, entry: str) -> str:
     raise SystemExit(f"族群 {family} 的 members 是非常规形式，请手工登记: {line!r}")
 
 
+def frontmatter_flags(family: str | None) -> tuple[str, str]:
+    """member 在骨架里就写上 disable-model-invocation，避免跳过 family-apply 后描述进目录。"""
+    if family:
+        return (
+            f"  family: {family}\n  role: member\n  load-mode: manual\n",
+            "disable-model-invocation: true\n",
+        )
+    return ("  role: standalone\n  load-mode: auto\n", "")
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="技能骨架生成器")
     ap.add_argument("name", help="技能名（kebab-case，将同时作为目录名）")
@@ -188,16 +198,13 @@ def main() -> None:
     if len(args.desc) > 1024:
         raise SystemExit(f"description 超 1024 字符: {len(args.desc)}（R3）")
 
-    family_block = ""
-    if args.family:
-        family_block = f'  family: {args.family}\n  role: member\n  load-mode: manual\n'
-    else:
-        family_block = '  role: standalone\n  load-mode: auto\n'
+    family_block, invocation = frontmatter_flags(args.family)
 
     plan: list[str] = []
     files: dict[Path, str] = {
         d / "SKILL.md": SKILL_TEMPLATE.format(
-            name=name, desc=args.desc, family_block=family_block, title=title_of(name)),
+            name=name, desc=args.desc, family_block=family_block,
+            invocation=invocation, title=title_of(name)),
     }
     if args.env in ("A", "B"):
         files[d / "scripts" / "__init__.py"] = ""

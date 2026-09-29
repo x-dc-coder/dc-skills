@@ -12,15 +12,14 @@
 │   例：Lumina/.agents/skills（9 个项目专属技能）。随项目走，不进主库。
 │
 ├─ 主库（第一层）──── ~/projects/dc-skills（git 仓库）
-│   全机唯一物理技能目录。33 个注册技能 + diagram-* 脚本目录 + archive/ 归档区。
+│   全机唯一物理技能目录。34 个注册技能 + diagram-* 脚本目录 + archive/ 归档区。
 │   所有跨项目通用的技能都必须物理位于此处。
 │
 ├─ 农场（第二层）──── 各 Agent 技能目录里的软链接，指向主库
-│   ~/.claude/skills(32)  ~/.grok/skills(32)  ~/.dsh/skills(32)
-│   ~/.zcode/skills(32)   ~/.codex/skills(32)
+│   五个 Agent 农场各 34 条软链（base 已含全部 12 个入口）。
 │   dsh 预设：thesis-agent/skills(6)  plugin-specialist/skills(2)
-│   共 168 条软链，由 `~/projects/dc-skills/scripts/skills-sync` 按 agent-map.yaml 物化。
-│   加载分两档：10 个族群入口（load: auto，进模型启动清单）+ 23 个族内技能
+│   链数以 `find <farm> -maxdepth 1 -type l | wc -l` 为准，由 skills-sync 物化。
+│   加载分两档：12 个族群入口（load: auto，进模型启动清单）+ 22 个族内技能
 │   （load: manual，不进清单、经 /name 或 $name 显式触发）——见 §4.8。
 │
 └─ App 自管根（只读参考，不进主库）
@@ -120,7 +119,6 @@ uv run python scripts/skillctl inventory     # 全机清单：主库 vs App 自�
 | lark 飞书协作（单体） | lark-cli | —（28 域已内聚） |
 | dshplugin DSH 插件 | dsh-plugin-troubleshooting | dsh-ui-optimization |
 | meta 仓库元工作（单体） | dc-skill-creator | — |
-| meta 仓库元工作 | dc-skill-creator | —（技能创建/校验工具） |
 
 **加载模式语义**：
 
@@ -175,9 +173,11 @@ hooks = [{ type = "command", command = "cd ~/projects/dc-skills && out=$(/home/d
 | 6 | 第三方 vendored 技能（omo 4 个）随上游演进而过期 | vendor 审计源留 `~/.dsh/vendor/omo-skills/`（SOURCE.txt 记录 omo 4.17.1）；更新时重跑清洗流程并比对 | 📌 人工周期任务 |
 | 7 | **加固动作本身写坏客户端配置**（2026-09-24 实例：Codex `[skills] bundled = false` 写成 bool，而 schema 是 table `BundledSkillsConfig { enabled: bool }`，导致 Codex 全量不可用；正确写法 `bundled = { enabled = false }`，`codex doctor` 显示 `✓ config loaded` 为判据） | 任何跨客户端配置改动后必须跑该客户端的 doctor/自检；W3 的 `assets-doctor` 将 `config_loads` 列为固定检查项（CLI 版本通过≠配置可加载） | ✅ 已修复+入库 |
 | 8 | 文档声明与实机漂移（本文件曾写 74 条软链，实机 90 条） | `assets-doctor`（W3）加"文档声明数 vs 实机数"断言；链数以 `find <farm> -maxdepth 1 -type l \| wc -l` 实测为准 | ✅ 本条已修正 |
+| 9 | 族群重分类后，入口 description / 正文仍指向已删除的 infra、repo，或把 manual 成员的触发词留在模型看不见的地方 | 入口 description 写用户原话；成员正文不再自称入口。dshplugin 入口与成员同在 base。Grok 上 `[skills] disabled` 去掉与主库撞车的自带技能 create-skill、docx、pptx；论文 PDF 仍留自带 pdf，由 thesis-writing 声明优先走 paper-reader | ✅ 2026-09-29 |
 
 ## 6. 变更日志
 
+- **2026-09-29**：dsh-plugin-troubleshooting 从 on_demand 并入 base（成员 dsh-ui-optimization 已在各农场，入口却不在，Grok 上 DSH 插件 UI 没有自动触发面）。修正 db-skill、programming、codegraph-explore、design-ui、thesis-writing、officecli、kimi-webbridge、dc-skill-creator 的路由与触发描述。本机 Grok 禁用自带 create-skill、docx、pptx。浏览器通道以 kimi-webbridge 为准。
 - **2026-09-23**：全机聚合收编 7 技能（omo 4 + thesis-export + dsh 预设 2）；新增 codex 农场；dsh-plugin-troubleshooting 补 frontmatter；本文件建立；`skillctl inventory` 上线；thesis-agent/plugin-specialist 接入 customSkillDirs；SKILL-AUTHORING-RULES.md 对齐 agentskills.io。
 - **2026-09-24（族群化 W2）**：agent-map 新增 families 段（10 族）；base 16→32（成员全部进农场但标 manual）、on_demand 收缩为 1（dsh-plugin-troubleshooting）；9 个入口升级（description 补族级路由触发 + 正文族群路由表）；23 成员标 `metadata.load-mode: manual` + `disable-model-invocation: true` + 生成 Codex `agents/openai.yaml`；新增 `scripts/family-apply.py`（幂等标记器）；skills-sync --check 增加族群一致性校验（反向测试通过）；农场 90→168 链。存量违规顺带清理：3 个顶层 version → metadata.version、test-guardian 顶层 whenToUse 删除。
 - **2026-09-24（重分类）**：按用户定调重划为 12 族（不硬凑，单体族合法）：拆 drawing（design-* 出走去 frontend 新族，design-ui 升入口）、并 repo 入 software（coding 更名 software，github-workflow/codegraph-explore 转入）、newapi-management 移入 agentops、infra 拆为 db + bridge 两个单体族；同步翻转 3 个角色（design-ui/wsl-windows-bridge member→entry，codegraph-explore entry→member）、更新 4 个入口路由表；修复 family-apply 写入吃换行 bug（13 个 SKILL.md 曾 `---#` 粘连，严格 frontmatter 解析器会丢元数据）并给 validate.py 加粘连检测。

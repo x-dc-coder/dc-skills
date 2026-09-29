@@ -1,8 +1,7 @@
 ---
 name: codegraph-explore
 description: >
-  用 CodeGraph 做代码库符号检索、调用链追踪和变更影响分析。理解大仓代码、定位定义或调用者、评估重构影响、选择测试时使用；一次返回相关源码与调用路径。小仓、配置和 Markdown 仍用 grep/read。
-  git/GitHub 工作流（github-workflow）同属 repo 族，由本技能路由。
+  用 CodeGraph 做代码库符号检索、调用链追踪和变更影响分析。当用户要理解大仓代码、定位定义或调用者、评估重构影响、选择测试时使用；一次返回相关源码与调用路径。任意语言。小仓、配置和 Markdown 仍用 grep/read。
 metadata:
   family: software
   role: member
@@ -11,14 +10,7 @@ disable-model-invocation: true
 ---
 # codegraph-explore — 符号级代码检索与影响面分析
 
-## 族群路由（repo 仓库工程入口）
-
-本技能是 **repo 仓库工程族群入口**。族内技能为 manual 加载（不进启动清单），命中下表场景时直接 Read 对应 SKILL.md 后按其规程执行；用户显式要求加载整族时依次读本表全部条目。
-
-| 技能 | 用途 | 何时选它 |
-|---|---|---|
-| [`github-workflow`](~/projects/dc-skills/github-workflow/SKILL.md) | GitHub-first git 工作流 | git/gh 操作/提交规范/PR/issue/manifest |
-
+本技能是 software 族的成员，由 programming 路由进来。git、GitHub、PR、issue 不在这里处理。
 
 ## 0. 一句话判据
 
@@ -27,21 +19,16 @@ disable-model-invocation: true
 实测教训：Vision-MCP `find` 出 1.7 万文件，排除虚拟环境后**真实源码只有 17 个**。）
 
 ---
-## 1. 怎么调（DSH 侧的关键差异）
+## 1. 怎么调
 
-工具只有 **1 个**：`mcp__codegraph__codegraph_explore`（v1.6.0 已把旧版 8 个工具合并）。
+工具只有 **1 个**：`codegraph_explore`（旧版多个工具已合并）。查询用符号名或文件名，少用长句。
 
-```
-codegraph_explore(
-  query="<符号名袋 或 自然语言问题>",
-  projectPath="/home/dc/projects/<repo>",   ← DSH 侧【必传】
-  maxFiles=12                                ← 可选，默认 12
-)
-```
+| 宿主 | projectPath | 索引新鲜度 |
+|---|---|---|
+| Grok、Claude Code | 问当前会话项目时省略，用默认项目；问另一个仓库时传绝对路径 | 默认项目有文件监听，滞后大约 1 秒 |
+| dsh | 必传。该客户端不发送 MCP roots，省略则没有默认项目 | 非默认项目没有实时监听。结果可疑或刚改完要查时，先 `cd <repo> && codegraph sync` |
 
-> ⚠️ **DSH 侧必须显式传 `projectPath`**：`dsh-mcp-client` 声明 `capabilities: {}`、**不发送 MCP roots**，
-> 服务端无法自行定位项目（启动日志会打印 `no default project, live sync disabled`，属预期）。
-> Claude Code 侧按 cwd 自动定位，**无需传参**；终端兜底用 CLI：`cd <repo> && codegraph explore "..."`。
+终端兜底：`cd <repo> && codegraph explore "..."`。`maxFiles` 可选，默认 12。
 
 ---
 
@@ -63,9 +50,10 @@ codegraph 抓了 `main` 这个极常见符号，返回 `drawio-xml` / `word-extr
 
 ---
 
-## 3. ⚠️ 索引会滞后（无 live watcher）
+## 3. ⚠️ 索引会滞后
 
-DSH 侧全部走 `projectPath` 查询，而服务端**只在默认项目上跑文件监听** → 这些索引**不会自动追平**。
+dsh 上按 `projectPath` 查询的仓库没有实时监听，改完不会自动追平。
+Grok / Claude Code 的默认项目有文件监听，仍可能滞后大约 1 秒。
 响应里出现 `⚠ changed on disk after the last index sync` 就是这个信号。
 
 **规程：重要改动前 / 拿到可疑结果时，先 sync（增量，毫秒级）**
@@ -106,4 +94,4 @@ D2 / Soul-Spark / lab-monitor / monitor-panel / Custom-Agents / Vision-MCP / dsh
 
 ## 6. 完整资料
 
-接入/维护/踩坑全量记录：`~/.dsh/knowledge/codegraph-guide.md`
+接入与踩坑记录：`~/.dsh/knowledge/codegraph-guide.md`。触发方式以本文件文首为准。

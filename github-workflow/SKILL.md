@@ -1,7 +1,7 @@
 ---
 name: github-workflow
 description: >
-  基于官方 gh CLI 的 GitHub-first git 工作流：本地仓库初始化（仓库级身份、master 默认分支、.gitignore）、提交前预览与敏感文件扫描、Conventional Commits 提交信息生成、review manifest 发布、gh repo create 建远程。当用户需要初始化 git、配置仓库身份、预览待提交文件、生成提交信息、创建 GitHub 远程或管理 issues/PR 时使用；替代已退役的 gitcode-workflow。
+  基于官方 gh CLI 的 GitHub 仓库生命周期。当用户要初始化仓库、preview/publish、创建 GitHub 远端或管理 issues/PR 时使用；这些流程的提交信息用 Conventional Commits。已有仓库的普通 commit、rebase、blame、bisect 读 git-master。替代已退役的 gitcode-workflow。
 metadata:
   family: software
   role: member
@@ -21,7 +21,7 @@ disable-model-invocation: true
 | 创建仓库 / Issue / PR / 用户信息 | `gh repo create` / `gh issue` / `gh pr` / `gh api` |
 | **本地 git 初始化、待提交预览、安全扫描、提交信息候选生成、review manifest、分层提交建议、提交规范** | **本技能（gh 没有的流程与判断能力）** |
 
-已弃用 GitCode；旧版 gitcode-workflow 已归档到 `~/skills-archive/gitcode-workflow`（未注册，仅供查档）。
+已有仓库的 commit、rebase、blame、bisect 读 git-master，提交信息沿用仓库既有风格。本技能只做初始化、GitHub 远端、PR、issue、preview/publish，这些提交信息才用 Conventional Commits。不要两套规矩写同一条提交。旧版 gitcode-workflow 已归档，未注册。
 
 ## Quick Commands
 

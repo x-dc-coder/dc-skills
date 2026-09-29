@@ -1,7 +1,7 @@
 
-> **ℹ️ 统一行为 (2026-07-19):** `--downsample` 参数语义已跨 4 个 diagram-* skill 统一（er, ers, module, usecase）。所有 skill 默认输出**高分辨率**，`--downsample` 为 opt-in 降至 1x。diagram-usecase 无变更（原本即正确实现）。
+> **ℹ️ 统一行为 (2026-07-19):** `--downsample` 参数语义已跨 4 个脚本目录统一（diagram-er、diagram-ers、diagram-module、diagram-usecase）。默认输出高分辨率，`--downsample` 为 opt-in 降至 1x。
 
-# 用例图生成 Skill
+# 用例图
 
 ## 工作流程
 

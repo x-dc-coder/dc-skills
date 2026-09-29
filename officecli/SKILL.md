@@ -1,7 +1,9 @@
 ---
 name: officecli
-description: Create, analyze, proofread, and modify Office documents (.docx, .xlsx, .pptx) using the officecli CLI tool. Use when the user wants to create, inspect, check formatting, find issues, add charts, or modify Office documents.
-  .docx 高精度提取（word-extractor）同属 docs 族，由本技能路由。
+description: >
+  当用户要创建、检查、校对或修改 .docx / .xlsx / .pptx 时使用本技能（officecli）。
+  不要改用 App 自带的 docx 或 pptx 技能。
+  .docx 要保留结构、图片、表格与题注，或要分析论文 docx 时，Read word-extractor 的 SKILL.md 再提取。
 metadata:
   family: docs
   role: entry
