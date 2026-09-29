@@ -1,7 +1,7 @@
 ---
 name: wsl-windows-bridge
 description: >
-  WSL→Windows 跨边界框架：三层调用通道（pythonw.exe 直调无弹窗首选 / cmd.exe fallback / 直接 EXE）+ GPU 资源治理（GpuLimits 单进程配额 + GpuGovernor 跨进程协调防 OOM）。覆盖 GPU 训练/推理、Windows Python 环境、注册表、WMI、COM、Event Log。涉及跨系统调用、Windows 侧程序、GPU 任务或注册表/COM 操作时使用。
+  WSL→Windows 跨边界框架：本地调用通道（pythonw.exe 直调无弹窗首选 / cmd.exe / EXE / PowerShell）+ SSH 特权与 Agent 门禁通道（Session 0 CLI / Session 1 GUI 计划任务投递）+ GPU 资源治理。覆盖 GPU 训练/推理、Windows Python 环境、注册表、WMI、COM、Word UI 自动化测试。涉及跨系统调用、Windows 侧程序、Agent 协同或真机门禁测试时使用。
 metadata:
   family: bridge
   role: entry
@@ -16,16 +16,17 @@ metadata:
 
 WSL2 runs a Linux kernel — Windows-only capabilities (COM, Win32 API, Registry, WMI, GPU) are **not directly accessible**. WSL provides `WSLInterop` to launch Windows executables from Linux.
 
-**三条通道按速度与简单度排序：**
+**调用通道按速度与能力矩阵：**
 
 | Channel | Launcher | Overhead | When |
 |---------|----------|----------|------|
-| **C: pythonw.exe** | `pythonw.exe` 直调 | ~50ms | **GPU / Python scripts / 无弹窗要求**（⭐ 首选） |
+| **C: pythonw.exe** | `pythonw.exe` 直调 | ~50ms | **GPU / Python scripts / 无弹窗要求**（⭐ 本地首选） |
 | **C': cmd.exe** | `cmd.exe /c` | ~55ms | 需要 shell 重定向 (`>` `2>` `&`)，会弹窗 |
 | **B: Direct EXE** | `reg.exe`, `sc.exe`... | ~10ms | 简单系统工具（注册表/服务/进程） |
 | **A: PowerShell** | `powershell.exe` | ~600ms | COM / WMI / P/Invoke / Event Log |
+| **S: SSH / Agent Gate** | `ssh` + `schtasks` | ~300ms / 2-4s | **特权操作 / 环境隔离 / Windows Agent / GUI与Word门禁** |
 
-**核心原则：pythonw 优先于 cmd，能 cmd 不用 ps，能直调不套壳。**
+**核心原则：本地首选 pythonw，特权/门禁走 SSH；能直调不套壳。**
 
 ## ⚠️ 无弹窗强制规则（HEADLESS，代码级强制 → `scripts/gpu_safe_subprocess.py::_ensure_pythonw`）
 
@@ -67,6 +68,26 @@ WSL2 runs a Linux kernel — Windows-only capabilities (COM, Win32 API, Registry
 4. **Job Object 孤儿防护**（最彻底）：`win-launcher.py` 用 ctypes 调 Job Object API（`JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE`），父进程崩溃自动清理子进程。
 5. **GpuGovernor 设备级协调**：多任务跨进程总显存 ≤90%，基于 `~/.cache/gpu-governor/ledger.json` + fcntl 文件锁；**只防 OOM 不防算力变慢**（单 GPU 无 MPS，并发任务各慢 30-50% 是物理限制）；**依赖所有 GPU 任务自觉 acquire**（绕过 governor 的进程会破坏不变量）。
 6. 现成封装：`scripts/gpu_safe_subprocess.py`（`GpuLimits` / `build_gpu_env` / `run_gpu_windows` / `stream_gpu_windows` / `launch_detached` / `acquire_gpu_slot` / `GpuGovernor`），测试 `test_gpu_governor.py`（12 TDD 测试）。paper-reader 已默认启用 governor。
+
+## ⭐ Channel S: SSH 特权与 GUI 自动化门禁通道
+
+适用于需要 **完整管理员令牌（High Integrity）**、**严格环境隔离** 或驱动 **真实桌面 UI 自动化 / Windows 原生 Agent** 的场景。
+
+### 1. 会话双态分流原则
+- **Session 0（服务会话直跑）**：非 GUI 的 pytest 单元测试、Windows 系统服务启停、特权环境初始化。直接在 SSH 连接内执行即可。
+- **Session 1（交互桌面投递）**：真实 GUI 自动化（pywinauto 窗口树读取、鼠标键盘模拟）、Word COM 视觉门禁。必须经由 `schtasks` 排程投递至活动桌面执行。
+
+### 2. 快捷投递工具（scripts/win-ssh-gate.sh）
+```bash
+# 经 SSH 跨会话投递至 Session 1 执行桌面 UI 测试并自动回收退出码与日志
+./scripts/win-ssh-gate.sh -- ".venv-win\\Scripts\\python.exe -m pytest tests\\workbench\\test_ui_driver.py -q"
+
+# 经 SSH 调用 Windows 侧原生 grok.exe 执行自主测试
+./scripts/win-ssh-gate.sh -- "C:\\Users\\32841\\.grok\\bin\\grok.exe -p 'Run gate tests and output compact JSON.' --permission-mode bypassPermissions"
+```
+
+### 3. 真值判据铁律
+Windows 原生 Agent 仅充当执行手，门禁判定必须由 WSL 侧直接读取并解析本地挂载的 `junit.xml` 或 `envelope.json` 文件。
 
 ## UTF-8 三层防护（必读，否则中文乱码）
 
@@ -119,6 +140,7 @@ echo ':WSLInterop:M::MZ::/init:' | sudo tee /proc/sys/fs/binfmt_misc/register
 | PowerShell 独有能力：COM/WMI/P/Invoke/Event Log/剪贴板/计划任务/环境变量 + 调用模式（-Command/-File/-EncodedCommand） | `references/powershell-channel.md` |
 | 快速直调工具：reg/sc/tasklist/taskkill/netsh/certutil/schtasks/icacls/takeown/systeminfo + wslu + wsl.exe 自管理 | `references/exe-channel.md` |
 | 通道选择详表、环境要求（版本/检查命令）、wslu 安装、WSLInterop 配置 | `references/environment.md` |
+| SSH 通道架构、服务加固（纯密钥/防爆破）、三种执行模式（Session 0/Session 1/Agent）、真值核验与排错 | `references/ssh-agent-channel.md` |
 | 场景汇总、完整错误处理表、调试策略、限制（9 条必知）、最佳实践（12+ 条） | `references/ops-reference.md` |
 
 ## 相关概念
