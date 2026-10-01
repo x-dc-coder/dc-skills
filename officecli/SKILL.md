@@ -1,24 +1,9 @@
 ---
 name: officecli
-description: >
-  当用户要创建、检查、校对或修改 .docx / .xlsx / .pptx 时使用本技能（officecli）。
-  不要改用 App 自带的 docx 或 pptx 技能。
-  .docx 要保留结构、图片、表格与题注，或要分析论文 docx 时，Read word-extractor 的 SKILL.md 再提取。
-metadata:
-  family: docs
-  role: entry
-  load-mode: auto
+description: Create, analyze, proofread, and modify Office documents (.docx, .xlsx, .pptx) using the officecli CLI tool. Use when the user wants to create, inspect, check formatting, find issues, add charts, or modify Office documents.
 ---
+
 # officecli
-
-## 族群路由（docs 文档处理入口）
-
-本技能是 **docs 文档处理族群入口**。族内技能为 manual 加载（不进启动清单），命中下表场景时直接 Read 对应 SKILL.md 后按其规程执行；用户显式要求加载整族时依次读本表全部条目。
-
-| 技能 | 用途 | 何时选它 |
-|---|---|---|
-| [`word-extractor`](~/projects/dc-skills/word-extractor/SKILL.md) | .docx 高精度提取 | 提取 Word 全部内容（结构/图片/表格/题注） |
-
 
 AI-friendly CLI for .docx, .xlsx, .pptx. Single binary, no dependencies, no Office installation needed.
 
@@ -259,17 +244,114 @@ officecli set slides.pptx / --find draft --replace final
 - No match = silent success. `--json` includes `"matched": N`
 - **Excel:** only `find` + `replace` supported (no find + format props)
 
-## 高级操作（按需加载）
+### add — add elements or clone
 
-以下细节已移至 `references/advanced-operations.md`，仅在对应任务需要时读取：
+```bash
+officecli add <file> <parent> --type <type> [--prop ...]
+officecli add <file> <parent> --type <type> --after <path> [--prop ...]   # insert after anchor
+officecli add <file> <parent> --type <type> --before <path> [--prop ...]  # insert before anchor
+officecli add <file> <parent> --type <type> --index N [--prop ...]        # 0-based position (legacy)
+officecli add <file> <parent> --from <path>                               # clone existing element
+```
 
-- add/clone 与各格式元素类型矩阵
-- xlsx Pivot、排序与文本锚定插入
-- move/swap/remove
-- 原子 batch、dump/replay
-- raw XML / raw-set / add-part
+`--after`, `--before`, `--index` are mutually exclusive. No position flag = append to end.
 
-优先运行 `officecli help <format> <element>` 获取当前 CLI 的权威属性；不要凭静态清单猜字段。
+**Element types (with aliases):**
+
+| Format | Types |
+|--------|-------|
+| **pptx** | slide (incl. hidden), shape (font.latin/ea/cs, direction=rtl, underline.color, highlight=COLOR (Add/Set/Get/HTML preview), effective.X+effective.X.src; arrow alias for rightArrow; slideMaster/slideLayout typed add/set/remove), picture (SVG, brightness/contrast/glow/shadow, rotation, link, tooltip), chart (direction=rtl, pieOfPie, barOfPie, axisLine/gridline per-attr setters, animation+chartBuild=byCategory|bySeries, line dropLines/hiLowLines/upDownBars, anchor=x,y,w,h shorthand), table (cell direction=rtl, fill/background, built-in PowerPoint style catalogue, /col[C] get + swap/copyFrom, row/col Move/CopyFrom), row (tr), connector (from/to accept full-path `@name=`/`@id=` forms — bare `@name=Foo` is rejected, must be `/slide[N]/shape[@name=Foo]` — startshape/endshape SetByPath; edge-to-edge anchoring by default, fromSide/toSide to force an edge, fromIdx/toIdx for raw cxn index), group (link, tooltip, deep walk by get/query/add/remove, ungroup=true dissolves back to slide-absolute), align/distribute (targets= accepts shape[@id=N] paths, not just positional), video/audio (loop, autoStart alias), equation, notes (direction=rtl, lang), comment (legacy + modern p188 threaded round-trip), animation (15 emphasis + 16 exit presets, multi-effect chains, motion-path presets, repeat/restart/autoReverse, chart animations), transition (12 p15 presets + morph/p14), paragraph (para), run, zoom, ole (preview=, full dump round-trip via add-part+raw-set), placeholder (phType=...), model3d (rotation=ax,ay,az; full dump round-trip), smartart (dump round-trip via add-part), diagram (add-only mermaid → native shapes or rendered image, `--type diagram`/`flowchart`). |
+| **docx** | paragraph (direction/font.latin/ea/cs, bold.cs/italic.cs/size.cs, lang.latin/ea/cs, wordWrap, framePr.\*, tabs shorthand), run (lang slots, direction, underline.color, position half-pts, **revision.type=ins\|del\|format\|moveFrom\|moveTo + revision.action=accept\|reject** with .author/.date — bare `@author=`/`@type=` selector on `set /revision[...]` for filtered accept/reject, but `query 'revision[...]'` needs the dotted `revision.author=`/`revision.type=` form; move+revision is run-level paths only, not paragraph-level; **range=START:END** on a paragraph/shape path formats a char span by explicit 0-based half-open offset instead of addressing a run — the offset sibling of find=), table (direction=rtl, hMerge, cantSplit on row/nowrap on cell (both add+set), **virtual column ops**: add/remove/move/copyfrom on /body/tbl[N]/col), row (tr), cell (td), image, header/footer (direction), section (pageNumFmt full enum, direction=rtl, rtlGutter, pgBorders=box), bookmark, comment, footnote, endnote, formfield, sdt, chart, equation, field (28 types), hyperlink, style (direction, indents, pbdr, lineSpacing on Add/Set), toc, watermark, break, ole, **num/abstractNum/lvl**, **tab**, **textbox/shape** (add-mostly — Get returns raw XML preview only, no structured readback; Set is limited to width/height/geometry/fill/line.\*; position is `anchor.x`/`anchor.y` not bare x/y; **textbox-only** `textDirection`/rotation/gradient/shadow — docx shape itself has neither rotation nor gradient), embedded **OLE round-trip on dump→batch**, **diagram** (add-only mermaid → native shapes or rendered image, `--type diagram`/`flowchart`, no x/y at add-time — reposition via `set /body/group[N]`). docDefaults.rtl, autoHyphenation, `get /` exposes locale + /comments /footnotes /endnotes. `create --minimal` for raw OOXML scaffolding. |
+| **xlsx** | sheet (visible/hidden/veryHidden, print margins, printTitleRows/Cols, rightToLeft sheetView, cascade-aware rename), row (c{N}= cell-content shorthand; add accepts --from /Sheet/col[L]; formula-ref rewrite on insert), col (formula-ref rewrite, named-range follow on move), cell (type=richtext+runs, merge=range/sweep, direction=rtl, phonetic; **--shift left\|up on remove, shift=right\|down on add** — Excel UI dialog parity; formula auto-detect; OFFSET/INDIRECT in calc), chart (per-axis RTL/title, anchor=x,y,w,h, pareto), image (SVG), comment (direction=rtl), table (listobject), namedrange (definedname, volatile, `[@name=X]`; formula-body inlined at parse), pivottable (cache CoW + cross-pivot sharing, labelFilter=field:type:value add-time-only, topN=integer add-time-only, fillDownLabels is an alias of repeatLabels not a separate feature, calculatedField), sparkline, validation, autofilter, shape, textbox, CF (databar/colorscale/iconset/formulacf/cellIs/topN/aboveAverage), ole, csv. Query supports `merge`/`mergedrange`. Workbook: password. Shape selector enumerates leaves inside grpSp. |
+
+### Pivot tables (xlsx)
+
+```bash
+officecli add data.xlsx /Sheet1 --type pivottable \
+  --prop source="Sheet1!A1:E100" --prop rows=Region,Category \
+  --prop cols=Year --prop values="Sales:sum,Qty:count" \
+  --prop grandTotals=rows --prop subtotals=off --prop sort=asc
+```
+
+Key props: `rows`, `cols`, `values` (Field:func[:showDataAs]), `filters`, `source`, `position`, `layout` (compact/outline/tabular), `repeatLabels`, `blankRows`, `aggregate`, `showDataAs` (percent_of_total/row/col, running_total), `grandTotals`, `subtotals`, `sort`. Aggregators: sum, count, average, max, min, product, stdDev, stdDevp, var, varp, countNums. Date columns auto-group. Run `officecli help xlsx pivottable` for full schema.
+
+### Document-level properties (all formats)
+
+```bash
+officecli set doc.docx / --prop docDefaults.font=Arial --prop docDefaults.fontSize=11pt
+officecli set doc.docx / --prop protection=forms --prop evenAndOddHeaders=true
+officecli set data.xlsx / --prop calc.mode=manual --prop calc.refMode=r1c1
+officecli set slides.pptx / --prop defaultFont=Arial --prop show.loop=true --prop print.what=handouts
+```
+
+Run `officecli help <format> /` for all document-level properties (docDefaults, docGrid, CJK spacing, calc, print, show, theme, extended).
+
+### Sort (xlsx)
+
+```bash
+officecli set data.xlsx /Sheet1 --prop sort="C desc" --prop sortHeader=true
+officecli set data.xlsx '/Sheet1/A1:D100' --prop sort="A asc" --prop sortHeader=true
+```
+
+Format: `COL DIR[, COL DIR ...]`. Rejects ranges with merged cells or formulas. Sidecar metadata (hyperlinks, comments, conditional formatting, drawings) follows rows automatically.
+
+### Text-anchored insert (`--after find:X` / `--before find:X`)
+
+Locate an insertion point by text match within a paragraph. Inline types (run, picture, hyperlink) insert within the paragraph; block types (table, paragraph) auto-split it. PPT only supports inline.
+
+```bash
+# Word: inline run after matched text
+officecli add doc.docx '/body/p[1]' --type run --after find:weather --prop text=" (sunny)"
+
+# Word: block table after matched text (auto-splits paragraph)
+officecli add doc.docx '/body/p[1]' --type table --after "find:First sentence." --prop rows=2 --prop cols=2
+```
+
+### Clone
+
+`officecli add <file> / --from '/slide[1]'` — copies with all cross-part relationships.
+
+### move, swap, remove
+
+```bash
+officecli move <file> <path> [--to <parent>] [--index N] [--after <path>] [--before <path>]
+officecli swap <file> <path1> <path2>
+officecli remove <file> '/body/p[4]'
+```
+
+When using `--after` or `--before`, `--to` can be omitted — the target container is inferred from the anchor.
+
+### batch — multiple operations in one save cycle
+
+**Atomic by default (v1.0.137+):** every item still runs and is reported (so `N succeeded, M failed` stays meaningful and every failure surfaces), but if *any* item fails the whole batch rolls back — the file on disk is left byte-identical to before the batch ran (confirmed live in both standalone and resident mode). Use `--best-effort` to restore the old apply-what-succeeds behavior (useful for lossy `dump→batch` replays where losing the whole thing over one unsupported item is worse than a partial result). `--stop-on-error` only changes how early the run stops (remaining items are `skipped`), not whether what ran gets kept — combine it with `--best-effort` if you want "stop at first failure but keep what already succeeded." `--force` is unrelated — it's only the docx-protection bypass. Failed items carry a machine-readable `code` field (same list as `error.code`); a rolled-back batch's JSON summary carries `"atomicRolledBack": true`.
+
+`officecli dump <file> [<path>]` emits a replayable batch JSON for round-trip — `.docx` (full coverage), `.pptx` (text/tables/pictures/charts/notes/theme + OLE/3D/video/audio/SmartArt/morph/p15 transitions via raw-set passthrough), and `.xlsx` (cells/formulas/styles + tables, conditional formatting, validations, comments, charts, sparklines, pictures, shapes, pivot tables; slicers/chartEx/OLE via verbatim carrier). Path defaults to `/` (whole document); pass a subtree path (docx: `/body`, `/body/p[N]`, `/body/tbl[N]`, `/theme`, `/settings`, `/numbering`, `/styles`; xlsx: `/SheetName`, `/sheet[N]`) to scope the dump. `officecli refresh <file.docx>` recalculates TOC page numbers / PAGE / cross-references after replay (Word backend on Windows; headless-HTML fallback elsewhere). `officecli plugins list` extends support to `.doc`, `.hwpx`, `.pdf` export.
+
+```bash
+echo '[
+  {"command":"set","path":"/Sheet1/A1","props":{"value":"Name","bold":"true"}},
+  {"command":"set","path":"/Sheet1/B1","props":{"value":"Score","bold":"true"}}
+]' | officecli batch data.xlsx --json
+
+officecli batch data.xlsx --commands '[{"op":"set","path":"/Sheet1/A1","props":{"value":"Done"}}]' --json
+officecli batch data.xlsx --input updates.json --best-effort --json   # keep whatever succeeds even if some items fail
+```
+
+Supports: `add`, `set`, `get`, `query`, `remove`, `move`, `swap`, `view`, `raw`, `raw-set`, `validate`. Fields: `command` (or `op`), `path`, `parent`, `type`, `from`, `to`, `index`, `after`, `before`, `props`, `selector`, `mode`, `depth`, `part`, `xpath`, `action`, `xml`.
+
+---
+
+## L3: Raw XML
+
+Use when L2 cannot express what you need. No xmlns declarations needed — prefixes auto-registered.
+
+```bash
+officecli raw <file> <part>                          # view raw XML
+officecli raw-set <file> <part> --xpath "..." --action replace --xml '<w:p>...</w:p>'
+officecli add-part <file> <parent>                   # create new document part (returns rId)
+```
+
+`raw-set` actions: `append`, `prepend`, `insertbefore`, `insertafter`, `replace`, `remove`, `setattr`. Run `officecli help <format> raw` for available parts.
 
 ---
 

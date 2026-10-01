@@ -8,7 +8,7 @@
 ## 验证命令速查（一条命令核对核心依赖）
 
 ```bash
-for t in uv gh git node lark-cli keenable mmdc officecli graph-easy mysql; do
+for t in uv gh git node lark-cli keenable mmdc officecli mdlineage graph-easy mysql; do
   printf '%-12s' "$t:"; "$t" --version 2>/dev/null | head -1 || echo "❌ 缺失"
 done
 ```
@@ -29,6 +29,7 @@ done
 | graph-easy | v0.76 | diagram（draft 类 ASCII 图） | `sudo apt install libgraph-easy-perl graphviz` | `graph-easy --version`（注意：退出码为 2，属正常） |
 | Playwright + Chromium | chromium-1134/1234 | diagram（ers 类 ECharts 引擎，默认）；缺失时用 `--engine pillow` 兜底 | pip playwright + `playwright install chromium`（~/.cache/ms-playwright） | `ls ~/.cache/ms-playwright` |
 | officecli | 1.0.152 | officecli（docx/xlsx/pptx） | 官方安装（~/.local/bin/officecli）；**自更新**，版本漂移常见 | `officecli --version` |
+| mdlineage | 0.1.0 | Markdown 知识库元数据/关系校验、变更影响分析与治理（CLI + MCP + LSP） | npm link（~/projects/md-lineage）或 npm 全局安装 | `mdlineage --version`；使用说明见 `~/projects/md-lineage/docs/使用手册/` |
 | codegraph | 1.6.0 | 代码知识图谱（符号检索/调用图/MCP 工具，非 skill 依赖） | 官方 installer（`~/.codegraph/versions/`）；升级 `codegraph upgrade` | `codegraph --version`；接入规程见 `~/.dsh/knowledge/codegraph-guide.md` |
 | mysql | 8.0.46 | db-skill（项目本地库） | 系统/容器 | `mysql --version` |
 | node / npx | v24.16.0 / 11.13.0 | drawio-xml（`npx @next-ai-drawio/mcp-server` 按需拉取）、lark-cli | nvm | `node --version` |
@@ -54,6 +55,7 @@ done
 | codegraph | Claude Code（`~/.claude.json`） | ✔ | 技能仓库 `.codegraph` 项目索引（代码检索） |
 | context7 | Claude Code 插件 | ✔ | 无技能引用（孤儿，保留） |
 | browser（Playwright） | DSH 插件（`cordis.patch.yml`，`playwright-mcp --headless`） | ✔ | 宿主有该 MCP 且不需要登录态时的浏览器通道（`mcp__browser__*`）。通道选择见 kimi-webbridge；工具用法见 `~/.dsh/knowledge/browser-mcp-guide.md` |
+| mdlineage | stdio（`mdlineage-mcp` / `mdlineage mcp --stdio`） | ✔ | Markdown 知识库元数据与拓扑校验、Schema 查询、关系反解与补丁提案（7 工具，源于 `md-lineage`） |
 | drawio | 按需 `npx @next-ai-drawio/mcp-server` | ⚠️ 未注册 | drawio-xml（执行层：会话/预览/编辑门控/导出）；待 `claude mcp add drawio` 后全链路可用 |
 | fiddler / visio | — | ✘ 已清理（2026-08-29） | 孤儿（无技能引用），配置已从 `~/.claude.json` 与 `/home/dc/.mcp.json` 移除 |
 

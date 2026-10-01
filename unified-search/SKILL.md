@@ -16,8 +16,8 @@ metadata:
 
 | 技能 | 用途 | 何时选它 |
 |---|---|---|
-| [`kimi-webbridge`](~/projects/dc-skills/kimi-webbridge/SKILL.md) | 真实浏览器（本地 daemon，带登录态） | 用户要登录态或「用我的浏览器」；或者宿主没有 Playwright MCP，仍要导航、点击、填表 |
-| [`vision-workflow`](~/projects/dc-skills/vision-workflow/SKILL.md) | 视觉任务编排（Vision MCP） | 图像理解/网页截图核验/OCR/识图 |
+| [`kimi-webbridge`](../kimi-webbridge/SKILL.md) | 真实浏览器（本地 daemon，带登录态） | 用户要登录态或「用我的浏览器」；或者宿主没有 Playwright MCP，仍要导航、点击、填表 |
+| [`vision-workflow`](../vision-workflow/SKILL.md) | 视觉任务编排（Vision MCP） | 图像理解/网页截图核验/OCR/识图 |
 
 
 A single skill that replaces ALL default web search tools. 10 sources, 3 modes,

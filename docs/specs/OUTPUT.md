@@ -129,6 +129,31 @@
 | C-8 全局状态三例 | unified-search state、gpu-governor、.git manifest | 长期 |
 | C-10 安装/脚手架 | 写用户项目源码树 | 长期 |
 
+## C-14 用户项目内的 git 忽略（机器级，2026-10-01）
+
+主库以外的项目内产物（统一产物树 + paper-reader 的 conversion/merged 两层）由**机器级全局忽略**
+兜底（git `core.excludesFile`，2026-10-01 起本机为 `~/.gitignore_global`）：
+
+```gitignore
+skills-output/*
+paper-conversion/*
+paper-merged/*
+```
+
+- 统一规则写**内容形式**（`X/*`）：目录一旦被整体排除，git 不允许再用 `!` 反选其中文件；
+  内容形式下，项目根 `.gitignore` 的 `!` 可以按文件转正
+- `paper-summaries/` 按设计纳入跟踪，不忽略；主库内的 `skills-output/` 另由主库 `.gitignore` 兜底
+- 新设备配置步骤见 `docs/runbook/CROSS-DEVICE-SETUP.md`
+
+**指定产物转正**（把已忽略的文件纳入跟踪）：
+
+| 场景 | 方法 |
+|---|---|
+| 单次、少量文件 | `git add -f <路径>` 强制加入一次即成普通跟踪文件，之后修改照常 `git add` / `git add -A` |
+| 一类文件反复出现 | 在**项目根** `.gitignore` 写 `!<路径>`；嵌套目录先写 `!<目录>/` 再写文件（被忽略目录内部的 `.gitignore` 不会被读取） |
+| 审计 | `git ls-files -ci --exclude-standard`（已跟踪但命中忽略的文件）；`git check-ignore -v --no-index <路径>`（看规则来源） |
+| 反悔 | `git rm --cached <路径>`（保留磁盘文件，仅退出跟踪） |
+
 ## 显式指定优先（本文件不覆盖的场景）
 
 1. 用户或调用方显式传入 `--output` / `--output-dir`（最终产物落指定处，审计副本仍生成，C-4）

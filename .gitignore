@@ -136,4 +136,4 @@ paper-analysis/
 *wsl.localhost*
 
 # github-workflow shared ignore rules
-unified-search/data/dblp_cookies.json
+unified-search/data/

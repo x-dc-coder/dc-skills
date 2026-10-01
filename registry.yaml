@@ -8,7 +8,7 @@
 #   模型渠道人读全字段   → docs/arch/MODELS.md（到期日在彼处机器可解析）
 # 违反归属权的字段不许加入本文件。消费者：scripts/assets-doctor。
 version: 1
-updated_at: 2026-09-24
+updated_at: 2026-10-01
 
 settings:
   net_timeout_s: 4
@@ -26,7 +26,7 @@ models:
     upstream_url: "https://api.commandcode.ai/provider/v1"
     check_cmd: "grok inspect --json"
     asserts: [provider_registered, env_key_present, upstream_reachable, expiry_ok]
-    notes: "上游 deepseek/deepseek-v4.1-flash；到期日只在 MODELS.md 维护"
+    notes: "Chat Completions；上游 deepseek/deepseek-v4.1-flash。走 127.0.0.1:7890，不要把该域放进 no_proxy。到期日只在 MODELS.md"
   - name: step-5-preview
     type: model_channel
     client: grok
@@ -35,7 +35,7 @@ models:
     upstream_url: "http://127.0.0.1:8321/v1"
     check_cmd: "grok inspect --json"
     asserts: [provider_registered, env_key_present, upstream_reachable, expiry_ok]
-    notes: "经本机 stepfun-shim（services.stepfun-shim）转发 StepFun"
+    notes: "Chat Completions，base_url 即本地 shim；shim 上游 api.stepfun.com/step_plan。人读见 MODELS.md"
   - name: glm-5.3-flash
     type: model_channel
     client: grok
@@ -53,15 +53,16 @@ models:
     upstream_url: "https://ai.x-lf.com/v1"
     check_cmd: "grok inspect --json"
     asserts: [provider_registered, env_key_present, upstream_reachable]
+    notes: "Responses；思考档位仅 low/medium/high，xhigh 与 max 被上游拒绝。人读见 MODELS.md"
   - name: Atria-Dawn-Preview
     type: model_channel
     client: grok
     location: "~/.grok/config.toml#[model.Atria-Dawn-Preview]"
-    env_key: NEWAPI_API_KEY
-    upstream_url: "http://127.0.0.1:3000/v1"
+    env_key: ASI_API_KEY
+    upstream_url: "https://api.atria-asi.ai/v1"
     check_cmd: "grok inspect --json"
     asserts: [provider_registered, env_key_present, upstream_reachable]
-    notes: "经本机 NewAPI 网关（services.newapi-gateway）"
+    notes: "官方 Responses；只收文本。思考档位 low/medium/high"
   - name: codex-default
     type: model_channel
     client: codex
@@ -281,12 +282,12 @@ services:
     location: "http://127.0.0.1:3000"
     check_cmd: "curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3000/api/status"
     asserts: [tcp_reachable, api_status_ok]
-    notes: "Claude/Codex/DSH/Grok(Atria) 的共同上游；渠道清单只在库内（newapi-management 查）"
+    notes: "Claude/Codex/DSH 的共同上游。Grok 的 Atria 已改官方 api.atria-asi.ai"
   - name: stepfun-shim
     type: service
     location: "http://127.0.0.1:8321"
     asserts: [tcp_reachable]
-    notes: "Grok step-5-preview 的后端；进程 ~/.local/share/stepfun-shim/server.py"
+    notes: "bashrc 在 8321 空闲时拉起。Grok step-5-preview 的 base_url 就是它，上游 api.stepfun.com/step_plan"
   - name: codegraph-daemon
     type: service
     location: "~/.omo/codegraph"

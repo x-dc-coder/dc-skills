@@ -19,7 +19,7 @@ metadata:
 
 | 技能 | 用途 | 何时选它 |
 |---|---|---|
-| [`dsh-ui-optimization`](~/projects/dc-skills/dsh-ui-optimization/SKILL.md) | DSH 插件前端优化（薄壳编排） | 优化 DSH client 插件注入的界面/settings 卡片 |
+| [`dsh-ui-optimization`](../dsh-ui-optimization/SKILL.md) | DSH 插件前端优化（薄壳编排） | 优化 DSH client 插件注入的界面/settings 卡片 |
 
 
 > 适用场景：DSH 插件安装失败、配置冲突、服务注册冲突、挂载失败、插件不生效、版本不匹配，以及"安装插件遇到未知问题"类请求。

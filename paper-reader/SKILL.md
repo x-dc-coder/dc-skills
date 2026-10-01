@@ -71,6 +71,9 @@ papers/              paper-conversion/         paper-merged/           paper-sum
 | `paper-merged/` | 合并产物 | ❌ ignore | 可从 PDF 重现 |
 | `paper-summaries/` | LLM 总结 | ✅ 跟踪 | 含主观分析，每次不同 |
 
+> `paper-conversion/`、`paper-merged/` 的忽略由机器级全局规则兜底（`docs/specs/OUTPUT.md` C-14）；
+> `paper-summaries/` 保持跟踪。个别产物需要转正时用 `git add -f <路径>`。
+
 ### 图片策略
 
 合并阶段从两引擎复制 **仅 Figure 类型图片** 到 `paper-merged/<stem>/images/`：

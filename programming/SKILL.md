@@ -19,12 +19,12 @@ metadata:
 
 | 技能 | 用途 | 何时选它 |
 |---|---|---|
-| [`debugging`](~/projects/dc-skills/debugging/SKILL.md) | 系统化调试（假设驱动闭环） | 崩溃、静默失败、结果错误、卡死、内存泄漏、时序异常。不限语言 |
-| [`git-master`](~/projects/dc-skills/git-master/SKILL.md) | 已有仓库的本地 git | commit、提交、暂存、rebase、squash、fixup、blame、bisect、reflog、谁写的。提交信息沿用该仓库既有风格 |
-| [`github-workflow`](~/projects/dc-skills/github-workflow/SKILL.md) | GitHub 仓库生命周期 | 初始化仓库、gh repo、PR、issue、preview、publish。这些流程里的提交信息用该技能的 Conventional Commits |
-| [`remove-ai-slops`](~/projects/dc-skills/remove-ai-slops/SKILL.md) | AI 味代码清除 | 清理分支改动中的 AI 生成代码味 |
-| [`test-guardian`](~/projects/dc-skills/test-guardian/SKILL.md) | 测试防假绿规范与双盲质检 | 审计测试是否真绿、测试分层与工程门禁 |
-| [`codegraph-explore`](~/projects/dc-skills/codegraph-explore/SKILL.md) | 任意语言的符号、调用链、影响面 | 理解大仓、定位定义或调用者、评估重构影响。不限 .py/.rs/.ts/.go。小仓、配置、Markdown 不要读它 |
+| [`debugging`](../debugging/SKILL.md) | 系统化调试（假设驱动闭环） | 崩溃、静默失败、结果错误、卡死、内存泄漏、时序异常。不限语言 |
+| [`git-master`](../git-master/SKILL.md) | 已有仓库的本地 git | commit、提交、暂存、rebase、squash、fixup、blame、bisect、reflog、谁写的。提交信息沿用该仓库既有风格 |
+| [`github-workflow`](../github-workflow/SKILL.md) | GitHub 仓库生命周期 | 初始化仓库、gh repo、PR、issue、preview、publish。这些流程里的提交信息用该技能的 Conventional Commits |
+| [`remove-ai-slops`](../remove-ai-slops/SKILL.md) | AI 味代码清除 | 清理分支改动中的 AI 生成代码味 |
+| [`test-guardian`](../test-guardian/SKILL.md) | 测试防假绿规范与双盲质检 | 审计测试是否真绿、测试分层与工程门禁 |
+| [`codegraph-explore`](../codegraph-explore/SKILL.md) | 任意语言的符号、调用链、影响面 | 理解大仓、定位定义或调用者、评估重构影响。不限 .py/.rs/.ts/.go。小仓、配置、Markdown 不要读它 |
 
 一次提交只打开 git-master 或 github-workflow 其中一个。查本地历史、在已有仓库里提交，打开 git-master。要初始化仓库、建远端、走 preview/publish 或处理 PR/issue，打开 github-workflow。
 

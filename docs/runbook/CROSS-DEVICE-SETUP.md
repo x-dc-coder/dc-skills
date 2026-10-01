@@ -104,6 +104,29 @@ bash ~/projects/dc-skills/paper-reader/scripts/bootstrap.sh
 
 > **安全提醒**：所有带 key 的文件（`config.json`、`.db-skill/*.json`）都已被 `.gitignore` / `.git/info/exclude` 排除，**不要**手动 `git add -f` 提交。
 
+### 全局 git 忽略（dc-skills 产物兜底，OUTPUT.md C-14）
+
+主库以外的项目内产物（统一产物树 + paper-reader 的 `paper-conversion/`、`paper-merged/`）由机器级
+全局忽略覆盖，避免每个项目单独加规则：
+
+```bash
+# 幂等追加（内容形式，保留项目内 ! 反选能力）
+grep -q 'dc-skills 运行产物' ~/.gitignore_global 2>/dev/null || cat >> ~/.gitignore_global <<'EOF'
+
+# ── dc-skills 运行产物（勿提交；规则见 docs/specs/OUTPUT.md C-14）──
+skills-output/*
+paper-conversion/*
+paper-merged/*
+EOF
+
+git config --global core.excludesFile ~/.gitignore_global   # 全新设备上确认指向该文件
+
+# 验证：任一口袋仓库内应命中 ~/.gitignore_global
+tmp=$(mktemp -d) && git -C "$tmp" init -q && git -C "$tmp" check-ignore -v skills-output/demo.md; rm -rf "$tmp"
+```
+
+> 指定产物转正的方法（`git add -f` / `!` 反选 / 审计命令）见 `docs/specs/OUTPUT.md` C-14。
+
 ---
 
 ## 六、全量验证

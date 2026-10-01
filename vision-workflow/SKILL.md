@@ -113,17 +113,16 @@ UI diff 报出结构性差异。原有 8 个工具回归全部正常，本地共
 
 **计费**：官方工具走 REST 直调（套餐积分），不经 npx 进程，省一层启动开销。
 
-## Grok 内模型补充（2026-09-21 配置）
+## Grok 内模型补充
 
-Grok `~/.grok/config.toml` 已配置智谱/第三方模型，视觉任务编排时可按需切换主对话模型：
+视觉任务需要换主对话模型时，渠道、协议和代理以 `docs/arch/MODELS.md` 为准。和本技能相关的两条：
 
 | 模型 | 用途 |
 |---|---|
-| `glm-5.3-flash` / `glm-5.3`（NewAPI 中转） | 日常主力 / 旗舰 |
-| `deepseek-v4.1-flash`（commandcode Provider API，模型 ID `deepseek/deepseek-v4.1-flash`） | 备用对话模型 |
+| `glm-5.3-flash` / `glm-5.3`（直连 `open.bigmodel.cn/api/v1`，Responses） | 日常主力 / 旗舰 |
+| `deepseek-v4.1-flash`（`api.commandcode.ai/provider/v1`，Chat Completions，上游 ID `deepseek/deepseek-v4.1-flash`） | 备用对话模型 |
 
-注意：`api.commandcode.ai` 在本机代理节点下会 TLS 黑洞，`~/.bashrc` 的 `no_proxy` 已豁免
-该域名（走 IPv6 直连）；若 Grok 内该模型超时，先检查 `no_proxy` 是否含 `api.commandcode.ai`。
+`api.commandcode.ai` 走本机代理 `http://127.0.0.1:7890`。`no_proxy` 不要包含该域名；豁免后请求改走 TUN 直连并超时。
 
 ## 输出规范
 

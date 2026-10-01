@@ -138,7 +138,7 @@ interface WBDocument {
 > - 图片必须上传到**目标画板**，跨画板的 token 不可用
 > - 同一画板内所有 image 节点应使用统一的 width/height，保持视觉一致
 > - 图片宽高比推荐 3:2（如 240×160），避免变形
-> - 详细上传流程见 [`elements/image.md`](../elements/image.md)
+> - 详细上传流程见 [`image.md`](image.md)
 
 ### Text（纯文本节点）
 

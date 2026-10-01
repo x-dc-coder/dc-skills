@@ -114,6 +114,14 @@ TRACKED_DEPS: list[dict] = [
         "upgrade": "codegraph upgrade",
         "notes": "符号级代码索引与调用图；Claude Code 侧已挂 MCP，DSH 侧见 cordis.patch.yml",
     },
+    {
+        "id": "mdlineage",
+        "skill": "（工具）Markdown 知识库校验与治理 / MCP",
+        "bin": "mdlineage",
+        "channel": "baseline",
+        "upgrade": "cd ~/projects/md-lineage && npm run build && (cd packages/cli && npm link)",
+        "notes": "Markdown 知识库元数据/关系校验、变更影响分析与 MCP 服务",
+    },
     # ── 基线比对通道（系统包，不联网）────────────────────────────────────
     {"id": "uv", "skill": "全部 Python 技能", "bin": "uv", "channel": "baseline",
      "upgrade": "uv self update"},

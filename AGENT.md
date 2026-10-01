@@ -42,7 +42,8 @@ uv run --directory ~/projects/dc-skills python scripts/github_issues.py ...
 所有 SKILL 的文件输出遵循 `OUTPUT.md`（docs/specs/OUTPUT.md，**唯一事实源**）的统一产物树规则：
 默认落 `<cwd>/skills-output/<族群>/<技能名>/<时间戳>/`；显式指定（`--output`）优先，最终产物另存
 `<master>/skills-output/` 审计副本。禁止固定名互相覆盖、`/tmp/skills-output/` 堆积、技能目录内
-产物。CLI 统一调用 `scripts/common.py` 的 `plan_output` / `commit_final`。
+产物。CLI 统一调用 `scripts/common.py` 的 `plan_output` / `commit_final`。用户项目内的产物由
+机器级全局忽略兜底（`docs/specs/OUTPUT.md` C-14）；需要把个别产物纳入跟踪时按该条款用 `git add -f`。
 
 ## 三条铁律（摘要）
 

@@ -17,11 +17,11 @@ metadata:
 
 | 技能 | 用途 | 何时选它 |
 |---|---|---|
-| [`thesis-ref-check`](~/projects/dc-skills/thesis-ref-check/SKILL.md) | 论文术语一致性检查 | 定稿前术语变体/前后不一检查与修正 |
-| [`thesis-export`](~/projects/dc-skills/thesis-export/SKILL.md) | 论文 Markdown→docx 导出与格式验证 | 导出 Word/导出前格式检查/封面拼接 |
-| [`md-to-thesis-latex`](~/projects/dc-skills/md-to-thesis-latex/SKILL.md) | 毕业论文 md→LaTeX→PDF | 转 LaTeX 排版输出 PDF |
-| [`paper-metrics`](~/projects/dc-skills/paper-metrics/SKILL.md) | 论文写作特征指标层 | 写作特征测量/AI 味量化分析 |
-| [`paper-reader`](~/projects/dc-skills/paper-reader/SKILL.md) | 学术论文 PDF 双引擎阅读 | 读 PDF 论文/转换/总结 |
+| [`thesis-ref-check`](../thesis-ref-check/SKILL.md) | 论文术语一致性检查 | 定稿前术语变体/前后不一检查与修正 |
+| [`thesis-export`](../thesis-export/SKILL.md) | 论文 Markdown→docx 导出与格式验证 | 导出 Word/导出前格式检查/封面拼接 |
+| [`md-to-thesis-latex`](../md-to-thesis-latex/SKILL.md) | 毕业论文 md→LaTeX→PDF | 转 LaTeX 排版输出 PDF |
+| [`paper-metrics`](../paper-metrics/SKILL.md) | 论文写作特征指标层 | 写作特征测量/AI 味量化分析 |
+| [`paper-reader`](../paper-reader/SKILL.md) | 学术论文 PDF 双引擎阅读 | 读 PDF 论文/转换/总结 |
 
 
 双模式学术稿件生成器。生成结构化 Markdown 初稿，图片使用占位符（出图时读 diagram 技能，按类型 er/ers/module/usecase/sequence/flow 执行），最后用 `check_markdown_spec.py` 校验。

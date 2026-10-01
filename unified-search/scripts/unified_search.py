@@ -1135,7 +1135,8 @@ def save_history(cfg: dict, query: str, top_results: list[dict], mode: str = "ge
     hcfg = cfg.get("history", {})
     if not hcfg.get("enabled", True):
         return
-    db_path = SKILL_DIR / hcfg.get("db_path", "data/history.db")
+    # 遵循 OUTPUT.md C-8：全局运行时状态落 ~/.local/state/dc-skills/unified-search/，不得写进技能目录
+    db_path = DB_PATH
     init_db(db_path)
     with sqlite3.connect(db_path) as conn:
         conn.execute(
@@ -1153,7 +1154,8 @@ def save_history(cfg: dict, query: str, top_results: list[dict], mode: str = "ge
 
 def query_history(query: str, cfg: dict, limit: int = 5) -> dict:
     hcfg = cfg.get("history", {})
-    db_path = SKILL_DIR / hcfg.get("db_path", "data/history.db")
+    # 遵循 OUTPUT.md C-8：全局运行时状态落 ~/.local/state/dc-skills/unified-search/
+    db_path = DB_PATH
     if not db_path.exists():
         return {"mode": "history", "query": query, "results": [], "note": "no history db yet"}
     init_db(db_path)

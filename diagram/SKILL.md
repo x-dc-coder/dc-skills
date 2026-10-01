@@ -21,7 +21,7 @@ metadata:
 
 | 技能 | 用途 | 何时选它 |
 |---|---|---|
-| [`drawio-xml`](~/projects/dc-skills/drawio-xml/SKILL.md) | .drawio 原生可编辑图表（XML） | 用户要可继续编辑的图表文件，或图片转 drawio |
+| [`drawio-xml`](../drawio-xml/SKILL.md) | .drawio 原生可编辑图表（XML） | 用户要可继续编辑的图表文件，或图片转 drawio |
 
 
 聚合原 7 个 `diagram-*` 独立技能（draft / er / ers / flow / module / sequence / usecase），

@@ -22,10 +22,10 @@ metadata:
 
 | 技能 | 用途 | 何时选它 |
 |---|---|---|
-| [`orchestration`](~/projects/dc-skills/orchestration/SKILL.md) | Orca worker 编排 | 多 worker 监督/线程消息/任务分发/DAG |
-| [`task-hub`](~/projects/dc-skills/task-hub/SKILL.md) | 跨会话任务中心 | 任务新建/编辑/查询/推进/报表看板 |
-| [`computer-use`](~/projects/dc-skills/computer-use/SKILL.md) | GUI 驱动（orca computer） | 可见窗口需要 GUI 控制且 CLI/文件/API 无法替代时 |
-| [`newapi-management`](~/projects/dc-skills/newapi-management/SKILL.md) | 本机 NewAPI 网关渠道/日志运维 | 配置 NewAPI 渠道/排查会话日志（模型链路运维） |
+| [`orchestration`](../orchestration/SKILL.md) | Orca worker 编排 | 多 worker 监督/线程消息/任务分发/DAG |
+| [`task-hub`](../task-hub/SKILL.md) | 跨会话任务中心 | 任务新建/编辑/查询/推进/报表看板 |
+| [`computer-use`](../computer-use/SKILL.md) | GUI 驱动（orca computer） | 可见窗口需要 GUI 控制且 CLI/文件/API 无法替代时 |
+| [`newapi-management`](../newapi-management/SKILL.md) | 本机 NewAPI 网关渠道/日志运维 | 配置 NewAPI 渠道/排查会话日志（模型链路运维） |
 
 
 This discovery stub loads the version-matched guide from the Orca executable used for this session.

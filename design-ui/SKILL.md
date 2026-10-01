@@ -17,8 +17,8 @@ metadata:
 
 | 技能 | 用途 | 何时选它 |
 |---|---|---|
-| [`design-diagram`](~/projects/dc-skills/design-diagram/SKILL.md) | Artifact 内联 SVG 图表规范 | 画架构图/流程图/机制图/状态图，且希望自包含可移植 |
-| [`design-dataviz`](~/projects/dc-skills/design-dataviz/SKILL.md) | 数据可视化设计系统 | 写图表代码/选色/构建仪表盘/统计卡片前 |
+| [`design-diagram`](../design-diagram/SKILL.md) | Artifact 内联 SVG 图表规范 | 画架构图/流程图/机制图/状态图，且希望自包含可移植 |
+| [`design-dataviz`](../design-dataviz/SKILL.md) | 数据可视化设计系统 | 写图表代码/选色/构建仪表盘/统计卡片前 |
 
 DSH 插件注入的界面（conversation.view、settings 卡片）不在本族。先 Read `~/projects/dc-skills/dsh-plugin-troubleshooting/SKILL.md`，由其转到 dsh-ui-optimization。
 
