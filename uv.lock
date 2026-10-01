@@ -254,6 +254,7 @@ dependencies = [
     { name = "pyyaml" },
     { name = "requests" },
     { name = "sqlglot" },
+    { name = "tomli" },
 ]
 
 [package.dev-dependencies]
@@ -278,6 +279,7 @@ requires-dist = [
     { name = "pyyaml", specifier = ">=6.0.0" },
     { name = "requests", specifier = ">=2.31.0" },
     { name = "sqlglot", specifier = ">=20.0.0" },
+    { name = "tomli", specifier = ">=2.0.0" },
 ]
 
 [package.metadata.requires-dev]

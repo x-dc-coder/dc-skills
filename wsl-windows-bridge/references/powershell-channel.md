@@ -37,7 +37,7 @@ powershell.exe -File "E:\temp\task.ps1" -Name "python"
 ## Channel A: PowerShell Bridge — Core Capabilities
 
 > **以下能力需要 PowerShell 桥接通道**（启动开销 ~300ms，适用于复杂操作、结构化输出、COM/WMI/P/Invoke）。
-> 对于简单快速的注册表/服务/进程操作，请先用 [Channel B](#channel-b-direct-windows-exe-tools-zero-powershell-overhead) 的直调工具。
+> 对于简单快速的注册表/服务/进程操作，请先用 [Channel B](exe-channel.md#channel-b-direct-windows-exe-tools-zero-powershell-overhead) 的直调工具。
 
 ### Capability 1: Registry Access
 

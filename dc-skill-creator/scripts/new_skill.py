@@ -152,7 +152,7 @@ def insert_extra(yaml_text: str, agent: str, entry: str) -> str:
 
 def insert_family_member(yaml_text: str, family: str, entry: str) -> str:
     lines = yaml_text.split("\n")
-    f = next((n for n, ln in enumerate(lines) if ln == f"  {family}:"), None)
+    f = next((n for n, ln in enumerate(lines) if re.match(rf"^\s+{family}:\s*(?:#.*)?$", ln)), None)
     if f is None:
         raise SystemExit(f"families 中找不到族群: {family}")
     m = next((n for n in range(f, min(f + 8, len(lines))) if lines[n].strip().startswith("members:")), None)

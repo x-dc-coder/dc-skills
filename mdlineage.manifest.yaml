@@ -1,0 +1,810 @@
+version: 1
+documents:
+  AGENT.md:
+    id: agent
+    kind: reference
+    status: active
+  AGENTS.md:
+    id: agents
+    kind: reference
+    status: active
+  CLAUDE.md:
+    id: claude
+    kind: reference
+    status: active
+  codegraph-explore/SKILL.md:
+    id: skill.codegraph-explore
+    kind: reference
+    status: active
+  computer-use/SKILL.md:
+    id: skill.computer-use
+    kind: reference
+    status: active
+  db-skill/references/mysql-config.md:
+    id: db-skill.references.mysql-config
+    kind: reference
+    status: active
+  db-skill/references/pg-config.md:
+    id: db-skill.references.pg-config
+    kind: reference
+    status: active
+  db-skill/SKILL.md:
+    id: skill.db-skill
+    kind: reference
+    status: active
+  dc-skill-creator/references/checklist.md:
+    id: dc-skill-creator.references.checklist
+    kind: reference
+    status: active
+  dc-skill-creator/references/description-guide.md:
+    id: dc-skill-creator.references.description-guide
+    kind: reference
+    status: active
+  dc-skill-creator/SKILL.md:
+    id: skill.dc-skill-creator
+    kind: reference
+    status: active
+  debugging/references/methodology/00-setup.md:
+    id: debugging.references.methodology.00-setup
+    kind: reference
+    status: active
+  debugging/references/methodology/02-investigate.md:
+    id: debugging.references.methodology.02-investigate
+    kind: reference
+    status: active
+  debugging/references/methodology/04-oracle-triple.md:
+    id: debugging.references.methodology.04-oracle-triple
+    kind: reference
+    status: active
+  debugging/references/methodology/05-escalate.md:
+    id: debugging.references.methodology.05-escalate
+    kind: reference
+    status: active
+  debugging/references/methodology/06-fix.md:
+    id: debugging.references.methodology.06-fix
+    kind: reference
+    status: active
+  debugging/references/methodology/08-qa.md:
+    id: debugging.references.methodology.08-qa
+    kind: reference
+    status: active
+  debugging/references/methodology/09-cleanup.md:
+    id: debugging.references.methodology.09-cleanup
+    kind: reference
+    status: active
+  debugging/references/methodology/partial-runtime-evidence.md:
+    id: debugging.references.methodology.partial-runtime-evidence
+    kind: reference
+    status: active
+  debugging/references/runtimes/bundled-js-binary.md:
+    id: debugging.references.runtimes.bundled-js-binary
+    kind: reference
+    status: active
+  debugging/references/runtimes/go.md:
+    id: debugging.references.runtimes.go
+    kind: reference
+    status: active
+  debugging/references/runtimes/native-binary.md:
+    id: debugging.references.runtimes.native-binary
+    kind: reference
+    status: active
+  debugging/references/runtimes/node.md:
+    id: debugging.references.runtimes.node
+    kind: reference
+    status: active
+  debugging/references/runtimes/python.md:
+    id: debugging.references.runtimes.python
+    kind: reference
+    status: active
+  debugging/references/runtimes/rust.md:
+    id: debugging.references.runtimes.rust
+    kind: reference
+    status: active
+  debugging/references/tools/ghidra.md:
+    id: debugging.references.tools.ghidra
+    kind: reference
+    status: active
+  debugging/references/tools/playwright-cli.md:
+    id: debugging.references.tools.playwright-cli
+    kind: reference
+    status: active
+  debugging/references/tools/pwndbg.md:
+    id: debugging.references.tools.pwndbg
+    kind: reference
+    status: active
+  debugging/references/tools/pwntools.md:
+    id: debugging.references.tools.pwntools
+    kind: reference
+    status: active
+  debugging/SKILL.md:
+    id: skill.debugging
+    kind: reference
+    status: active
+  design-dataviz/references/anti-patterns.md:
+    id: design-dataviz.references.anti-patterns
+    kind: reference
+    status: active
+  design-dataviz/references/choosing-a-form.md:
+    id: design-dataviz.references.choosing-a-form
+    kind: reference
+    status: active
+  design-dataviz/references/color-formula.md:
+    id: design-dataviz.references.color-formula
+    kind: reference
+    status: active
+  design-dataviz/references/components.md:
+    id: design-dataviz.references.components
+    kind: reference
+    status: active
+  design-dataviz/references/interaction.md:
+    id: design-dataviz.references.interaction
+    kind: reference
+    status: active
+  design-dataviz/references/marks-and-anatomy.md:
+    id: design-dataviz.references.marks-and-anatomy
+    kind: reference
+    status: active
+  design-dataviz/references/palette.md:
+    id: design-dataviz.references.palette
+    kind: reference
+    status: active
+  design-dataviz/SKILL.md:
+    id: skill.design-dataviz
+    kind: reference
+    status: active
+  design-diagram/SKILL.md:
+    id: skill.design-diagram
+    kind: reference
+    status: active
+  design-ui/SKILL.md:
+    id: skill.design-ui
+    kind: reference
+    status: active
+  diagram/references/draft.md:
+    id: diagram.references.draft
+    kind: reference
+    status: active
+  diagram/references/er.md:
+    id: diagram.references.er
+    kind: reference
+    status: active
+  diagram/references/ers.md:
+    id: diagram.references.ers
+    kind: reference
+    status: active
+  diagram/references/flow.md:
+    id: diagram.references.flow
+    kind: reference
+    status: active
+  diagram/references/module.md:
+    id: diagram.references.module
+    kind: reference
+    status: active
+  diagram/references/sequence.md:
+    id: diagram.references.sequence
+    kind: reference
+    status: active
+  diagram/references/usecase.md:
+    id: diagram.references.usecase
+    kind: reference
+    status: active
+  diagram/SKILL.md:
+    id: skill.diagram
+    kind: reference
+    status: active
+  docs/arch/ENVIRONMENT.md:
+    id: docs.arch.environment
+    kind: reference
+    status: active
+  docs/arch/MODELS.md:
+    id: docs.arch.models
+    kind: reference
+    status: active
+  docs/INDEX.md:
+    id: docs.index
+    kind: reference
+    status: active
+  docs/research/canonical-base-design-2026-09-14.md:
+    id: docs.research.canonical-base-design-2026-09-14
+    kind: reference
+    status: active
+  docs/research/open-source-tech-matrix.md:
+    id: docs.research.open-source-tech-matrix
+    kind: reference
+    status: active
+  docs/research/remaining-work-2026-09-14.md:
+    id: docs.research.remaining-work-2026-09-14
+    kind: reference
+    status: active
+  docs/runbook/CROSS-DEVICE-SETUP.md:
+    id: docs.runbook.cross-device-setup
+    kind: reference
+    status: active
+  docs/specs/OUTPUT.md:
+    id: docs.specs.output
+    kind: reference
+    status: active
+  docs/specs/SKILL-AUTHORING-RULES.md:
+    id: docs.specs.skill-authoring-rules
+    kind: reference
+    status: active
+  docs/specs/SKILL-MANAGEMENT.md:
+    id: docs.specs.skill-management
+    kind: reference
+    status: active
+  drawio-xml/references/drawio-quality-rules.md:
+    id: drawio-xml.references.drawio-quality-rules
+    kind: reference
+    status: active
+  drawio-xml/references/mcp-usage.md:
+    id: drawio-xml.references.mcp-usage
+    kind: reference
+    status: active
+  drawio-xml/references/paper-diagram-prompts.md:
+    id: drawio-xml.references.paper-diagram-prompts
+    kind: reference
+    status: active
+  drawio-xml/SKILL.md:
+    id: skill.drawio-xml
+    kind: reference
+    status: active
+  dsh-plugin-troubleshooting/SKILL.md:
+    id: skill.dsh-plugin-troubleshooting
+    kind: reference
+    status: active
+  dsh-ui-optimization/SKILL.md:
+    id: skill.dsh-ui-optimization
+    kind: reference
+    status: active
+  git-master/SKILL.md:
+    id: skill.git-master
+    kind: reference
+    status: active
+  github-workflow/references/commit-rules.md:
+    id: github-workflow.references.commit-rules
+    kind: reference
+    status: active
+  github-workflow/references/config-format.md:
+    id: github-workflow.references.config-format
+    kind: reference
+    status: active
+  github-workflow/references/gh-cheatsheet.md:
+    id: github-workflow.references.gh-cheatsheet
+    kind: reference
+    status: active
+  github-workflow/references/safety-and-ignore.md:
+    id: github-workflow.references.safety-and-ignore
+    kind: reference
+    status: active
+  github-workflow/SKILL.md:
+    id: skill.github-workflow
+    kind: reference
+    status: active
+  kimi-webbridge/references/operations.md:
+    id: kimi-webbridge.references.operations
+    kind: reference
+    status: active
+  kimi-webbridge/SKILL.md:
+    id: skill.kimi-webbridge
+    kind: reference
+    status: active
+  lark-cli/resources/lark-apps-creative-design/agents/fork-verifier-agent.md:
+    id: lark-cli.resources.lark-apps-creative-design.agents.fork-verifier-agent
+    kind: reference
+    status: active
+  lark-cli/resources/lark-apps-creative-design/agents/vision-probe-agent.md:
+    id: lark-cli.resources.lark-apps-creative-design.agents.vision-probe-agent
+    kind: reference
+    status: active
+  lark-cli/resources/lark-apps-creative-design/creative-design.md:
+    id: lark-cli.resources.lark-apps-creative-design.creative-design
+    kind: reference
+    status: active
+  lark-cli/resources/lark-apps-creative-design/references/aily.md:
+    id: lark-cli.resources.lark-apps-creative-design.references.aily
+    kind: reference
+    status: active
+  lark-cli/resources/lark-apps-creative-design/references/animated-video.md:
+    id: lark-cli.resources.lark-apps-creative-design.references.animated-video
+    kind: reference
+    status: active
+  lark-cli/resources/lark-apps-creative-design/references/charts.md:
+    id: lark-cli.resources.lark-apps-creative-design.references.charts
+    kind: reference
+    status: active
+  lark-cli/resources/lark-apps-creative-design/references/claude.md:
+    id: lark-cli.resources.lark-apps-creative-design.references.claude
+    kind: reference
+    status: active
+  lark-cli/resources/lark-apps-creative-design/references/codex.md:
+    id: lark-cli.resources.lark-apps-creative-design.references.codex
+    kind: reference
+    status: active
+  lark-cli/resources/lark-apps-creative-design/references/data-report.md:
+    id: lark-cli.resources.lark-apps-creative-design.references.data-report
+    kind: reference
+    status: active
+  lark-cli/resources/lark-apps-creative-design/references/frontend-design.md:
+    id: lark-cli.resources.lark-apps-creative-design.references.frontend-design
+    kind: reference
+    status: active
+  lark-cli/resources/lark-apps-creative-design/references/hi-fi-design.md:
+    id: lark-cli.resources.lark-apps-creative-design.references.hi-fi-design
+    kind: reference
+    status: active
+  lark-cli/resources/lark-apps-creative-design/references/interactive-prototype.md:
+    id: lark-cli.resources.lark-apps-creative-design.references.interactive-prototype
+    kind: reference
+    status: active
+  lark-cli/resources/lark-apps-creative-design/references/make-a-deck.md:
+    id: lark-cli.resources.lark-apps-creative-design.references.make-a-deck
+    kind: reference
+    status: active
+  lark-cli/resources/lark-apps-creative-design/references/visual-exposure.md:
+    id: lark-cli.resources.lark-apps-creative-design.references.visual-exposure
+    kind: reference
+    status: active
+  lark-cli/resources/lark-apps-creative-design/references/wireframe.md:
+    id: lark-cli.resources.lark-apps-creative-design.references.wireframe
+    kind: reference
+    status: active
+  lark-cli/resources/lark-whiteboard-elements/connectors.md:
+    id: lark-cli.resources.lark-whiteboard-elements.connectors
+    kind: reference
+    status: active
+  lark-cli/resources/lark-whiteboard-elements/content.md:
+    id: lark-cli.resources.lark-whiteboard-elements.content
+    kind: reference
+    status: active
+  lark-cli/resources/lark-whiteboard-elements/image.md:
+    id: lark-cli.resources.lark-whiteboard-elements.image
+    kind: reference
+    status: active
+  lark-cli/resources/lark-whiteboard-elements/layout.md:
+    id: lark-cli.resources.lark-whiteboard-elements.layout
+    kind: reference
+    status: active
+  lark-cli/resources/lark-whiteboard-elements/schema.md:
+    id: lark-cli.resources.lark-whiteboard-elements.schema
+    kind: reference
+    status: active
+  lark-cli/resources/lark-whiteboard-elements/style.md:
+    id: lark-cli.resources.lark-whiteboard-elements.style
+    kind: reference
+    status: active
+  lark-cli/resources/lark-whiteboard-elements/typography.md:
+    id: lark-cli.resources.lark-whiteboard-elements.typography
+    kind: reference
+    status: active
+  lark-cli/SKILL.md:
+    id: skill.lark-cli
+    kind: reference
+    status: active
+  md-to-thesis-latex/references/chapter-specs.md:
+    id: md-to-thesis-latex.references.chapter-specs
+    kind: reference
+    status: active
+  md-to-thesis-latex/references/conversion-rules.md:
+    id: md-to-thesis-latex.references.conversion-rules
+    kind: reference
+    status: active
+  md-to-thesis-latex/SKILL.md:
+    id: skill.md-to-thesis-latex
+    kind: reference
+    status: active
+  newapi-management/references/api-reference.md:
+    id: newapi-management.references.api-reference
+    kind: reference
+    status: active
+  newapi-management/SKILL.md:
+    id: skill.newapi-management
+    kind: reference
+    status: active
+  officecli/references/advanced-operations.md:
+    id: officecli.references.advanced-operations
+    kind: reference
+    status: active
+  officecli/references/dom-operations.md:
+    id: officecli.references.dom-operations
+    kind: reference
+    status: active
+  officecli/references/watch-marks.md:
+    id: officecli.references.watch-marks
+    kind: reference
+    status: active
+  officecli/SKILL.md:
+    id: skill.officecli
+    kind: reference
+    status: active
+  orca-cli/SKILL.md:
+    id: skill.orca-cli
+    kind: reference
+    status: active
+  orchestration/SKILL.md:
+    id: skill.orchestration
+    kind: reference
+    status: active
+  OUTPUT.md:
+    id: output
+    kind: reference
+    status: active
+  paper-metrics/references/figure-profile-schema.md:
+    id: paper-metrics.references.figure-profile-schema
+    kind: reference
+    status: active
+  paper-metrics/references/metric-definitions.md:
+    id: paper-metrics.references.metric-definitions
+    kind: reference
+    status: active
+  paper-metrics/references/rejected-paper-analysis.md:
+    id: paper-metrics.references.rejected-paper-analysis
+    kind: reference
+    status: active
+  paper-metrics/references/test-corpora.md:
+    id: paper-metrics.references.test-corpora
+    kind: reference
+    status: active
+  paper-metrics/SKILL.md:
+    id: skill.paper-metrics
+    kind: reference
+    status: active
+  paper-reader/references/merge-algorithm.md:
+    id: paper-reader.references.merge-algorithm
+    kind: reference
+    status: active
+  paper-reader/references/state-file.md:
+    id: paper-reader.references.state-file
+    kind: reference
+    status: active
+  paper-reader/references/summary-template.md:
+    id: paper-reader.references.summary-template
+    kind: reference
+    status: active
+  paper-reader/references/textlayer-probe.md:
+    id: paper-reader.references.textlayer-probe
+    kind: reference
+    status: active
+  paper-reader/SKILL.md:
+    id: skill.paper-reader
+    kind: reference
+    status: active
+  programming/references/code-smells.md:
+    id: programming.references.code-smells
+    kind: reference
+    status: active
+  programming/references/go/backend-stack.md:
+    id: programming.references.go.backend-stack
+    kind: reference
+    status: active
+  programming/references/go/bootstrap.md:
+    id: programming.references.go.bootstrap
+    kind: reference
+    status: active
+  programming/references/go/bubbletea-v2.md:
+    id: programming.references.go.bubbletea-v2
+    kind: reference
+    status: active
+  programming/references/go/cobra-stack.md:
+    id: programming.references.go.cobra-stack
+    kind: reference
+    status: active
+  programming/references/go/concurrency.md:
+    id: programming.references.go.concurrency
+    kind: reference
+    status: active
+  programming/references/go/data-modeling.md:
+    id: programming.references.go.data-modeling
+    kind: reference
+    status: active
+  programming/references/go/error-handling.md:
+    id: programming.references.go.error-handling
+    kind: reference
+    status: active
+  programming/references/go/golangci-strict.md:
+    id: programming.references.go.golangci-strict
+    kind: reference
+    status: active
+  programming/references/go/grpc-connect.md:
+    id: programming.references.go.grpc-connect
+    kind: reference
+    status: active
+  programming/references/go/libraries.md:
+    id: programming.references.go.libraries
+    kind: reference
+    status: active
+  programming/references/go/one-liners.md:
+    id: programming.references.go.one-liners
+    kind: reference
+    status: active
+  programming/references/go/README.md:
+    id: programming.references.go.readme
+    kind: reference
+    status: active
+  programming/references/go/sqlc-pgx.md:
+    id: programming.references.go.sqlc-pgx
+    kind: reference
+    status: active
+  programming/references/go/testing.md:
+    id: programming.references.go.testing
+    kind: reference
+    status: active
+  programming/references/go/type-patterns.md:
+    id: programming.references.go.type-patterns
+    kind: reference
+    status: active
+  programming/references/logging.md:
+    id: programming.references.logging
+    kind: reference
+    status: active
+  programming/references/python/async-anyio.md:
+    id: programming.references.python.async-anyio
+    kind: reference
+    status: active
+  programming/references/python/data-modeling.md:
+    id: programming.references.python.data-modeling
+    kind: reference
+    status: active
+  programming/references/python/data-processing.md:
+    id: programming.references.python.data-processing
+    kind: reference
+    status: active
+  programming/references/python/error-handling.md:
+    id: programming.references.python.error-handling
+    kind: reference
+    status: active
+  programming/references/python/fastapi-stack.md:
+    id: programming.references.python.fastapi-stack
+    kind: reference
+    status: active
+  programming/references/python/httpx2-optimization.md:
+    id: programming.references.python.httpx2-optimization
+    kind: reference
+    status: active
+  programming/references/python/libraries.md:
+    id: programming.references.python.libraries
+    kind: reference
+    status: active
+  programming/references/python/one-liners.md:
+    id: programming.references.python.one-liners
+    kind: reference
+    status: active
+  programming/references/python/orjson-stack.md:
+    id: programming.references.python.orjson-stack
+    kind: reference
+    status: active
+  programming/references/python/pydantic-ai.md:
+    id: programming.references.python.pydantic-ai
+    kind: reference
+    status: active
+  programming/references/python/pyproject-strict.md:
+    id: programming.references.python.pyproject-strict
+    kind: reference
+    status: active
+  programming/references/python/README.md:
+    id: programming.references.python.readme
+    kind: reference
+    status: active
+  programming/references/python/textual-tui.md:
+    id: programming.references.python.textual-tui
+    kind: reference
+    status: active
+  programming/references/python/type-patterns.md:
+    id: programming.references.python.type-patterns
+    kind: reference
+    status: active
+  programming/references/rust-ub/miri-sanitizers-loom.md:
+    id: programming.references.rust-ub.miri-sanitizers-loom
+    kind: reference
+    status: active
+  programming/references/rust-ub/README.md:
+    id: programming.references.rust-ub.readme
+    kind: reference
+    status: active
+  programming/references/rust-ub/ub-taxonomy.md:
+    id: programming.references.rust-ub.ub-taxonomy
+    kind: reference
+    status: active
+  programming/references/rust/async-tokio.md:
+    id: programming.references.rust.async-tokio
+    kind: reference
+    status: active
+  programming/references/rust/axum-stack.md:
+    id: programming.references.rust.axum-stack
+    kind: reference
+    status: active
+  programming/references/rust/cargo-strict.md:
+    id: programming.references.rust.cargo-strict
+    kind: reference
+    status: active
+  programming/references/rust/clap-stack.md:
+    id: programming.references.rust.clap-stack
+    kind: reference
+    status: active
+  programming/references/rust/concurrency.md:
+    id: programming.references.rust.concurrency
+    kind: reference
+    status: active
+  programming/references/rust/libraries.md:
+    id: programming.references.rust.libraries
+    kind: reference
+    status: active
+  programming/references/rust/one-liners.md:
+    id: programming.references.rust.one-liners
+    kind: reference
+    status: active
+  programming/references/rust/proptest-insta.md:
+    id: programming.references.rust.proptest-insta
+    kind: reference
+    status: active
+  programming/references/rust/README.md:
+    id: programming.references.rust.readme
+    kind: reference
+    status: active
+  programming/references/rust/type-state.md:
+    id: programming.references.rust.type-state
+    kind: reference
+    status: active
+  programming/references/rust/unsafe-discipline.md:
+    id: programming.references.rust.unsafe-discipline
+    kind: reference
+    status: active
+  programming/references/rust/zero-cost-safety.md:
+    id: programming.references.rust.zero-cost-safety
+    kind: reference
+    status: active
+  programming/references/typescript/backend-hono.md:
+    id: programming.references.typescript.backend-hono
+    kind: reference
+    status: active
+  programming/references/typescript/bootstrap.md:
+    id: programming.references.typescript.bootstrap
+    kind: reference
+    status: active
+  programming/references/typescript/data-modeling.md:
+    id: programming.references.typescript.data-modeling
+    kind: reference
+    status: active
+  programming/references/typescript/error-handling.md:
+    id: programming.references.typescript.error-handling
+    kind: reference
+    status: active
+  programming/references/typescript/README.md:
+    id: programming.references.typescript.readme
+    kind: reference
+    status: active
+  programming/references/typescript/tsconfig-strict.md:
+    id: programming.references.typescript.tsconfig-strict
+    kind: reference
+    status: active
+  programming/references/typescript/type-patterns.md:
+    id: programming.references.typescript.type-patterns
+    kind: reference
+    status: active
+  programming/SKILL.md:
+    id: skill.programming
+    kind: reference
+    status: active
+  README.md:
+    id: readme
+    kind: reference
+    status: active
+  remove-ai-slops/SKILL.md:
+    id: skill.remove-ai-slops
+    kind: reference
+    status: active
+  task-hub/SKILL.md:
+    id: skill.task-hub
+    kind: reference
+    status: active
+  test-guardian/references/dual-agent-rgf-protocol.md:
+    id: test-guardian.references.dual-agent-rgf-protocol
+    kind: reference
+    status: active
+  test-guardian/references/false-green-taxonomy.md:
+    id: test-guardian.references.false-green-taxonomy
+    kind: reference
+    status: active
+  test-guardian/references/testing-pyramid-rules.md:
+    id: test-guardian.references.testing-pyramid-rules
+    kind: reference
+    status: active
+  test-guardian/SKILL.md:
+    id: skill.test-guardian
+    kind: reference
+    status: active
+  thesis-export/SKILL.md:
+    id: skill.thesis-export
+    kind: reference
+    status: active
+  thesis-ref-check/SKILL.md:
+    id: skill.thesis-ref-check
+    kind: reference
+    status: active
+  thesis-writing/references/journal-example-output.md:
+    id: thesis-writing.references.journal-example-output
+    kind: reference
+    status: active
+  thesis-writing/references/journal-image-spec.md:
+    id: thesis-writing.references.journal-image-spec
+    kind: reference
+    status: active
+  thesis-writing/references/journal-template-cs.md:
+    id: thesis-writing.references.journal-template-cs
+    kind: reference
+    status: active
+  thesis-writing/references/journal-writing-norms.md:
+    id: thesis-writing.references.journal-writing-norms
+    kind: reference
+    status: active
+  thesis-writing/references/shared-markdown-norms.md:
+    id: thesis-writing.references.shared-markdown-norms
+    kind: reference
+    status: active
+  thesis-writing/references/undergrad-example-output.md:
+    id: thesis-writing.references.undergrad-example-output
+    kind: reference
+    status: active
+  thesis-writing/references/undergrad-image-spec.md:
+    id: thesis-writing.references.undergrad-image-spec
+    kind: reference
+    status: active
+  thesis-writing/references/undergrad-template.md:
+    id: thesis-writing.references.undergrad-template
+    kind: reference
+    status: active
+  thesis-writing/references/writing-norms.md:
+    id: thesis-writing.references.writing-norms
+    kind: reference
+    status: active
+  thesis-writing/SKILL.md:
+    id: skill.thesis-writing
+    kind: reference
+    status: active
+  unified-search/references/keenable-setup.md:
+    id: unified-search.references.keenable-setup
+    kind: reference
+    status: active
+  unified-search/SKILL.md:
+    id: skill.unified-search
+    kind: reference
+    status: active
+  vision-workflow/SKILL.md:
+    id: skill.vision-workflow
+    kind: reference
+    status: active
+  word-extractor/SKILL.md:
+    id: skill.word-extractor
+    kind: reference
+    status: active
+  wsl-windows-bridge/references/2026-08-17_WSL实验方案.md:
+    id: doc.c5583b6e
+    kind: reference
+    status: active
+  wsl-windows-bridge/references/environment.md:
+    id: wsl-windows-bridge.references.environment
+    kind: reference
+    status: active
+  wsl-windows-bridge/references/exe-channel.md:
+    id: wsl-windows-bridge.references.exe-channel
+    kind: reference
+    status: active
+  wsl-windows-bridge/references/ops-reference.md:
+    id: wsl-windows-bridge.references.ops-reference
+    kind: reference
+    status: active
+  wsl-windows-bridge/references/powershell-channel.md:
+    id: wsl-windows-bridge.references.powershell-channel
+    kind: reference
+    status: active
+  wsl-windows-bridge/references/python-channel.md:
+    id: wsl-windows-bridge.references.python-channel
+    kind: reference
+    status: active
+  wsl-windows-bridge/references/ssh-agent-channel.md:
+    id: wsl-windows-bridge.references.ssh-agent-channel
+    kind: reference
+    status: active
+  wsl-windows-bridge/SKILL.md:
+    id: skill.wsl-windows-bridge
+    kind: reference
+    status: active

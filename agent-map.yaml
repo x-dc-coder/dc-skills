@@ -82,6 +82,7 @@ base:
   - dsh-ui-optimization         # DSH 插件 UI 优化（member；plugin-specialist 预设亦挂载）
   # ── meta（entry: dc-skill-creator）──
   - dc-skill-creator    # 本仓库技能创建工具（validate/new_skill/check_triggers）
+  - cloudreve-storage   # Cloudreve 云存储网盘操作与备份管理工具：支持文件浏览(ls/tree)
 
 # 按需技能：默认不进任何农场。目前为空；新的按需技能写在这里，再放进某个 agent 的 extra。
 on_demand:
@@ -151,7 +152,7 @@ families:
     members: [debugging, git-master, remove-ai-slops, test-guardian, github-workflow, codegraph-explore]
   agentops:          # Agent 运维：Orca 编排 + 任务中心 + GUI + 本机 NewAPI 网关
     entry: orca-cli
-    members: [orchestration, task-hub, computer-use, newapi-management]
+    members: [orchestration, task-hub, computer-use, newapi-management, cloudreve-storage]
   info:              # 信息与视觉：搜索/真实浏览器/图像理解
     entry: unified-search
     members: [kimi-webbridge, vision-workflow]

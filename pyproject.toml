@@ -18,6 +18,7 @@ dependencies = [
     "feedparser>=6.0.0",
     "playwright>=1.61.0",
     "pdfplumber>=0.11.10",
+    "tomli>=2.0.0",
     # Chinese word segmentation for paper-metrics issue #22 (clause layer).
     # MIT, pure Python, CPU-only.  Only the new INFERRED-layer primitives use it;
     # the 14 frozen OBSERVED metrics stay character/unit based and byte-identical.
@@ -30,7 +31,7 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
-testpaths = ["word-extractor/scripts", "paper-reader/scripts", "paper-metrics/scripts", "thesis-writing/scripts", "unified-search/scripts", "newapi-management/scripts"]
+testpaths = ["word-extractor/scripts", "paper-reader/scripts", "paper-metrics/scripts", "thesis-writing/scripts", "unified-search/scripts", "newapi-management/scripts", "cloudreve-storage/scripts"]
 python_files = ["test_*.py"]
 addopts = "-q"
 
