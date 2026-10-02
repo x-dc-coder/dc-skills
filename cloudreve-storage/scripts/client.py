@@ -7,6 +7,8 @@ from __future__ import annotations
 
 import os
 import posixpath
+import re
+import subprocess
 import urllib.parse
 import uuid
 import xml.etree.ElementTree as ET
@@ -16,6 +18,38 @@ from typing import Any, Optional
 import requests
 
 from config import CloudreveConfig
+
+
+def normalize_remote_path(remote_path: str) -> str:
+    """规整化 WebDAV 远程路径（统一将 Windows 反斜杠转为正斜杠，并进行 posix 规整化）。"""
+    s = str(remote_path).strip().replace("\\", "/")
+    clean = posixpath.normpath(s)
+    if not clean.startswith("/"):
+        clean = "/" + clean
+    return clean
+
+
+def resolve_local_path(path_input: str | Path) -> Path:
+    """解析本地文件系统路径，跨平台支持 Windows 盘符路径（在 WSL/Linux 下无缝转为 /mnt/<drive>/...）。"""
+    s = str(path_input).strip("\"'")
+    if not s:
+        return Path(".").resolve()
+    # 当在 Linux/WSL 环境下收到 Windows 盘符路径（如 C:\... 或 E:/...）时进行跨环境转换
+    if os.name != "nt" and re.match(r"^[a-zA-Z]:[/\\]", s):
+        # 优先使用 wslpath -u（适用于 WSL）
+        try:
+            res = subprocess.check_output(
+                ["wslpath", "-u", s], text=True, stderr=subprocess.DEVNULL
+            ).strip()
+            if res:
+                return Path(res).resolve()
+        except Exception:
+            pass
+        # 降级备用：直接映射 /mnt/<drive>/...
+        drive = s[0].lower()
+        rest = s[2:].replace("\\", "/").lstrip("/")
+        return Path(f"/mnt/{drive}/{rest}").resolve()
+    return Path(s).expanduser().resolve()
 
 
 class CloudreveError(Exception):
@@ -76,8 +110,9 @@ class CloudreveClient:
 
     def build_url(self, remote_path: str) -> str:
         """构建 URL 编码的安全 WebDAV 请求地址。各路径段独立转义。"""
-        clean = posixpath.normpath(remote_path)
-        ends_with_slash = remote_path.endswith("/") and clean != "/"
+        clean = normalize_remote_path(remote_path)
+        s = str(remote_path).strip().replace("\\", "/")
+        ends_with_slash = s.endswith("/") and clean != "/"
 
         parts = [p for p in clean.split("/") if p]
         dav_prefix = self.config.webdav_path.strip("/")
@@ -94,13 +129,8 @@ class CloudreveClient:
 
     def check_sandbox(self, remote_path: str, allow_outside: bool = False) -> str:
         """检查并规整化路径。若超出安全沙箱且未显式允许，抛出 SandboxViolationError。"""
-        clean = posixpath.normpath(remote_path)
-        if not clean.startswith("/"):
-            clean = "/" + clean
-
-        sandbox = posixpath.normpath(self.config.root_sandbox)
-        if not sandbox.startswith("/"):
-            sandbox = "/" + sandbox
+        clean = normalize_remote_path(remote_path)
+        sandbox = normalize_remote_path(self.config.root_sandbox)
 
         if not allow_outside:
             is_inside = clean == sandbox or clean.startswith(sandbox + "/")
@@ -113,12 +143,9 @@ class CloudreveClient:
 
     def check_dangerous_path(self, remote_path: str) -> str:
         """严禁删除等危险操作命中根目录或沙箱根目录。"""
-        clean = posixpath.normpath(remote_path)
-        if not clean.startswith("/"):
-            clean = "/" + clean
-
-        dav_root = posixpath.normpath(self.config.webdav_path)
-        sandbox = posixpath.normpath(self.config.root_sandbox)
+        clean = normalize_remote_path(remote_path)
+        dav_root = normalize_remote_path(self.config.webdav_path)
+        sandbox = normalize_remote_path(self.config.root_sandbox)
 
         dangerous = {"/", dav_root, sandbox}
         if clean in dangerous:
@@ -363,7 +390,7 @@ class CloudreveClient:
     ) -> dict[str, Any]:
         """上传本地文件。原子性处理：先上传为 .part，成功后通过 MOVE 原子重命名。"""
         self.config.validate_credentials()
-        loc = Path(local_path).expanduser().resolve()
+        loc = resolve_local_path(local_path)
         if not loc.is_file():
             raise FileNotFoundError(f"本地文件不存在: {loc}")
 
@@ -441,7 +468,7 @@ class CloudreveClient:
         self.config.validate_credentials()
         clean = self.check_sandbox(remote_path, allow_outside=allow_outside)
 
-        dest = Path(local_path).expanduser().resolve()
+        dest = resolve_local_path(local_path)
         if dest.is_dir():
             dest = dest / posixpath.basename(clean)
 

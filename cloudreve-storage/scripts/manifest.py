@@ -17,7 +17,12 @@ from typing import Any, Optional, Tuple
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "scripts"))
 from common import OutputPlan, plan_output  # noqa: E402
 
-from client import CloudreveClient, format_bytes  # noqa: E402
+from client import (  # noqa: E402
+    CloudreveClient,
+    format_bytes,
+    normalize_remote_path,
+    resolve_local_path,
+)
 
 
 def compute_file_sha256(path: Path) -> str:
@@ -43,7 +48,7 @@ def backup_file(
       /AgentBackups/<host_id>/<category>/<YYYYMMDD>/<HHMMSS>_<sha256前12位>/<filename>
     """
     client.config.validate_credentials()
-    loc = Path(local_path).expanduser().resolve()
+    loc = resolve_local_path(local_path)
     if not loc.is_file():
         raise FileNotFoundError(f"待备份的本地文件不存在: {loc}")
 
@@ -134,7 +139,7 @@ def restore_file(
 
     # 确定本地保存路径
     if output_arg:
-        p = Path(output_arg).expanduser().resolve()
+        p = resolve_local_path(output_arg)
         dest_file = p / filename if p.is_dir() else p
     else:
         dest_file = Path.cwd() / filename

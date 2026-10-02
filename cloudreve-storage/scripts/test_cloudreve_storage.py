@@ -859,3 +859,41 @@ def test_put_part_cleanup_on_move_failure() -> None:
                 client.put(src, "/AgentBackups/f.txt", overwrite=True)
         assert len(deleted) == 1
         assert ".part" in deleted[0]
+
+
+def test_windows_remote_paths_normalization() -> None:
+    """测试远程路径中的 Windows 反斜杠能够被统一转为正斜杠并在沙箱中正常校验。"""
+    from client import normalize_remote_path
+    client = _make_client()
+
+    assert normalize_remote_path(r"\AgentBackups\configs\app.ini") == "/AgentBackups/configs/app.ini"
+    assert normalize_remote_path(r"AgentBackups\media\test.png") == "/AgentBackups/media/test.png"
+    assert normalize_remote_path(r"/AgentBackups\sub\file.txt") == "/AgentBackups/sub/file.txt"
+
+    # check_sandbox 能够接纳反斜杠形式
+    clean = client.check_sandbox(r"\AgentBackups\sub\file.txt")
+    assert clean == "/AgentBackups/sub/file.txt"
+
+    # check_dangerous_path 正确拦截反斜杠形式的根路径
+    with pytest.raises(DangerousOperationError):
+        client.check_dangerous_path(r"\AgentBackups")
+    with pytest.raises(DangerousOperationError):
+        client.check_dangerous_path("\\")
+
+
+def test_windows_local_drive_paths_resolution(monkeypatch: pytest.MonkeyPatch) -> None:
+    r"""测试 Windows 盘符路径（如 C:\... 或 E:/...）的跨环境解析支持。"""
+    from client import resolve_local_path
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        # 普通相对/绝对路径正常解析
+        p = resolve_local_path(tmpdir)
+        assert p.is_dir()
+
+        # 模拟 WSL 下的盘符解析降级逻辑
+        test_win_path = r"E:\Projects\test\file.txt"
+        resolved = resolve_local_path(test_win_path)
+        # 在非 Windows 环境下应映射至 /mnt/e/Projects/test/file.txt
+        if os.name != "nt":
+            assert str(resolved).startswith("/mnt/e/Projects/test")
+

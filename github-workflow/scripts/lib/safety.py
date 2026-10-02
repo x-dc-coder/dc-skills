@@ -33,7 +33,7 @@ def gitignore_match(project: Path, path: Path) -> bool:
     """Check if a file is already matched by a gitignore rule."""
     from .git import run as _run  # avoid top-level circular import
     rel = str(path.relative_to(project))
-    return _run(["git", "check-ignore", rel], cwd=project, check=False).returncode == 0
+    return _run(["git", "check-ignore", "--no-index", rel], cwd=project, check=False).returncode == 0
 
 
 def classify_sensitive_files(project: Path) -> Dict[str, List[str]]:
@@ -45,6 +45,8 @@ def classify_sensitive_files(project: Path) -> Dict[str, List[str]]:
     is_repo = _is_git_repo(project)
     for file_path in walk_project_files(project):
         rel = str(file_path.relative_to(project))
+        if rel.endswith((".example", ".sample", ".template")) or file_path.name.endswith((".example", ".sample", ".template")):
+            continue
         for pattern in HIGH_RISK_PATTERNS:
             if fnmatch(rel, pattern) or fnmatch(file_path.name, pattern):
                 if is_repo:
