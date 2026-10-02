@@ -66,10 +66,12 @@ def cmd_status(args: argparse.Namespace) -> int:
     print(f"主机标识:    {info['host_id']}")
     print(f"安全沙箱:    {info['root_sandbox']}")
     print(f"连接状态:    {info['status']} (HTTP 207)")
-    print("空间容量:")
-    print(f"  - 已用空间: {info['used_human']} ({info['quota_used_bytes']} 字节)")
-    print(f"  - 剩余空间: {info['available_human']} ({info['quota_available_bytes']} 字节)")
-    print(f"  - 总计空间: {info['total_human']} ({info['quota_total_bytes']} 字节)")
+    print("空间容量 (七牛云主力存储 / 50 GB 资源包):")
+    used_pct = info.get("used_percent", 0.0)
+    avail_pct = info.get("available_percent", 100.0)
+    print(f"  - 已用空间: {info['used_human']} ({info['quota_used_bytes']} 字节) [{used_pct:.2f}%]")
+    print(f"  - 剩余空间: {info['available_human']} ({info['quota_available_bytes']} 字节) [{avail_pct:.2f}%]")
+    print(f"  - 总计配额: {info['total_human']} ({info['quota_total_bytes']} 字节)")
     print("========================================")
     return 0
 

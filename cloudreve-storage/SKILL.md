@@ -25,10 +25,20 @@ Cloudreve 云存储网盘操作与备份管理工具，基于 WebDAV / REST 协�
 
 ## 触发场景
 
+- 当用户询问云存储空间还剩余多少、查看七牛云/网盘配额与当前使用量时。
 - 当用户需要将本地生成的成果物、日志、数据库导出或配置归档至 Cloudreve 网盘时。
 - 当用户需要查看 Cloudreve 网盘存储空间配额、浏览目录文件树或下载云端文件时。
 - 当用户需要从云端历史备份快照恢复特定版本文件，并校验 SHA256 完整性时。
 - 当用户需要定期清理远端过期备份快照以节省云存储配额时。
+
+## 存储架构与平台对应关系
+
+- **主力平台**：七牛云（Kodo / S3 兼容，华东浙江 `cn-east-1`，存储桶 `cloudreve-custom-made`）。
+- **配额基准**：当前绑定 **50 GB 资源包**，Admin 用户组配额 `53,687,091,200` 字节（50.00 GB）。
+- **备用容灾**：多吉云（腾讯云 COS `syst` 空间，华东上海 `ap-shanghai`）。
+- **查询通道**：
+  - 应用层 WebDAV 余量查询：`cli.py status` / `cli.py status --json`（推荐，零依赖，秒级响应）。
+  - 底层 S3 物理对象审计：直连七牛云 S3 端点（`https://cloudreve-custom-made.s3.cn-east-1.qiniucs.com`）核验物理占用。
 
 ## 核心安全防御机制
 
@@ -81,8 +91,33 @@ root_sandbox = "/AgentBackups/"
 
 ### 1. 连接状态与空间配额检测
 
+主力存储已切换为**七牛云**（存储桶 `cloudreve-custom-made`），系统配额已校准为 **50 GB 资源包**。
+
 ```bash
+# 人读终端模式
 cd ~/projects/dc-skills && uv run python cloudreve-storage/scripts/cli.py status
+
+# Agent / 脚本机器可读 JSON 模式（包含 available_human, quota_available_bytes, used_percent 等）
+cd ~/projects/dc-skills && uv run python cloudreve-storage/scripts/cli.py status --json
+```
+
+JSON 输出示例：
+```json
+{
+  "status": "connected",
+  "endpoint": "https://cloudreve.dc-sy.cn/dav/",
+  "username": "dcsy1314@qq.com",
+  "host_id": "DCDC",
+  "root_sandbox": "/AgentBackups/",
+  "quota_available_bytes": 53687088821,
+  "quota_used_bytes": 2379,
+  "quota_total_bytes": 53687091200,
+  "used_percent": 0.0,
+  "available_percent": 100.0,
+  "available_human": "50.00 GB",
+  "used_human": "2.32 KB",
+  "total_human": "50.00 GB"
+}
 ```
 
 ### 2. 浏览与文件查看

@@ -199,8 +199,13 @@ class CloudreveClient:
             raise WebDAVError(f"解析 WebDAV 状态响应 XML 失败: {e}") from e
 
         total_bytes: Optional[int] = None
+        used_percent: float = 0.0
+        avail_percent: float = 100.0
         if avail_bytes is not None and used_bytes is not None:
             total_bytes = avail_bytes + used_bytes
+            if total_bytes > 0:
+                used_percent = round((used_bytes / total_bytes) * 100, 4)
+                avail_percent = round((avail_bytes / total_bytes) * 100, 4)
 
         return {
             "status": "connected",
@@ -211,6 +216,8 @@ class CloudreveClient:
             "quota_available_bytes": avail_bytes,
             "quota_used_bytes": used_bytes,
             "quota_total_bytes": total_bytes,
+            "used_percent": used_percent,
+            "available_percent": avail_percent,
             "available_human": format_bytes(avail_bytes),
             "used_human": format_bytes(used_bytes),
             "total_human": format_bytes(total_bytes),
