@@ -28,6 +28,18 @@ def expand(p: str) -> Path:
     return Path(os.path.expanduser(p))
 
 
+def _norm_path(p: Path | str) -> str:
+    r"""统一路径格式：去除 Windows 扩展前缀（\\?\ 或 \\?\UNC\），并在 Windows 下规范大小写与斜杠。"""
+    s = str(p)
+    if os.name == "nt":
+        if s.startswith("\\\\?\\UNC\\"):
+            s = "\\\\" + s[8:]
+        elif s.startswith("\\\\?\\"):
+            s = s[4:]
+        return os.path.normcase(os.path.normpath(s))
+    return os.path.normpath(s)
+
+
 def load_manifest() -> dict:
     if not MANIFEST.exists():
         sys.exit(f"缺少清单文件: {MANIFEST}")
@@ -39,7 +51,12 @@ def under_master(target: Path, master: Path) -> bool:
         target.relative_to(master)
         return True
     except ValueError:
-        return False
+        pass
+    if os.name == "nt":
+        norm_t = _norm_path(target)
+        norm_m = _norm_path(master)
+        return norm_t == norm_m or norm_t.startswith(norm_m + os.sep)
+    return False
 
 
 def resolve_names(value, base: set[str]) -> set[str]:
@@ -56,7 +73,10 @@ def resolve_names(value, base: set[str]) -> set[str]:
 def sync_farm(farm_dir: str, names: set[str], master: Path, check: bool) -> list[str]:
     farm = expand(farm_dir)
     actions: list[str] = []
-    farm.mkdir(parents=True, exist_ok=True)
+    if not farm.is_dir():
+        if check:
+            return [f"  ! 农场目录缺失: {farm}"]
+        farm.mkdir(parents=True, exist_ok=True)
 
     # 1) 清理：指向 master 但不在启用清单里的软链接
     for entry in sorted(farm.iterdir()):
@@ -76,7 +96,7 @@ def sync_farm(farm_dir: str, names: set[str], master: Path, check: bool) -> list
             actions.append(f"  ! 缺失技能目录: {src}")
             continue
         link = farm / name
-        if link.is_symlink() and Path(os.path.realpath(link)) == src.resolve():
+        if link.is_symlink() and _norm_path(os.path.realpath(link)) == _norm_path(src.resolve()):
             continue
         if link.exists() and not link.is_symlink():
             actions.append(f"  ! 跳过（真实目录已占用）: {link}")
@@ -85,7 +105,8 @@ def sync_farm(farm_dir: str, names: set[str], master: Path, check: bool) -> list
         if not check:
             if link.is_symlink() or link.exists():
                 link.unlink()
-            link.symlink_to(src)
+            # Windows 上必须显式声明目录目标，否则生成文件型符号链接（错误码 0x8007010B）
+            link.symlink_to(src, target_is_directory=True)
     return actions
 
 
@@ -147,18 +168,37 @@ def check_families(m: dict, master: Path) -> list[str]:
 
 
 def main() -> None:
+    if hasattr(sys.stdout, "reconfigure"):
+        try:
+            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        except Exception:
+            pass
+
     ap = argparse.ArgumentParser(description="按 agent-map.yaml 物化技能农场")
     ap.add_argument("--check", action="store_true", help="只检查漂移，不修改")
     args = ap.parse_args()
 
     m = load_manifest()
-    master = expand(m["master"])
+    on_windows = sys.platform.startswith("win")
+    if on_windows:
+        master_win = m.get("master_win")
+        if not master_win:
+            sys.exit("Windows 平台运行需要 agent-map.yaml 提供 master_win（UNC 路径）")
+        master = expand(str(master_win))
+    else:
+        master = expand(m["master"])
+
     if not master.is_dir():
         sys.exit(f"master 不存在: {master}")
     base = set(m.get("base") or [])
     on_demand = set(m.get("on_demand") or [])
 
     for agent_name, cfg in (m.get("agents") or {}).items():
+        plat = cfg.get("platform", "linux")
+        if plat == "windows" and not on_windows:
+            continue
+        if plat != "windows" and on_windows:
+            continue
         names = resolve_names(cfg.get("skills"), base)
         for extra in cfg.get("extra") or []:
             if extra not in on_demand and extra not in base:
@@ -180,7 +220,7 @@ def main() -> None:
     elif m.get("families"):
         n_member = sum(len(f.get("members") or []) for f in m["families"].values())
         print(f"[families] {len(m['families'])} 族 / {n_member} 成员标记一致"
-              "（member ⇔ manual + openai.yaml）")
+              "（member <=> manual + openai.yaml）")
 
     print("check 模式，未做修改" if args.check else "农场物化完成")
 

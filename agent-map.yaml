@@ -30,6 +30,9 @@
 
 master: /home/dc/projects/dc-skills
 
+# master 的 Windows UNC 视图：仅 skills-sync 在 Windows 上运行时替换解析（与 master 平级）
+master_win: //wsl.localhost/Ubuntu-New/home/dc/projects/dc-skills
+
 # 全局基座：默认进入所有 Agent 农场。
 # 加载语义（2026-09-24 族群化）：base 内技能分两种加载模式——
 #   entry（族群入口，load: auto）：进模型启动清单，自动触发后按路由表按需读成员 SKILL.md
@@ -129,6 +132,16 @@ agents:
     dir: ~/.codex/skills
     skills: base
     extra: []   # 注：~/.codex/skills/.system 为 Codex 自带系统技能，skills-sync 不碰真实目录
+
+  # Windows 侧只读消费（DSH 等会话）：platform=windows 使 WSL 侧跳过，Windows 侧处理
+  dsh-win:
+    dir: C:/Users/32841/.dsh/skills
+    platform: windows
+    skills: []                # 只读消费侧不吃 base（base 多依赖 WSL 运行时）
+    extra:                    # 显式挑 Windows 会话用得上的
+      - git-master
+      - dc-skill-creator
+      - unified-search
 
 # ── 族群（2026-09-24 重分类；2026-09-24 族群化）─────────────────────────
 # 原则（用户 2026-09-24 定调）：不硬凑——不相关的技能宁可单体族；同源/同工作流的聚为族。
