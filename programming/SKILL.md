@@ -4,7 +4,8 @@ description: >
   software 族入口。当用户要 commit、提交、rebase、squash、blame、bisect、查谁写的，读 git-master；
   初始化仓库、gh、PR、issue、preview、publish，读 github-workflow；崩溃、静默失败、结果错误、内存泄漏、卡死，读 debugging；
   任意语言的调用链、谁在调用、大仓影响面，读 codegraph-explore；假绿、测试门禁，读 test-guardian；
-  代码 deslop、去掉代码里的 AI 味，读 remove-ai-slops。论文的 AI 腔不在这里。写或改 .py/.pyi/.rs/.ts/.tsx/.mts/.cts/.go 时也先读本技能。
+  代码 deslop、去掉代码里的 AI 味，读 remove-ai-slops。派发子代理完成任务、根据任务类型选模型（子代理模型路由/查表 MODELS.md）、
+  双模型交叉审查、架构设计分析与决策，也读本技能。写或改 .py/.pyi/.rs/.ts/.tsx/.mts/.cts/.go 时也先读本技能。
   哲学：Pydantic v2、serde+thiserror、Zod、gin+sqlc+pgx，parse-don't-validate，250 行，TDD。
 metadata:
   family: software
@@ -27,6 +28,26 @@ metadata:
 | [`codegraph-explore`](../codegraph-explore/SKILL.md) | 任意语言的符号、调用链、影响面 | 理解大仓、定位定义或调用者、评估重构影响。不限 .py/.rs/.ts/.go。小仓、配置、Markdown 不要读它 |
 
 一次提交只打开 git-master 或 github-workflow 其中一个。查本地历史、在已有仓库里提交，打开 git-master。要初始化仓库、建远端、走 preview/publish 或处理 PR/issue，打开 github-workflow。
+
+---
+
+## 子代理派发与模型路由规程（SUBAGENT DELEGATION GATE）
+
+当编程或架构任务需要派发子代理（Subagent）或进行跨模型协同审查时，遵循额度感知分层与双模型交叉验证机制：
+
+1. **唯一事实源**：以 `docs/arch/MODELS.md` 为统一事实源。详细派发规范见 [`references/model-routing-guide.md`](references/model-routing-guide.md)。
+2. **额度感知模型选型**：
+   - **主力执行层（高吞吐、大上下文）**：日常业务逻辑编写、测试用例生成、排障执行首选 `deepseek-v4.1-flash`（后端与核心逻辑）或 `gemini-3.8-flash`（前端、多模态与大文档），承担 80% 以上的日常生成量。
+   - **最高决策与核心分析层（稀缺额度）**：宏观架构终审与复杂安全威胁选用 `grok-4.7`；代码级深层排障与根因裁决选用 `glm-5.3`。严控大段代码生成，聚焦关键决策与分析收敛。
+   - **专项质检与免费探索层**：红绿变异反证选用 `step-5-preview`；开源调研与免费二线审查选用 `Atria-Dawn-Preview`。
+3. **连通性与反序列化自检**：
+   派发前可通过健康检测脚本确认目标模型接口通畅与反序列化正常：
+   ```bash
+   cd ~/projects/dc-skills && uv run python scripts/check_models.py -m <model-slug>
+   ```
+4. **双模型交叉审查闭环**：关键方案由主力模型生成初稿，异构审查模型执行批判式对抗校验，主智能体负责最终裁决。
+5. **外部终审逃生通道**：团队遭遇无法收敛的逻辑死锁时，生成格式化《外部专家咨询卡》，由用户手动向 ChatGPT Plus 客户端的 `gpt6Astra` 提问并带回结论。
+
 
 
 You are a lazy senior engineer — lazy meaning efficient, never careless. **The best code is the code never written; the code you do write is type-strict, stack-first, async-correct, and architecturally honest about size.**

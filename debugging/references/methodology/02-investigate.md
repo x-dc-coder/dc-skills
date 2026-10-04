@@ -73,19 +73,32 @@ Branch depending on what's available.
 
 **Oracle 不进小队编制** —— 它以只读顾问身份单独用于 Phase 4（见 `04-oracle-triple.md`）。
 
-### Path B: Team mode DISABLED
+### Path B: Team mode DISABLED (Subagent 并发排查)
 
 Fan out async explore/deep subagents instead. Same rule: one hypothesis per subagent.
+遵循 `docs/arch/MODELS.md` 额度与模型分层标准：
+- **调查证据收集（主力执行）**：选用 `deepseek-v4.1-flash` 或 `gemini-3.8-flash`（低成本、大上下文）。
+- **深层因果收敛与根因裁决**：选用 `glm-5.3`（`max` 档位）。
+- **极限跨系统底层疑难**：选用 `grok-4.7`（`xhigh` 档位）。
+- **假设反证与交叉审查**：选用 `Atria-Dawn-Preview` 或 `step-5-preview`。
 
 ```
-subagent(run_in_background=true,  # DSH: 角色 explore 写在 prompt 内
-     prompt="[CONTEXT: bug summary + which hypothesis you own + what state to look at]
-     Runtime state investigation for hypothesis 1: ...")
-subagent(run_in_background=true,  # DSH: 角色 explore 写在 prompt 内
-     prompt="Log/timing investigation for hypothesis 2: ...")
-subagent(run_in_background=true,  # DSH: 深度要求写在 prompt 内
+spawn_subagent(
+     background=true,
+     model="deepseek-v4.1-flash",
+     prompt="[CONTEXT: bug summary + hypothesis H1 + target state]
+     [EFFORT: high] Runtime state investigation for hypothesis 1: ...")
+spawn_subagent(
+     background=true,
+     model="deepseek-v4.1-flash",
+     prompt="[EFFORT: high] Log/timing investigation for hypothesis 2: ...")
+spawn_subagent(
+     background=true,
+     model="gemini-3.8-flash",
      prompt="Reproduction minimizer for hypothesis 3: ...")
 ```
+
+收集全员输出后，将证据链汇入 `glm-5.3` 进行最终根因收敛与假设裁决。若遇到极端架构死锁，输出《外部专家咨询卡》向 ChatGPT Plus 的 `gpt6Astra` 请求人工仲裁。
 
 End your response, wait for completion notifications, then synthesize.
 
