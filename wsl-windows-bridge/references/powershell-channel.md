@@ -3,32 +3,68 @@
 > 本文件是 `SKILL.md` 的按需加载参考。需要 COM 自动化、WMI/CIM 查询、Win32 P/Invoke、
 # Event Log、计划任务、剪贴板等 PowerShell 独有能力时读取。
 
-## Channel A: PowerShell — COM / WMI / P/Invoke / Event Log
+## Channel A: PowerShell — 双引擎架构（pwsh.exe 7.x 优先，powershell.exe 5.1 兜底）
 
-> **仅当 cmd.exe 无法胜任时使用**：COM 对象、WMI 查询、Event Log、P/Invoke 动态编译 C#。
+> **仅当 cmd.exe / 原生 EXE 无法胜任时使用**：COM 对象、WMI 查询、Event Log、P/Invoke 动态编译 C#、高级 JSON 处理。
+
+### 引擎对比与特性矩阵
+
+| 特性维度 | PowerShell 7.x (`pwsh.exe`) | Windows PowerShell 5.1 (`powershell.exe`) | 桥接工程建议 |
+|---|---|---|---|
+| **定位与分发** | **首选**（推荐安装 7.2+ LTS，当前 7.6.6） | **兼容兜底**（Windows 10/11 内置） | 脚本与助手优先调用 `pwsh.exe`，缺失时自动回退 `powershell.exe` |
+| **冷启动延迟 (`-NoProfile`)** | ~340ms（CoreCLR JIT + 程序集装载） | ~135ms（.NET Framework NGEN） | 维持“非独有能力走 Channel B/C、批量集中化”的铁律 |
+| **管道链式操作符 (`&&`, `||`)** | 支持（`cmd1 && cmd2`） | 不支持（报 ParserError） | 复杂单行桥接命令推荐使用 `&&` 与 `||` 编排 |
+| **现代语言操作符** | 支持三元 `?:`、空值合并 `??`、赋值 `??=`、安全导航 `?.` | 不支持（语法解析错误） | 简化条件分支与安全字段提取 |
+| **JSON 单元素数组** | `ConvertTo-Json -AsArray` | 不支持（单元素自动降为标量） | 涉及列表返回时使用 `-AsArray` 确保 JSON 结构稳定 |
+| **JSON 哈希表解析** | `ConvertFrom-Json -AsHashtable` | 不支持（仅能转 PSCustomObject） | 需要字典索引 `$json['key']` 时使用 `-AsHashtable` |
+| **多线程并行管道** | `ForEach-Object -Parallel` | 不支持（需手动写 RunspacePool） | 跨文件批量哈希/属性批量采集可单进程多线程并发 |
+| **工作目录开关** | `-WorkingDirectory` 生效 | 静默忽略（保持 WSL UNC 路径） | pwsh 下可用 `-WorkingDirectory` 降低 UNC 相对路径误写风险 |
+| **文件输出编码** | 默认 UTF-8 (无 BOM) | 默认 ANSI (GBK) 或 UTF-16LE | 重定向 `>` 与 `Out-File` 在 pwsh 下原生契合 Linux 生态 |
+| **跨边界管道输出** | Interop pipe 仍受 OEM 代码页约束 | 默认为 GBK | 两者均应配置 `[Console]::OutputEncoding = UTF8` 前缀 |
+| **COM 线程单元** | Windows 宿主下默认 STA | 默认 STA | Office 与剪贴板自动化无需特殊切换，兼容运行 |
+
+---
 
 ### Calling Patterns
 
-**简单一行**（使用单引号避免 bash 展开）：
+**简单单行（使用单引号避免 bash 展开，带 -NoProfile 提升启动速度）：**
 ```bash
-powershell.exe -Command 'Get-Process -Name code | ConvertTo-Json'
+# 首选 pwsh.exe (PowerShell 7.x)
+pwsh.exe -NoProfile -Command 'Get-Process -Name code | ConvertTo-Json -AsArray'
+
+# 兼容 powershell.exe (PS 5.1)
+powershell.exe -NoProfile -Command 'Get-Process -Name code | ConvertTo-Json'
 ```
 
-**复杂脚本**（写 `.ps1` 文件，通过 `-File` 调用）：
+**现代链式操作与安全访问（PowerShell 7.x 专属）：**
 ```bash
-# 从 WSL 写入 PS1 到共享盘
+# 存在文件时才读取，失败时降级
+pwsh.exe -NoProfile -Command 'Test-Path "E:\data\summary.json" && (Get-Content "E:\data\summary.json" -Raw | ConvertFrom-Json -AsHashtable) || @{}'
+```
+
+**并发批量处理（PowerShell 7.x 专属）：**
+```bash
+# 4 线程并行检查多个服务状态
+pwsh.exe -NoProfile -Command '"wuauserv","Dhcp","EventLog" | ForEach-Object -Parallel { (Get-Service -Name $_).Status } -ThrottleLimit 4'
+```
+
+**复杂脚本（写 `.ps1` 文件，通过 `-File` 调用）：**
+```bash
+# 从 WSL 写入 PS1 到本地 Windows 磁盘（规避 UNC Internet Zone 执行限制）
 cat > /mnt/e/temp/task.ps1 << 'EOF'
 param([string]$Name)
 $r = Get-CimInstance Win32_Process | Where-Object CommandLine -like "*$Name*"
 $r | Select-Object ProcessId,CommandLine | ConvertTo-Json
 EOF
 
-powershell.exe -File "E:\temp\task.ps1" -Name "python"
+# 调用（使用绝对路径，显式 Bypass 执行策略）
+pwsh.exe -NoProfile -ExecutionPolicy Bypass -File "E:\temp\task.ps1" -Name "python"
 ```
 
 **注意**：
-- PowerShell `-Command` 参数传递有 bug：含空格的参数（如 `"hello world"`）会被拆分为两个参数。复杂参数用 `-File`。
-- `-EncodedCommand` 的 stdout 在非 TTY 时会包 CLIXML，不推荐用于数据交换。
+- **参数拆分规避**：两代 PowerShell 的 `-Command` 在接收含空格参数时均可能发生拆分。复杂参数建议使用 `-File` 或以 JSON 字符串传递。
+- **编码与 CLIXML**：两代引擎的 `-EncodedCommand` 均严格要求 Base64(UTF-16LE) 编码；错误流输出可能包含 CLIXML 包装，需做行过滤。
+- **路径第一防线**：无论使用哪个引擎，跨边界文件写入一律传入绝对 Windows 路径（`wslpath -w`）。
 
 ---
 
@@ -311,6 +347,11 @@ powershell.exe -Command "
 
 **Critical Note:** COM objects cannot be passed across the WSL-Windows boundary.
 They must be created, used, and destroyed entirely within the Windows-side process.
+
+**COM 线程单元与引擎兼容性**：
+- 在 Windows 宿主环境下，PowerShell 7 (`pwsh.exe`) 与 5.1 (`powershell.exe`) 默认均运行于 STA (Single-Threaded Apartment) 模式，与 Word/Excel/Visio 等桌面 Office COM 接口兼容。
+- 启动独立 PS 自动化脚本时，可显式传递 `-STA` 参数（例如 `pwsh.exe -STA -File ...`）提供显式线程单元保障。
+- 自动化结束时务必显式调用 `Quit()` 并退出进程，避免残余后台 COM 宿主占用系统句柄。
 
 **Common COM ProgIDs:**
 | ProgID | Application |

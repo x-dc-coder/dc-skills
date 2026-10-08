@@ -4,28 +4,50 @@
 # =============================================================================
 # Source this file in ~/.bashrc to get one-liner PowerShell access from WSL:
 #
-#   source ~/.claude/skills/wsl-powershell-bridge/scripts/psh
+#   source ~/projects/dc-skills/wsl-windows-bridge/scripts/psh
 #
 # Or add to ~/.bashrc:
-#   echo 'source ~/.claude/skills/wsl-powershell-bridge/scripts/psh' >> ~/.bashrc
+#   echo 'source ~/projects/dc-skills/wsl-windows-bridge/scripts/psh' >> ~/.bashrc
 #
 # Key design decisions:
-# - psh() uses -Command (clean text output, no CLIXML)
+# - Auto-detects pwsh.exe (PowerShell 7.x) with powershell.exe (PS 5.1) fallback
+# - All calls include -NoProfile to minimize cold-start latency (~340ms pwsh / ~135ms PS 5.1)
+# - psh() uses -Command (clean text output)
 # - pshx() uses -EncodedCommand (for complex scripts with nested quotes)
-# - All calls set UTF-8 encoding to prevent garbled Chinese output
+# - All calls set UTF-8 encoding prefix to ensure safe CJK pipe output across interop
 # =============================================================================
 
-# UTF-8 encoding prefix (CRITICAL: prevents garbled Chinese/multibyte output)
+# Engine detection: pwsh.exe (PS 7.x) preferred, fallback to powershell.exe (PS 5.1).
+# Override with WSL_BRIDGE_POWERSHELL (e.g. export WSL_BRIDGE_POWERSHELL=powershell.exe)
+_psh_init_engine() {
+    if [ -n "${WSL_BRIDGE_POWERSHELL:-}" ] && command -v "$WSL_BRIDGE_POWERSHELL" >/dev/null 2>&1; then
+        PSH_BIN="$WSL_BRIDGE_POWERSHELL"
+    elif command -v pwsh.exe >/dev/null 2>&1; then
+        PSH_BIN="pwsh.exe"
+    else
+        PSH_BIN="powershell.exe"
+    fi
+    PSH_COMMON_ARGS=(-NoProfile)
+}
+_psh_init_engine
+
+# UTF-8 encoding prefix (CRITICAL: prevents garbled Chinese/multibyte output over interop pipe)
 POWERSHELL_UTF8_PREFIX='[Console]::InputEncoding = [System.Text.Encoding]::UTF8; [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; $OutputEncoding = [System.Text.Encoding]::UTF8;'
 
 # Check WSLInterop once on source
 _psh_check_interop() {
-    if ! powershell.exe -Command "${POWERSHELL_UTF8_PREFIX} Write-Host 'ok'" 2>/dev/null | grep -q ok; then
-        echo "[psh] WARNING: WSLInterop not working. Run:" >&2
+    if ! "$PSH_BIN" "${PSH_COMMON_ARGS[@]}" -Command "${POWERSHELL_UTF8_PREFIX} Write-Host 'ok'" 2>/dev/null | grep -q ok; then
+        echo "[psh] WARNING: WSLInterop not working ($PSH_BIN). Run:" >&2
         echo "  echo ':WSLInterop:M::MZ::/init:' | sudo tee /proc/sys/fs/binfmt_misc/register" >&2
         return 1
     fi
     return 0
+}
+
+# Show currently detected PowerShell engine and version
+psh-engine() {
+    echo "Engine: $PSH_BIN"
+    "$PSH_BIN" "${PSH_COMMON_ARGS[@]}" -Command '$PSVersionTable.PSVersion'
 }
 
 # psh — Execute a PowerShell command via -Command (clean text output)
@@ -41,11 +63,11 @@ psh() {
         return 1
     fi
     local cmd="$1"
-    powershell.exe -Command "${POWERSHELL_UTF8_PREFIX} ${cmd}" 2>&1 | tr -d '\r'
+    "$PSH_BIN" "${PSH_COMMON_ARGS[@]}" -Command "${POWERSHELL_UTF8_PREFIX} ${cmd}" 2>&1 | tr -d '\r'
 }
 
 # pshx — Execute via -EncodedCommand (for complex scripts, no quote escaping needed)
-# NOTE: EncodedCommand wraps output in CLIXML. This function strips it.
+# NOTE: EncodedCommand wraps output in CLIXML under PS 5.1 / errors. This function strips it.
 # Usage: pshx 'Write-Host "Complex \"nested\" quotes work here"'
 pshx() {
     if [ $# -eq 0 ]; then
@@ -63,7 +85,7 @@ pshx() {
         return 1
     fi
     # Filter out CLIXML wrapper lines (#< CLIXML and <Objs...>...</Objs>)
-    powershell.exe -EncodedCommand "$cmd_b64" 2>&1 | tr -d '\r' | sed '/^#< CLIXML/d; /^<Objs /,/^<\/Objs>/d'
+    "$PSH_BIN" "${PSH_COMMON_ARGS[@]}" -EncodedCommand "$cmd_b64" 2>&1 | tr -d '\r' | sed '/^#< CLIXML/d; /^<Objs /,/^<\/Objs>/d'
 }
 
 # pshj — Execute PowerShell, parse output as JSON through jq
@@ -96,7 +118,7 @@ pshf() {
     fi
     local script_path="$1"
     shift
-    powershell.exe -File "$script_path" "$@" 2>&1 | tr -d '\r'
+    "$PSH_BIN" "${PSH_COMMON_ARGS[@]}" -ExecutionPolicy Bypass -File "$script_path" "$@" 2>&1 | tr -d '\r'
 }
 
 # win-clip — Copy stdin to Windows clipboard
@@ -104,7 +126,7 @@ pshf() {
 # NOTE: clip.exe works for ASCII. For Chinese/UTF-8, content is stored
 # using the console code page and may be garbled on paste.
 # For reliable Chinese clipboard: write to a file on /mnt/c/ and use
-#   powershell.exe -Command "Set-Clipboard -Value (Get-Content 'C:\path\to\file' -Raw -Encoding UTF8)"
+#   psh "Set-Clipboard -Value (Get-Content 'C:\path\to\file' -Raw -Encoding UTF8)"
 win-clip() {
     clip.exe
 }
@@ -112,7 +134,7 @@ win-clip() {
 # win-paste — Paste Windows clipboard to stdout
 # Usage: win-paste
 win-paste() {
-    powershell.exe -Command "${POWERSHELL_UTF8_PREFIX} Get-Clipboard" 2>&1 | tr -d '\r'
+    "$PSH_BIN" "${PSH_COMMON_ARGS[@]}" -Command "${POWERSHELL_UTF8_PREFIX} Get-Clipboard" 2>&1 | tr -d '\r'
 }
 
 # win-reg-read — Read a Windows Registry value
@@ -217,7 +239,7 @@ win-hash() {
         echo "$result"
     else
         # Fallback: PowerShell Get-FileHash (UTF-8 safe)
-        powershell.exe -Command "${POWERSHELL_UTF8_PREFIX} (Get-FileHash -Path '$file' -Algorithm $algo).Hash" 2>/dev/null | tr -d '\r'
+        "$PSH_BIN" "${PSH_COMMON_ARGS[@]}" -Command "${POWERSHELL_UTF8_PREFIX} (Get-FileHash -Path '$file' -Algorithm $algo).Hash" 2>/dev/null | tr -d '\r'
     fi
 }
 
@@ -260,9 +282,9 @@ win-open() {
     if command -v wslview &>/dev/null; then
         wslview "$target"
     elif [[ "$target" =~ ^https?:// ]]; then
-        powershell.exe -Command "Start-Process '$target'" 2>/dev/null
+        "$PSH_BIN" "${PSH_COMMON_ARGS[@]}" -Command "Start-Process '$target'" 2>/dev/null
     else
-        powershell.exe -Command "Invoke-Item '$(wslpath -w "$target" 2>/dev/null || echo "$target")'" 2>/dev/null
+        "$PSH_BIN" "${PSH_COMMON_ARGS[@]}" -Command "Invoke-Item '$(wslpath -w "$target" 2>/dev/null || echo "$target")'" 2>/dev/null
     fi
 }
 

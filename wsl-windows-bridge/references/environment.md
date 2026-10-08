@@ -12,11 +12,12 @@
 | 简单注册表 | reg.exe (B) | `reg query HKLM\...` | ~10ms, 原生工具 |
 | 服务启停 | sc.exe (B) | `sc start MyService` | 原生, 输出简洁 |
 | 进程管理(简单) | tasklist/taskkill (B) | `taskkill /F /PID 12345` | 快速, 无需 PS |
-| 进程管理(按命令行) | PowerShell (A) | `Get-CimInstance Win32_Process` | 只有 WMI 能按命令行过滤 |
+| 进程管理(按命令行) | PowerShell (A) | `pwsh.exe` / `powershell.exe` | 只有 WMI/CIM 能按命令行过滤 |
 | WMI/CIM 查询 | PowerShell (A) | `Get-CimInstance ...` | PowerShell 独有能力 |
 | Event Log | PowerShell (A) | `Get-WinEvent ...` | PowerShell 独有能力 |
-| COM 自动化 | PowerShell (A) | `New-Object -ComObject` | COM 必须用 PS |
+| COM 自动化 | PowerShell (A) | `New-Object -ComObject` | COM 必须用 PS (STA 兼容) |
 | Win32 P/Invoke | PowerShell (A) | `Add-Type -TypeDefinition` | 动态编译 C# 必须用 PS |
+| 高级 JSON / 管道并行 | PowerShell (A) | `ConvertTo-Json -AsArray` / `ForEach-Object -Parallel` | PS 7.x 独有能力 |
 
 ## Environment Requirements
 
@@ -28,7 +29,8 @@
 | **WSL** | 2.0.0+ | 2.6.3 ✅ | `wsl.exe --version` |
 | **WSLInterop** | enabled | enabled ✅ | `cat /proc/sys/fs/binfmt_misc/WSLInterop` |
 | **Ubuntu** | 20.04 LTS+ | 22.04.5 ✅ | `lsb_release -a` |
-| **PowerShell** | 5.1+ (Windows 内置) | 5.1.26100 ✅ | `powershell.exe -Command '$PSVersionTable.PSVersion'` |
+| **PowerShell 7.x (首选)** | 7.2+ LTS (推荐) | 7.6.6 ✅ | `pwsh.exe -Command '$PSVersionTable.PSVersion'` |
+| **Windows PowerShell (兜底)** | 5.1+ (Windows 内置) | 5.1.26100 ✅ | `powershell.exe -Command '$PSVersionTable.PSVersion'` |
 | **iconv** | 任意 (GNU coreutils) | 已安装 ✅ | `which iconv` |
 | **base64** | 任意 (GNU coreutils) | 已安装 ✅ | `which base64` |
 
@@ -68,7 +70,7 @@ Before attempting any Windows calls, verify WSLInterop is working:
 
 ```bash
 # Should print "Hello from Windows" if WSLInterop is enabled
-powershell.exe -Command "Write-Host 'Hello from Windows'"
+pwsh.exe -NoProfile -Command "Write-Host 'Hello from Windows'" || powershell.exe -NoProfile -Command "Write-Host 'Hello from Windows'"
 ```
 
 If this fails with `Exec format error`, WSLInterop is not registered.

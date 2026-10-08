@@ -121,15 +121,17 @@ powershell.exe -Command "
 2. **No State Persistence**: Each call is a fresh process. Variables don't persist between calls.
 3. **Encoding Gap**: cmd.exe (C) 和 Direct EXE (B) 的 pipe 输出走系统 GBK 编码，中文会乱码。**解决**：① 用 pythonw.exe + UTF-8 三层防护（`PYTHONUTF8=1` + `PYTHONIOENCODING=utf-8` + `-X utf8` + WSLENV 白名单）；② 写文件（`pythonw ... > out.txt` 然后从 WSL 读取）。
 4. **cmd.exe UNC 路径**: 从 WSL `~/` 目录调用 `cmd.exe` 报 UNC 不支持。**`cwd="/mnt/e/temp"`** 解决。
-5. **ps -Command 参数拆分**: `powershell.exe -Command '...' "hello world"` 会把 hello world 拆成两个参数。复杂参数用 `-File`。
-6. **ps -EncodedCommand CLIXML**: 非 TTY 输出会包 CLIXML。不推荐用于数据交换。
-7. **ps -File 退出码**: 子进程的退出码在 `-File` 模式下会被吞掉。不推荐用于需要检测退出码的场景。
+5. **ps -Command 参数拆分**: 两代 PowerShell 均存在将含空格参数拆分的历史行为。复杂参数用 `-File` 或以 JSON 字符串传参。
+6. **ps -EncodedCommand**: 两代引擎均要求 Base64(UTF-16LE) 编码；错误流在非 TTY 下可能包含 CLIXML，需做行过滤。
+7. **ps -File 退出码**: PS 5.1 下子进程退出码易被吞掉，需显式 `exit $LASTEXITCODE`；复杂任务推荐使用 `win-ssh-gate.sh` 或捕获 stdout JSON。
 8. **COM Object Boundaries**: COM 对象在 PowerShell 进程内创建和使用，不能传递给 WSL。
 9. **Administrator Privileges**: `netsh.exe firewall`、`sc.exe config` 等需要管理员权限。
 
 ## Best Practices
 
-- **Channel 优先级**: pythonw.exe > cmd.exe (C) > Direct EXE (B) > PowerShell (A)。GPU/Python 实验一律优先 pythonw.exe（无弹窗）。
+- **Channel 优先级**: pythonw.exe > cmd.exe (C) > Direct EXE (B) > PowerShell (A，pwsh.exe 首选 / powershell.exe 兜底)。GPU/Python 实验一律优先 pythonw.exe（无弹窗）。
+- **PowerShell 调用参数**: 一律追加 `-NoProfile` 消除 profile 加载损耗（省 30~50ms）；pwsh.exe 支持 `-WorkingDirectory` 降低 UNC 污染风险。
+- **跨边界路径第一防线**: 无论使用哪款引擎，跨边界文件操作必须使用 `wslpath -w` 传入绝对路径，严禁依赖进程相对路径。
 - **GPU / Python 脚本**: 优先 `pythonw.exe`；仅当需要 shell 重定向 (`>` `2>`) 时降级到 `cmd.exe /c`，`cwd="/mnt/e/temp"`。
 - **UTF-8 三层防护**: PYTHONUTF8=1 + PYTHONIOENCODING=utf-8 + pythonw.exe `-X utf8`。三者必须配 WSLENV 白名单才生效。
 - **PowerShell 仅用于**: COM / WMI / Event Log / P/Invoke — 这些是 cmd.exe 做不到的。

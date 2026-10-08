@@ -23,7 +23,7 @@ WSL2 runs a Linux kernel — Windows-only capabilities (COM, Win32 API, Registry
 | **C: pythonw.exe** | `pythonw.exe` 直调 | ~50ms | **GPU / Python scripts / 无弹窗要求**（⭐ 本地首选） |
 | **C': cmd.exe** | `cmd.exe /c` | ~55ms | 需要 shell 重定向 (`>` `2>` `&`)，会弹窗 |
 | **B: Direct EXE** | `reg.exe`, `sc.exe`... | ~10ms | 简单系统工具（注册表/服务/进程） |
-| **A: PowerShell** | `powershell.exe` | ~600ms | COM / WMI / P/Invoke / Event Log |
+| **A: PowerShell** | `pwsh.exe -NoProfile` (首选) / `powershell.exe -NoProfile` (兜底) | ~340ms / ~135ms | COM / WMI / P/Invoke / Event Log / 高级 JSON |
 | **S: SSH / Agent Gate** | `ssh` + `schtasks` | ~300ms / 2-4s | **特权操作 / 环境隔离 / Windows Agent / GUI与Word门禁** |
 
 **核心原则：本地首选 pythonw，特权/门禁走 SSH；能直调不套壳。**
@@ -103,13 +103,14 @@ Windows 原生 Agent 仅充当执行手，门禁判定必须由 WSL 侧直接读
 ## When to Use This Skill
 
 - 需要在 WSL 中调用 Windows 侧能力（EXE / Python / GPU / 系统工具）
-- 关键词: `cmd.exe`、`powershell.exe`、GPU、CUDA、torch、Windows venv、注册表、WMI、COM、Visio、Office
+- 关键词: `pwsh.exe`、`powershell.exe`、`cmd.exe`、GPU、CUDA、torch、Windows venv、注册表、WMI、COM、Visio、Office
 - GPU 训练流式输出/后台任务: `stream_gpu_windows()`（实时）、`launch_detached()`（后台 + tail -f）、`win-launcher.py`（Job Object 孤儿清理）
 
 ## WSLInterop Quick Check
 
 ```bash
-powershell.exe -Command "Write-Host 'Hello from Windows'"
+# 优先使用 pwsh.exe，或兼容 powershell.exe
+pwsh.exe -NoProfile -Command "Write-Host 'Hello from Windows'" || powershell.exe -NoProfile -Command "Write-Host 'Hello from Windows'"
 # 失败（Exec format error）→ WSLInterop 未注册：
 echo ':WSLInterop:M::MZ::/init:' | sudo tee /proc/sys/fs/binfmt_misc/register
 # 持久化：/etc/wsl.conf → [interop] enabled=true appendWindowsPath=true
@@ -118,7 +119,7 @@ echo ':WSLInterop:M::MZ::/init:' | sudo tee /proc/sys/fs/binfmt_misc/register
 ## Encoding Notes
 
 - **Channel C (cmd.exe) / B (Direct EXE)**: pipe 输出走系统 GBK 编码 → 非 ASCII 乱码。**写文件绕开**。
-- **Channel A (PowerShell)**: 设置 `[Console]::OutputEncoding = UTF8` 可正确输出中文。
+- **Channel A (PowerShell)**: PowerShell 7+ 脚本写文件与重定向默认 UTF-8 (无 BOM)。跨边界 interop 管道输出时设置 `[Console]::OutputEncoding = UTF8` 即可正确输出中文。
 
 ## 常见错误速查（完整表见 references/ops-reference.md）
 

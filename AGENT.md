@@ -51,3 +51,4 @@ uv run --directory ~/projects/dc-skills python scripts/github_issues.py ...
 2. **输出位置**：以 `OUTPUT.md` 为唯一事实源（见上）；SKILL.md 引用条款号，不引用行号。
 3. **单一物理副本**：技能只存在于主库；各 Agent 经软链农场可见；App 自带技能不收编
    （架构见 `SKILL-MANAGEMENT.md`，启用清单见 `agent-map.yaml`）。
+4. **真实产物验证**：严禁在未成功调用工具的情况下宣称“文件已生成 / 已写入 / 已保存”；向用户汇报路径与体积必须以 `write` / `search_replace` 的真实执行回执为依据，严禁在规划阶段提前断言落盘。
