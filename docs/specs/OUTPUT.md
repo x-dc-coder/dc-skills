@@ -51,7 +51,7 @@
 
 - 同一运行的中间产物落 **`<时间戳>/.work/`**（与最终产物同根，整批清理/打包）
 - 示例：`diagram-ers` 的 graphviz `.dot`、`diagram-sequence` 的 mmdc 临时 `.mmd`、
-  `db-skill` 查询结果、`newapi-management` 落盘前的中间 JSON
+  `db-skill` 查询结果等中间 JSON
 
 ## C-6 跨会话状态
 

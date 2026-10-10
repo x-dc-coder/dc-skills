@@ -61,12 +61,11 @@ base:
   - test-guardian       # 测试工程质量规范
   - codegraph-explore   # 任意语言的大仓符号检索（member）
   - github-workflow     # GitHub 仓库生命周期（member）
-  # ── agentops（entry: orca-cli；newapi 是成员）──
+  # ── agentops（entry: orca-cli）──
   - orca-cli            # Orca worktree/终端操作
   - orchestration       # Orca worker 编排
   - task-hub            # 跨会话任务中心
   - computer-use        # GUI 驱动（orca computer）
-  - newapi-management   # 本机 NewAPI 网关（member）
   # ── info（entry: unified-search）──
   - unified-search      # 10 源聚合搜索
   - kimi-webbridge      # 真实浏览器控制
@@ -163,9 +162,9 @@ families:
   software:          # 软件工程：omo 4 技能为核心（debugging/git-master/programming/remove-ai-slops，
     entry: programming   # oh-my-openagent 4.17.1 vendored）+ test-guardian + repo 工程并入
     members: [debugging, git-master, remove-ai-slops, test-guardian, github-workflow, codegraph-explore]
-  agentops:          # Agent 运维：Orca 编排 + 任务中心 + GUI + 本机 NewAPI 网关
+  agentops:          # Agent 运维：Orca 编排 + 任务中心 + GUI 驱动 + Cloudreve 云存储
     entry: orca-cli
-    members: [orchestration, task-hub, computer-use, newapi-management, cloudreve-storage]
+    members: [orchestration, task-hub, computer-use, cloudreve-storage]
   info:              # 信息与视觉：搜索/真实浏览器/图像理解
     entry: unified-search
     members: [kimi-webbridge, vision-workflow]

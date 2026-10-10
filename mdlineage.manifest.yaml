@@ -392,14 +392,6 @@ documents:
     id: skill.md-to-thesis-latex
     kind: reference
     status: active
-  newapi-management/references/api-reference.md:
-    id: newapi-management.references.api-reference
-    kind: reference
-    status: active
-  newapi-management/SKILL.md:
-    id: skill.newapi-management
-    kind: reference
-    status: active
   officecli/references/advanced-operations.md:
     id: officecli.references.advanced-operations
     kind: reference

@@ -2,8 +2,7 @@
 name: db-skill
 description: >
   项目内 MySQL / PostgreSQL 的查询与写入。当用户要跑 CRUD、从项目配置读取连接、
-  限制返回行数、把结果落成 JSON 时使用。NewAPI 网关读 newapi-management
-  （入口是 orca-cli）。WSL 调用 Windows、GPU、注册表读 wsl-windows-bridge。
+  限制返回行数、把结果落成 JSON 时使用。WSL 调用 Windows、GPU、注册表读 wsl-windows-bridge。
 metadata:
   family: db
   role: entry
@@ -17,7 +16,6 @@ metadata:
 
 | 请求 | 去读 |
 |---|---|
-| NewAPI 渠道、会话日志 | `~/projects/dc-skills/newapi-management/SKILL.md` |
 | WSL 调用 Windows、GPU、注册表、COM | `~/projects/dc-skills/wsl-windows-bridge/SKILL.md` |
 
 

@@ -34,7 +34,6 @@ def test_db_skill_does_not_own_infra() -> None:
     assert "infra" not in desc
     body = skill_text("db-skill").split("---", 2)[2]
     assert "基础设施运维族群入口" not in body
-    assert "newapi-management" in body
     assert "wsl-windows-bridge" in body
 
 

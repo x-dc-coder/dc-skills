@@ -63,23 +63,14 @@ models:
     check_cmd: "grok inspect --json"
     asserts: [provider_registered, env_key_present, upstream_reachable]
     notes: "官方 Responses；只收文本。思考档位 low/medium/high"
-  - name: codex-default
-    type: model_channel
-    client: codex
-    location: "~/.codex/config.toml#model + [model_providers.localnewapi]"
-    env_key: null                        # bearer token 在 config.toml 内（doctor 只验存在性）
-    upstream_url: "http://localhost:3000/v1"
-    check_cmd: "codex doctor"
-    asserts: [config_loads, upstream_reachable]
-    notes: "2026-09-24 事故记录：[skills] bundled 必须是 table（{enabled=false}）"
   - name: claude-default
     type: model_channel
     client: claude-code
     location: "~/.claude/settings.json#env"
     env_key: ANTHROPIC_AUTH_TOKEN
-    upstream_url: "http://localhost:3000"
+    upstream_url: null                   # 2026-10-10 本地网关指向已清除，恢复官方默认端点
     check_cmd: "claude mcp list"
-    asserts: [config_loads, env_key_present, upstream_reachable]
+    asserts: [config_loads, env_key_present]
   - name: dsh-default
     type: model_channel
     client: dsh
@@ -277,12 +268,12 @@ app_roots:
 
 # ── 本地依赖服务 ──
 services:
-  - name: newapi-gateway
+  - name: model-gateway
     type: service
-    location: "http://127.0.0.1:3000"
-    check_cmd: "curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:3000/api/status"
+    location: "http://127.0.0.1:8320"
+    check_cmd: "curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8320/health"
     asserts: [tcp_reachable, api_status_ok]
-    notes: "Claude/Codex/DSH 的共同上游。Grok 的 Atria 已改官方 api.atria-asi.ai"
+    notes: "统一模型代理网关（gateway.py），本机唯一本地 LLM 网关"
   - name: stepfun-shim
     type: service
     location: "http://127.0.0.1:8321"

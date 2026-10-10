@@ -111,7 +111,7 @@ uv run python scripts/skillctl inventory     # 全机清单：主库 vs App 自�
 | drawing 图表生成 | diagram | drawio-xml |
 | frontend 前端设计 | design-ui | design-diagram、design-dataviz（2026-08-29 同批创建设计规范三件套） |
 | software 软件工程 | programming | debugging、git-master、remove-ai-slops（omo 4.17.1 vendored 核心）、test-guardian、github-workflow、codegraph-explore |
-| agentops Agent 运维 | orca-cli | orchestration、task-hub、computer-use、newapi-management（本机 NewAPI 网关） |
+| agentops Agent 运维 | orca-cli | orchestration、task-hub、computer-use、cloudreve-storage |
 | info 信息与视觉 | unified-search | kimi-webbridge、vision-workflow |
 | docs 办公文档 | officecli | word-extractor |
 | db 数据库（单体） | db-skill | — |
@@ -177,6 +177,7 @@ hooks = [{ type = "command", command = "cd ~/projects/dc-skills && out=$(/home/d
 
 ## 6. 变更日志
 
+- **2026-10-10**：移除 `newapi-management` 技能（本地 NewAPI 网关 localhost:3000 全面弃用，由统一模型网关 127.0.0.1:8320 替代）：主库目录删除、agent-map/registry/mdlineage/pyproject/marketplace 同步去登记、db-skill 与 orca-cli 路由表更新、vision-workflow 改为 MCP-only（Bamboo 中继桥随网关退役）、test_route_invariants 断言同步。
 - **2026-09-29**：dsh-plugin-troubleshooting 从 on_demand 并入 base（成员 dsh-ui-optimization 已在各农场，入口却不在，Grok 上 DSH 插件 UI 没有自动触发面）。修正 db-skill、programming、codegraph-explore、design-ui、thesis-writing、officecli、kimi-webbridge、dc-skill-creator 的路由与触发描述。本机 Grok 禁用自带 create-skill、docx、pptx。浏览器通道以 kimi-webbridge 为准。
 - **2026-09-23**：全机聚合收编 7 技能（omo 4 + thesis-export + dsh 预设 2）；新增 codex 农场；dsh-plugin-troubleshooting 补 frontmatter；本文件建立；`skillctl inventory` 上线；thesis-agent/plugin-specialist 接入 customSkillDirs；SKILL-AUTHORING-RULES.md 对齐 agentskills.io。
 - **2026-09-24（族群化 W2）**：agent-map 新增 families 段（10 族）；base 16→32（成员全部进农场但标 manual）、on_demand 收缩为 1（dsh-plugin-troubleshooting）；9 个入口升级（description 补族级路由触发 + 正文族群路由表）；23 成员标 `metadata.load-mode: manual` + `disable-model-invocation: true` + 生成 Codex `agents/openai.yaml`；新增 `scripts/family-apply.py`（幂等标记器）；skills-sync --check 增加族群一致性校验（反向测试通过）；农场 90→168 链。存量违规顺带清理：3 个顶层 version → metadata.version、test-guardian 顶层 whenToUse 删除。

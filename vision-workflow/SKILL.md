@@ -9,20 +9,18 @@ disable-model-invocation: true
 ---
 # Vision Workflow（视觉任务编排）
 
-本技能编排 Vision MCP 工具（`vision_health` / `describe_image` / `clipboard_image` / `describe_images` / `analyze_screenshot` / `extract_text` / `verify_figure` / `batch_analyze`）。当模型本身无视觉能力时，通过调用这些工具完成视觉任务；当 new-api Bamboo 中继桥已开启图片自动识别时，日常发图由网关层完成，本技能工具聚焦**交叉验证与专业场景**（见下"分流原则"）。
+本技能编排 Vision MCP 工具（`vision_health` / `describe_image` / `clipboard_image` / `describe_images` / `analyze_screenshot` / `extract_text` / `verify_figure` / `batch_analyze`）。当模型本身无视觉能力时，通过调用这些工具完成视觉任务；本机所有识图统一走本技能编排的 Vision MCP 工具（见下"分流原则"）。
 
 > **DSH 会话中用户直接发送的图片**：DSH 会把图片持久化为无扩展名的 content-addressed 文件（`~/.dsh/attachments/v1/objects/xx/<sha256>`），模型收到的是 `[Unsupported Image]` 占位符。此时把附件路径传给 `describe_image` / `describe_images` 即可（服务端已支持魔数嗅探，无需复制改名）。多张截图一次发来用 `describe_images` 逐张识别。
 
-> **Bamboo 中继桥自动识别（快速第一印象）**：new-api 已启用 Bamboo 中继桥 + 图片识别（`image_recognize_model=qwen3-vl-flash`，经 dashscope-vision 渠道）。用户在 DSH 会话直接发图时，图片会在**网关层**被自动识别成文字描述并注入上下文（历史图片替换为 `[image]` 标记），模型直接"看到"图片内容——**此时无需再调 Vision MCP 工具**。识别失败（hop 错误）会导致整个请求失败。
+## 分流原则（日常识别 vs 交叉验证）
 
-## 分流原则（Bamboo 桥 vs Vision MCP 交叉验证）
-
-- **日常发图（快速第一印象）**：Bamboo 桥已自动完成（qwen3-vl-flash，~1.3s，稳定）——用户发图后模型可直接理解，**不要重复调 Vision MCP**。
+- **日常发图（快速第一印象）**：调 `describe_image`（默认性价比模型）拿一次描述即可，不要对同一图片反复调用多个工具。
 - **关键场景（必须主动交叉验证）**：用户要求"分析/确认/核验/校验/帮我看看这张图/数据/文字/图表"或图片涉及数据/科研图/重要文档时，**主动对同一附件做双模型交叉**：
   1. 取附件路径（`~/.dsh/attachments/v1/objects/xx/<sha256>`，魔数嗅探已支持）
   2. 调 `describe_image` 两次（不同厂商，如 qwen3-vl-flash + glm-4.6v），或调 `verify_figure`（自动双模型）
   3. 两模型描述**一致** → 高置信，直接汇报 `meta.cross_validated`；**不一致** → 列出分歧点，标注待用户确认
-- **禁止**：对已由 Bamboo 桥识别过的日常图片重复调用 Vision MCP（浪费且多余）；除非场景是关键验证。
+- **禁止**：对已描述过的日常图片重复调用 Vision MCP（浪费且多余）；除非场景是关键验证。
 
 ## 流程总则
 

@@ -15,8 +15,7 @@
         "./orca-cli",
         "./orchestration",
         "./task-hub",
-        "./computer-use",
-        "./newapi-management"
+        "./computer-use"
       ]
     },
     {
