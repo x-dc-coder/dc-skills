@@ -961,7 +961,11 @@ class MarkdownChecker:
         独立扫描连续表格块（不依赖 _table_starts 的起始语义），
         跳过分隔行，比较各数据行与首行列数。列数不一致通常意味着
         单元格漏填或多填（markdown 表格要求各行列数一致）。
-        含 ``<<N``/``^^N`` 合并语法的表格豁免（合并行列数天然不一致）。
+
+        豁免只认单元格末尾的有效合并（与 Words-Production
+        markdown_proc._merge_parse_cell 同口径）：colspan>1（``<<N``）
+        或 rowspan>1（``^^N``）。``数据<<2后续``、``<<1``、普通文本里的
+        ``<<``/``^^``、裸 ``^^`` 都不豁免整表。
         """
         lines = self._lines
         i = 0
@@ -973,13 +977,16 @@ class MarkdownChecker:
             has_merge = False
             while i < len(lines) and _is_table_row(lines[i].strip()):
                 s = lines[i].strip()
-                if "<<" in s or "^^" in s:
-                    has_merge = True
                 if not _is_table_separator(s):
                     block.append((i + 1, _count_table_cols(s)))
+                    inner = s[1:-1] if s.endswith("|") else s[1:]
+                    for cell in inner.split("|"):
+                        _text, col, row = _merge_parse_cell(cell)
+                        if col > 1 or row > 1:
+                            has_merge = True
                 i += 1
             if has_merge:
-                continue  # 合并表格各行列数天然不一致（跨列<<N/续行^^），豁免
+                continue  # 有效跨列/跨行时各行列数天然不一致，豁免
             if len(block) >= 2:
                 ref = block[0][1]
                 for ln_no, cols in block[1:]:

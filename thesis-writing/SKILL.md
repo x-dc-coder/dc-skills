@@ -362,18 +362,18 @@ uv run python paper-metrics/scripts/validate_draft.py \
 
 ## Markdown 格式规范（两模式共享）
 
-所有生成的 Markdown 文档必须符合 `references/shared-markdown-norms.md` 中的机械化规范（由 `check_markdown_spec.py` 检查）。要点：
+所有生成的 Markdown 文档必须符合 `references/shared-markdown-norms.md` 中的机械化规范（由 `check_markdown_spec.py` 检查）。本规范与 Words-Production 仓（`/mnt/e/AllProjects202604/Words-Production`）的 `tools/check_markdown_spec.py` 与《使用手册/Markdown与样式要求》行为对齐；checker 代码短期允许两仓重复，后续 Agent 化时吸收为单一实现。要点：
 
 - **编码**：UTF-8 无 BOM，LF 行尾
 - **标题**：ATX 风格（`#`/`##`/`###`），编号连续不跳级
 - **图片**：Markdown 语法，禁止 `<img>`，禁止公式以图片插入，图前后须有段落
-- **表格**：表题在表格前，编号连续，表前后须有段落，**各行列数一致**（合并 `<<N`/`^^N` 合法）
+- **表格**：表题在表格前，编号连续，表前后须有段落，**各行列数一致**；合并 `<<N`/`^^N` 仅在导出配置 `table.merge_syntax: true`（默认关）时翻译，标记须锚定单元格末尾，列数检查只对有效合并（colspan/rowspan>1）豁免
 - **公式**：行内 `$...$`，独立 `$$...$$`（**必须成对闭合**），编号 `\tag{X-Y}`
 - **代码块**：fence（```）**必须成对闭合**
-- **段内换行**：禁止（用空行分段），禁止 `<br>`
+- **段内换行**：禁止（用空行分段），禁止 `<br>`；单独一行 `---` 会被导出预处理替换为空行（不会成为水平线）
 - **参考文献**：从 [1] 开始连续，条目间空行；正文数字引用↔文献表双向核验（越界报 `DANGLING_CITATION`，未引用报 `UNCITED_REFERENCE`；作者-年份制/无文献表自动跳过）
 - **标记成对**：`**` / `*` / `~~` / `` ` `` / `[]` / `()` / 引号
-- **Mermaid**：保留会触发 WARN，应渲染为图片或删除
+- **Mermaid**：\`\`\`mermaid 围栏（大小写不敏感、\`\`\` 与 mermaid 间可有空白）导出时会被删除，检查器报 `MERMAID_DISABLED` WARN；\`~~~mermaid\` 不受影响，应渲染为图片后引用
 
 各模式特有的写作规范：
 - Mode A：见 `references/writing-norms.md`（GB/T 7714 强制、≥15000 字、CY/T 35-2001 编号）
