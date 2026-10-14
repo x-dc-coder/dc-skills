@@ -65,7 +65,7 @@ def find_python(explicit: str | None = None) -> Path | None:
 
 
 def default_out_dir() -> Path:
-    """统一产物树（docs/specs/OUTPUT.md C-1）：
+    """统一产物树（docs/specs/输出规范.md C-1）：
     <cwd>/skills-output/info/unified-search/<时间戳>/downloads。"""
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "scripts"))
     from common import run_dir  # noqa: E402

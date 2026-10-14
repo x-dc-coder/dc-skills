@@ -11,7 +11,7 @@
 # 安装器着陆区 ~/.agents/skills（通用技能安装器的默认目标，见 .skill-lock.json）如出现新技能：
 #   mv ~/.agents/skills/<name> ~/projects/dc-skills/ 并在此文件登记，再跑 skills-sync。
 #
-# ── 各 Agent 自注册根与可控配置（2026-09-23 实测；完整机制与风险见 SKILL-MANAGEMENT.md）──
+# ── 各 Agent 自注册根与可控配置（2026-09-23 实测；完整机制与风险见 技能管理.md）──
 # claude-code: 自注册 = 插件市场 ~/.claude/plugins/cache + 账号同步 ~/.claude/skills/synced（农场根内，须保持关闭）
 #              可控 = settings.json 的 enabledPlugins/skillOverrides/blockedMarketplaces，CLAUDE_CODE_SYNC_SKILLS=0
 # grok:       自注册 = ~/.grok/bundled/skills（随 App 更新）；可控 = config.toml [skills] ignore/paths/disabled

@@ -800,7 +800,7 @@ def main():
     data = extract_all(args.input)
 
     base_name = Path(args.input).stem
-    # 统一产物树（docs/specs/OUTPUT.md C-1/C-4）：显式 --output-dir 优先；
+    # 统一产物树（docs/specs/输出规范.md C-1/C-4）：显式 --output-dir 优先；
     # 默认 <cwd>/skills-output/docs/word-extractor/<时间戳>/，最终产物另存主库审计副本。
     explicit_dir = args.output_dir
     md_plan = plan_output("docs", "word-extractor", f"{base_name}.md",

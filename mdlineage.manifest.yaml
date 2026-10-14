@@ -192,11 +192,11 @@ documents:
     id: skill.diagram
     kind: reference
     status: active
-  docs/arch/ENVIRONMENT.md:
+  docs/arch/环境依赖.md:
     id: docs.arch.environment
     kind: reference
     status: active
-  docs/arch/MODELS.md:
+  docs/arch/模型渠道.md:
     id: docs.arch.models
     kind: reference
     status: active
@@ -216,19 +216,23 @@ documents:
     id: docs.research.remaining-work-2026-09-14
     kind: reference
     status: active
-  docs/runbook/CROSS-DEVICE-SETUP.md:
+  docs/runbook/跨设备搭建.md:
     id: docs.runbook.cross-device-setup
     kind: reference
     status: active
-  docs/specs/OUTPUT.md:
+  docs/specs/上下文预算与农场优化方案.md:
+    id: docs.specs.context-budget
+    kind: reference
+    status: draft
+  docs/specs/输出规范.md:
     id: docs.specs.output
     kind: reference
     status: active
-  docs/specs/SKILL-AUTHORING-RULES.md:
+  docs/specs/技能编写规则.md:
     id: docs.specs.skill-authoring-rules
     kind: reference
     status: active
-  docs/specs/SKILL-MANAGEMENT.md:
+  docs/specs/技能管理.md:
     id: docs.specs.skill-management
     kind: reference
     status: active

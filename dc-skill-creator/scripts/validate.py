@@ -4,7 +4,7 @@
 规则分级：E = 错误（阻断），W = 警告（不阻断，--Werror 升级为失败）。
 退出码：0 全过；2 存在 E 级违规；3 仅 W 级；4 环境/配置错误。
 
-规则表（编号与 docs/specs/SKILL-AUTHORING-RULES.md 对应）：
+规则表（编号与 docs/specs/技能编写规则.md 对应）：
   R1(E)  frontmatter 仅规范 6 字段 + metadata；禁 CC 私有字段；
          disable-model-invocation 仅在 metadata.load-mode: manual 时允许（B3 例外）
   R2(E)  name 规则（^[a-z0-9-]+$/无首尾-/无--/≤64/==目录名）且全仓+App 根唯一
@@ -12,7 +12,7 @@
          (W) 含触发场景句式（当用户…时 / Use when）
   R4(E)  SKILL.md ≤400 行（B7a）
   R5(E)  A 类：scripts/__init__.py + .venv→主库 .venv；(W) 含 .py 但缺 __init__.py
-  R6(E)  metadata.requires-bins 的外部二进制必须已登记 docs/arch/ENVIRONMENT.md
+  R6(E)  metadata.requires-bins 的外部二进制必须已登记 docs/arch/环境依赖.md
   R7(W)  import 的第三方包应在 pyproject.toml（误报交人工）
   R8(E)  必须登记进 agent-map.yaml（base/on_demand/extra/preset 之一）
   R9(W)  与现有技能触发词冲突（Jaccard Top-5）；兜底技能须含 B6 优先级声明
@@ -47,7 +47,7 @@ PRIVATE_FIELDS = {
 }
 #: agentskills.io 规范字段全集
 SPEC_FIELDS = {"name", "description", "license", "compatibility", "metadata", "allowed-tools"}
-#: App 自管根（R2 重名检查用；与 skillctl inventory 同源，见 SKILL-MANAGEMENT.md §1）
+#: App 自管根（R2 重名检查用；与 skillctl inventory 同源，见 技能管理.md §1）
 APP_OWNED_ROOTS = [
     "~/.grok/bundled/skills",
     "~/.codex/skills/.system",
@@ -87,9 +87,9 @@ def app_root_names() -> dict[str, list[str]]:
 
 
 def registered_bins() -> set[str]:
-    env_md = MASTER_ROOT / "docs" / "arch" / "ENVIRONMENT.md"
+    env_md = MASTER_ROOT / "docs" / "arch" / "环境依赖.md"
     if not env_md.exists():
-        env_md = MASTER_ROOT / "ENVIRONMENT.md"
+        env_md = MASTER_ROOT / "环境依赖.md"
     bins: set[str] = set()
     if env_md.exists():
         for line in env_md.read_text(encoding="utf-8", errors="replace").splitlines():
@@ -221,7 +221,7 @@ def check(skill_dir: Path) -> list[dict]:
         registered = registered_bins()
         for b in bin_list:
             if b not in registered:
-                bad("R6", "E", f"外部二进制未登记 docs/arch/ENVIRONMENT.md: {b}")
+                bad("R6", "E", f"外部二进制未登记 docs/arch/环境依赖.md: {b}")
 
     # R7 import 对照 pyproject（启发；B 类私有 venv 不参与）
     if has_py and not (skill_dir / "venvs").is_dir():
@@ -270,7 +270,7 @@ def check(skill_dir: Path) -> list[dict]:
         if any(k in str(desc) for k in ("通用", "兜底", "fallback")) and "仅当" not in str(desc):
             bad("R9", "W", "兜底/通用技能须含 B6 优先级声明（“仅当其他专用 skill 无法满足时使用”）")
 
-    # R10 输出路径（docs/specs/OUTPUT.md 统一产物树）
+    # R10 输出路径（docs/specs/输出规范.md 统一产物树）
     for pat, msg in [
         (r"/tmp/skills-output", "硬编码 /tmp/skills-output（C-12 禁止）"),
         (r"~/?\.claude/skills-output|/home/[^/\s]+/\.claude/skills-output",
@@ -287,7 +287,7 @@ def check(skill_dir: Path) -> list[dict]:
             bad("R10", "E", "出现 skills-output 字面量但未调 plan_output/run_dir（C-12 禁绕过 common.py）")
         if not re.search(r'"--output', py_all) and re.search(
                 r"\.(png|jpg|svg|md|json|docx|pdf|tex)\b", body):
-            bad("R10", "W", "疑似有产物但 CLI 无 --output 参数（OUTPUT.md C-4）")
+            bad("R10", "W", "疑似有产物但 CLI 无 --output 参数（输出规范.md C-4）")
 
     # R11 孤儿目录与污染文件
     for p in skill_dir.rglob("*"):

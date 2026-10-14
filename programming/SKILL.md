@@ -32,20 +32,24 @@ metadata:
 
 ## 子代理派发
 
-编程或架构任务需要派发子代理、做交叉分析或请外部专家时，按角色组合派发。渠道、协议、窗口和思考档位见 [`references/MODELS.md`](references/MODELS.md)（与 `docs/arch/MODELS.md` 同一份）。登记只记渠道事实，不决定派谁。
+编程或架构任务需要派发子代理、做交叉分析或请外部专家时，按「角色 → Agent → 模型」派发。终审由主会话直接承担（`grok-4.7` 官方渠道；官方余额恢复前临时终审用 `glm-5.3`），不经派发。渠道、协议、窗口、思考档位与 Agent 渠道事实见 [`references/模型渠道.md`](references/模型渠道.md)（与 `docs/arch/模型渠道.md` 同一份）。登记只记渠道事实，不决定派谁。
 
-1. **角色组合**。下表按协作习惯分类。先对上角色，再派该组合里的模型；同一类里的模型一起用。用户点名模型或组合时，按用户指定执行。
+1. **角色组合（Agent 承载）**。先对上角色，再按表选 Agent 与模型；同一行的模型一起用。用户点名模型或 Agent 时，按用户指定执行。
 
 | 角色 | 常用组合 |
 |---|---|
-| 协作（交叉分析） | `glm-5.3` + `grok-4.7`。问题更难时，再加上 `muse-spark-1.3`、`Atria-Dawn-Preview` |
-| 执行 | `deepseek-v4.1-flash` 或 `gemini-3.8-flash`。需要旁证时，再加上 `Atria-Dawn-Preview` |
-| 前端优化 | `gemini-3.8-flash` + `step-5-preview` |
-| 外部专家 | 任何角色上，任务足够复杂时引入 `gpt-6-astra` |
+| 执行 | Grok 子代理：`deepseek-v4.1-flash`（默认，8320 网关）或 `gemini-3.8-flash`。机械批量用 `qwen3.8-27b`（最大输出 4096，长任务拆批） |
+| 交叉分析 | Grok 子代理：`glm-5.3` + `grok-4.7`，加难时 + `Atria-Dawn-Preview`；仍不收敛（分歧 >2 处且两轮无收敛迹象）才跨 Agent 升 commandcode `muse-spark-1.3` |
+| 分析（默认启用） | commandcode：`muse-spark-1.3`（性价比最高，分析默认档） |
+| 难题升级 | commandcode：`kimi-k3`（bug 深挖）或 `claude-sonnet-5-5`（设计仲裁）——非常难的任务才启用，按问题类型二选一 |
+| 前端优化 | 默认双 Agent：`gemini-3.8-flash`（Grok 子代理）+ `step`（step CLI，仅 `step-5-preview`） |
+| StepFun 模型 | 一律 step CLI（仅 `step-5-preview`）；Grok 内 slug 停止派发 |
+| 外部专家 | codex：`gpt-6-astra`（≤3 次/天，仅成功调用计数；连续 2 次失败由用户带到外部客户端，失败不计配额） |
 
 2. **交叉分析**。组合内的模型各自给出分析，主会话综合后裁决。看缺陷、边界和分歧。
 3. **外部专家**。任务足够复杂，或内部组合仍无法收敛时，把背景、分歧和待决问题交给 `gpt-6-astra`。渠道不可用时，由用户把同一份问题带到外部客户端。
-4. **连通性**。对不常用模型，派发前可跑：
+4. **产物落盘**。commandcode / step / codex 的产物按 输出规范.md 落 `<cwd>/skills-output/software/programming/<时间戳>/`，主会话读文件综合。step 派发任务默认含「完成后写产物文件」契约；`/exit` 是客户端命令、agent 无法代发，由派发方确认产物后发送关闭。
+5. **连通性**。Grok slug 用 `check_models.py`；commandcode 只测 `muse-spark-1.3`（`kimi-k3`、`claude-sonnet-5-5` 在册已验证，直接派发）；step 用 `step --list-models`；codex 直接试跑。
 
    ```bash
    cd ~/projects/dc-skills && uv run python scripts/check_models.py -m <model-slug>

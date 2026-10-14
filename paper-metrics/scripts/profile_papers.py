@@ -2608,7 +2608,7 @@ def main() -> None:
     parser.add_argument("--out", "--output", dest="out", default=None,
                         help="output directory for _domain_profile.{json,md} + metric artifacts "
                              "(default: unified tree <cwd>/skills-output/thesis/paper-metrics/<timestamp>/, "
-                             "docs/specs/OUTPUT.md C-1)")
+                             "docs/specs/输出规范.md C-1)")
     parser.add_argument("--min-papers", type=int, default=3,
                         help="warn if fewer papers are found (default: 3)")
     parser.add_argument("--no-section-metrics", action="store_true",

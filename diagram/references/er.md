@@ -59,7 +59,7 @@ uv run python -m scripts.cli \
   --sql-file docs/er/sql/<table_name>.sql
 ```
 
-产物默认落**统一产物树**（docs/specs/OUTPUT.md C-1）：`<cwd>/skills-output/drawing/diagram-er/<时间戳>/er-diagram.png`——`<cwd>` 即运行时的当前目录，无项目推断、无兜底分叉。如需自定义路径：
+产物默认落**统一产物树**（docs/specs/输出规范.md C-1）：`<cwd>/skills-output/drawing/diagram-er/<时间戳>/er-diagram.png`——`<cwd>` 即运行时的当前目录，无项目推断、无兜底分叉。如需自定义路径：
 
 ```bash
 cd ~/projects/dc-skills/diagram-er

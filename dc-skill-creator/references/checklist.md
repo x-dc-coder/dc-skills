@@ -7,7 +7,7 @@
 [3] agent-map.yaml 已登记（validate R8 通过）+ family-apply --apply 已跑
 [4] skills-sync 物化成功 + --check 零漂移（含 families 一致性）
 [5] skillctl lint 过检（venv/死链/环境体检）
-[6] 新外部二进制已登记 docs/arch/ENVIRONMENT.md（R6）
+[6] 新外部二进制已登记 docs/arch/环境依赖.md（R6）
 [7] README.md 目录结构/环境分类表已更新（若新增技能或改变分类）
 [8] docs/INDEX.md 已同步（若新增/移动文档）
 [9] git 提交模板：

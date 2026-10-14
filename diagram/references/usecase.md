@@ -71,7 +71,7 @@ uv run python -m scripts.cli \
   --json-file docs/usecase/json/<usecase_name>.json
 ```
 
-产物默认落**统一产物树**（docs/specs/OUTPUT.md C-1）：`<cwd>/skills-output/drawing/diagram-usecase/<时间戳>/usecase-diagram.png`——`<cwd>` 即运行时的当前目录，无项目推断、无兜底分叉。如需自定义路径：
+产物默认落**统一产物树**（docs/specs/输出规范.md C-1）：`<cwd>/skills-output/drawing/diagram-usecase/<时间戳>/usecase-diagram.png`——`<cwd>` 即运行时的当前目录，无项目推断、无兜底分叉。如需自定义路径：
 
 ```bash
 cd ~/projects/dc-skills/diagram-usecase
@@ -121,7 +121,7 @@ cd ~/projects/dc-skills/diagram-usecase
 uv run python -m scripts.cli --json-file usecase.json
 ```
 
-默认输出路径：`<cwd>/skills-output/drawing/diagram-usecase/<时间戳>/usecase-diagram.png`（统一产物树，docs/specs/OUTPUT.md C-1）
+默认输出路径：`<cwd>/skills-output/drawing/diagram-usecase/<时间戳>/usecase-diagram.png`（统一产物树，docs/specs/输出规范.md C-1）
 
 ## 多参与者格式（向后兼容）
 

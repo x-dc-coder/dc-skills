@@ -5,7 +5,7 @@
   <name>/SKILL.md          frontmatter 占位（name/description/metadata.version/
                            family/role/load-mode）+ heading 骨架（对齐 B8）
   <name>/scripts/          __init__.py（A 类必需）+ cli.py 桩（含 --output 与
-                           plan_output 接线，对齐 OUTPUT.md C-1/C-3）
+                           plan_output 接线，对齐 输出规范.md C-1/C-3）
   <name>/scripts/test_*.py pytest 桩（R13）
   <name>/.venv -> ../.venv（A 类；规则 A1）
 登记（文本级最小侵入，保留原注释缩进）：
@@ -48,7 +48,7 @@ metadata:
 
 ## 依赖说明
 
-<!-- 外部二进制登记 docs/arch/ENVIRONMENT.md 后在此 metadata.requires-bins 声明（R6）-->
+<!-- 外部二进制登记 docs/arch/环境依赖.md 后在此 metadata.requires-bins 声明（R6）-->
 
 ## 快速用法
 
@@ -58,11 +58,11 @@ cd ~/projects/dc-skills && uv run python {name}/scripts/cli.py --help
 
 ## 详细规程
 
-<!-- 超过 400 行前拆到 references/（B7a）；产物路径遵循 docs/specs/OUTPUT.md -->
+<!-- 超过 400 行前拆到 references/（B7a）；产物路径遵循 docs/specs/输出规范.md -->
 """
 
 CLI_TEMPLATE = '''#!/usr/bin/env python3
-"""{name} CLI 桩（由 dc-skill-creator 生成；接线 OUTPUT.md 统一产物树）。"""
+"""{name} CLI 桩（由 dc-skill-creator 生成；接线 输出规范.md 统一产物树）。"""
 
 from __future__ import annotations
 
@@ -79,7 +79,7 @@ def main() -> None:
     ap.add_argument("input", nargs="?", help="输入文件")
     ap.add_argument("--output", help="显式输出路径/目录（最高优先，最终产物另存主库审计副本）")
     args = ap.parse_args()
-    # 统一产物树（OUTPUT.md C-1/C-4）：<cwd>/skills-output/<族群>/<技能名>/<时间戳>/
+    # 统一产物树（输出规范.md C-1/C-4）：<cwd>/skills-output/<族群>/<技能名>/<时间戳>/
     plan = plan_output("<family>", "{name}", "<default>.png", explicit=args.output)
     out = plan.primary
     # TODO(实现): 生成产物并写入 out；写毕调用 plan.commit() 落审计副本

@@ -6,7 +6,7 @@
   # 例：uv run python scripts/output-dir.py drawing diagram-draft
   # 输出：/home/dc/projects/MyThesis/skills-output/drawing/diagram-draft/20260924-143022
 
-docs/specs/OUTPUT.md C-1：bash 技能脚本无法 import common.py，用本 CLI 取运行目录。
+docs/specs/输出规范.md C-1：bash 技能脚本无法 import common.py，用本 CLI 取运行目录。
 """
 from __future__ import annotations
 

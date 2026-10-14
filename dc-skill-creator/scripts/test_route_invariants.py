@@ -126,14 +126,14 @@ def test_entry_descriptions_keep_member_phrases() -> None:
 
 
 def test_output_docs_do_not_teach_retired_paths() -> None:
-    rules = (ROOT / "docs/specs/SKILL-AUTHORING-RULES.md").read_text(encoding="utf-8")
+    rules = (ROOT / "docs/specs/技能编写规则.md").read_text(encoding="utf-8")
     assert "必须实现两级回退" not in rules
     assert "plan_output" in rules
     guide = (ROOT / "dc-skill-creator/references/description-guide.md").read_text(encoding="utf-8")
     assert "thesis-output/" not in guide
     draft = (ROOT / "diagram/references/draft.md").read_text(encoding="utf-8")
     assert "diagram-flow" not in draft
-    env = (ROOT / "docs/arch/ENVIRONMENT.md").read_text(encoding="utf-8")
+    env = (ROOT / "docs/arch/环境依赖.md").read_text(encoding="utf-8")
     assert "仅在用户显式指定" not in env
 
 

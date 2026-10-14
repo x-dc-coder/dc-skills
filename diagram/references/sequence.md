@@ -59,7 +59,7 @@ uv run python -m scripts.cli \
   --json-file docs/sequence/json/<name>.json
 ```
 
-产物默认落**统一产物树**（docs/specs/OUTPUT.md C-1）：`<cwd>/skills-output/drawing/diagram-sequence/<时间戳>/sequence-diagram.png`；中间 `.mmd` 与 PNG 同目录（`<时间戳>/.work/` 之外的运行目录内）。如需自定义路径：
+产物默认落**统一产物树**（docs/specs/输出规范.md C-1）：`<cwd>/skills-output/drawing/diagram-sequence/<时间戳>/sequence-diagram.png`；中间 `.mmd` 与 PNG 同目录（`<时间戳>/.work/` 之外的运行目录内）。如需自定义路径：
 
 ```bash
 cd ~/projects/dc-skills/diagram-sequence

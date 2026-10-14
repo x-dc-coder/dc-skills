@@ -143,7 +143,7 @@ def ensure_jsonable_row(row: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def plan_result_output(explicit: Optional[str]) -> OutputPlan:
-    """查询结果落点（docs/specs/OUTPUT.md C-1/C-4/C-9）：
+    """查询结果落点（docs/specs/输出规范.md C-1/C-4/C-9）：
     <cwd>/skills-output/db/db-skill/<时间戳>/pg-result.json（固定名，禁随机名）；
     explicit（--output）优先，最终产物另存主库审计副本。"""
     return plan_output("db", "db-skill", f"pg-result.json", explicit=explicit)

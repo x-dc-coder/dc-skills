@@ -5,7 +5,7 @@ description: >
   description 1024 字符、400 行门禁、agent-map 登记、触发词冲突、输出路径接线）。当用户要求
   创建/新增技能、给主库加 SKILL、或修改技能后需要过检时使用（create a skill / 新建技能 /
   加个 skill）。只用于 ~/projects/dc-skills。不要用 App 自带的 create-skill 或 skill-creator
-  （那些写到客户端技能目录，破坏单一物理副本）。规约见 SKILL-AUTHORING-RULES.md 与 SKILL-MANAGEMENT.md。
+  （那些写到客户端技能目录，破坏单一物理副本）。规约见 技能编写规则.md 与 技能管理.md。
 metadata:
   version: "0.1"
   family: meta
@@ -28,7 +28,7 @@ CLI 管**形式正确**（确定性校验与骨架生成），本 SKILL 管**内
 ## 依赖说明
 
 - Python ≥3.10 + pyyaml（随主库 `.venv`，A 类技能）
-- 无外部二进制依赖；规则全文见 `docs/specs/SKILL-AUTHORING-RULES.md`
+- 无外部二进制依赖；规则全文见 `docs/specs/技能编写规则.md`
 
 ## 快速用法
 
@@ -66,7 +66,7 @@ uv run python scripts/skills-sync && uv run python scripts/skillctl lint
    description 草稿给用户确认或编辑（关键触发词放最前 80 字符，≤1024，祈使句 Use when…）。
 4. **环境分类**：A（轻量 Python，建 `.venv` 软链 + `scripts/__init__.py`）/ B（重型独立
    venvs）/ C（无统一 venv，默认）。
-5. **外部依赖**：默认空；填了 → 必须先登记 `docs/arch/ENVIRONMENT.md`，否则 R6 拒绝。
+5. **外部依赖**：默认空；填了 → 必须先登记 `docs/arch/环境依赖.md`，否则 R6 拒绝。
 6. **启用范围**：on_demand（默认）/ base / 某 agent extra / dsh preset —— 决定 agent-map 写法。
 
 随后：`new_skill.py` 生成骨架 →（member 跑 `family-apply --apply`）→ 按下方写作原则写正文 →
@@ -78,7 +78,7 @@ uv run python scripts/skills-sync && uv run python scripts/skillctl lint
   假设使用方已具备通用能力，不写科普，不复述规范全文（引用条款号）。
 - **触发词即门面**：description 决定自动调用；写用户会说的原话（中英文都要），不写内部术语。
 - **优先引用已有 CLI 而非写自定义脚本**；确需脚本时走 `scripts/` + `--output` 接线
-  （docs/specs/OUTPUT.md C-1/C-3），禁止把产物写进 C-10 明令禁止的 /tmp 日期堆积目录。
+  （docs/specs/输出规范.md C-1/C-3），禁止把产物写进 C-10 明令禁止的 /tmp 日期堆积目录。
 - **渐进披露**：SKILL.md ≤400 行（B7a）；长文拆 `references/`，静态资产放 `assets/`，
   文件引用相对 skill 根且只深一层。
 - **单一物理副本**：创建器不建农场软链——登记 agent-map 后由 `skills-sync` 物化（P2）。
@@ -87,7 +87,7 @@ uv run python scripts/skills-sync && uv run python scripts/skillctl lint
 
 - 验收清单全文（提交前逐项打钩）：`references/checklist.md`
 - description 写法与 1024 字符预算分配（含 bad/good 对照）：`references/description-guide.md`
-- R1-R13 规则表与违规消息的规则编号对照：`docs/specs/SKILL-AUTHORING-RULES.md`
+- R1-R13 规则表与违规消息的规则编号对照：`docs/specs/技能编写规则.md`
 - 与 `skillctl` 的边界：本工具管**创建态**（单技能 + 增量关系），`skillctl lint/inventory`
   管**运行态**（全仓快照）；`skills-sync` 管物化，三者不重叠。
 

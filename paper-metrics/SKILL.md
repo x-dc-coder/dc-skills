@@ -330,7 +330,7 @@ cd ~/projects/dc-skills && uv run pytest paper-metrics/scripts -q   # 610 tests
 cd ~/projects/dc-skills
 uv run python paper-metrics/scripts/audit_corpus.py --name vrp-en    # 英文基线（--out 缺省落统一产物树）
 uv run python paper-metrics/scripts/audit_corpus.py --name ycgl-zh   # 中文语料
-# 缺省输出：<cwd>/skills-output/thesis/paper-metrics/<时间戳>/（docs/specs/OUTPUT.md C-1）
+# 缺省输出：<cwd>/skills-output/thesis/paper-metrics/<时间戳>/（docs/specs/输出规范.md C-1）
 ```
 
 - 登记表：`data/test-corpora.json`（机器可读）+ `references/test-corpora.md`（获取方式与已知缺陷）；

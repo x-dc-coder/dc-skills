@@ -94,7 +94,7 @@ def backup_file(
         "status": "completed",
     }
 
-    # 规范化落盘：对齐 OUTPUT.md 统一产物树
+    # 规范化落盘：对齐 输出规范.md 统一产物树
     plan: OutputPlan = plan_output(
         "agentops", "cloudreve-storage", "backup-manifest.json", explicit=output_arg
     )

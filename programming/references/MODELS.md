@@ -1,1 +1,0 @@
-../../docs/arch/MODELS.md

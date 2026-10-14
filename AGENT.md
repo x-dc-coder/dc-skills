@@ -39,16 +39,16 @@ uv run --directory ~/projects/dc-skills python scripts/github_issues.py ...
 
 ## 核心约束：输出目录
 
-所有 SKILL 的文件输出遵循 `OUTPUT.md`（docs/specs/OUTPUT.md，**唯一事实源**）的统一产物树规则：
+所有 SKILL 的文件输出遵循 `输出规范.md`（docs/specs/输出规范.md，**唯一事实源**）的统一产物树规则：
 默认落 `<cwd>/skills-output/<族群>/<技能名>/<时间戳>/`；显式指定（`--output`）优先，最终产物另存
 `<master>/skills-output/` 审计副本。禁止固定名互相覆盖、`/tmp/skills-output/` 堆积、技能目录内
 产物。CLI 统一调用 `scripts/common.py` 的 `plan_output` / `commit_final`。用户项目内的产物由
-机器级全局忽略兜底（`docs/specs/OUTPUT.md` C-14）；需要把个别产物纳入跟踪时按该条款用 `git add -f`。
+机器级全局忽略兜底（`docs/specs/输出规范.md` C-14）；需要把个别产物纳入跟踪时按该条款用 `git add -f`。
 
 ## 三条铁律（摘要）
 
 1. **执行目录**：Python 脚本一律先 `cd ~/projects/dc-skills` 再 `uv run`（见上）。
-2. **输出位置**：以 `OUTPUT.md` 为唯一事实源（见上）；SKILL.md 引用条款号，不引用行号。
+2. **输出位置**：以 `输出规范.md` 为唯一事实源（见上）；SKILL.md 引用条款号，不引用行号。
 3. **单一物理副本**：技能只存在于主库；各 Agent 经软链农场可见；App 自带技能不收编
-   （架构见 `SKILL-MANAGEMENT.md`，启用清单见 `agent-map.yaml`）。
+   （架构见 `技能管理.md`，启用清单见 `agent-map.yaml`）。
 4. **真实产物验证**：严禁在未成功调用工具的情况下宣称“文件已生成 / 已写入 / 已保存”；向用户汇报路径与体积必须以 `write` / `search_replace` 的真实执行回执为依据，严禁在规划阶段提前断言落盘。

@@ -21,7 +21,7 @@ Cloudreve 云存储网盘操作与备份管理工具，基于 WebDAV / REST 协�
 - **文件流式读写** (`cat` / `put` / `get`)：支持流式读取文本内容（分行或分字节截断）；支持本地大文件流式上传下载，自动跟随 COS 签名重定向。
 - **原子性与防护**：上传采用 `.part` 临时文件先行上传再通过 WebDAV MOVE 原子重命名；下载采用本地临时文件校验后原子替换，防止网络中断产生残损半文件。
 - **文件整理与清理** (`mv` / `rm`)：远端移动/重命名、文件删除、递归目录删除及 `--dry-run` 预览防护。
-- **规范化备份与恢复** (`backup` / `restore` / `prune`)：按照统一命名规范备份至云端沙箱，自动计算 SHA256，生成审计 Manifest 并对齐 `OUTPUT.md` 统一产物树；提供过期快照保留清理。
+- **规范化备份与恢复** (`backup` / `restore` / `prune`)：按照统一命名规范备份至云端沙箱，自动计算 SHA256，生成审计 Manifest 并对齐 `输出规范.md` 统一产物树；提供过期快照保留清理。
 
 ## 触发场景
 
@@ -155,7 +155,7 @@ cd ~/projects/dc-skills && uv run python cloudreve-storage/scripts/cli.py backup
 执行后将自动：
 - 计算本地源文件 SHA256 哈希值与大小。
 - 上传并归档至特定分类与日期的快照目录。
-- 遵循 `OUTPUT.md` 规约在 `<cwd>/skills-output/agentops/cloudreve-storage/<时间戳>/backup-manifest.json` 生成 Manifest，并在主库同步审计副本。
+- 遵循 `输出规范.md` 规约在 `<cwd>/skills-output/agentops/cloudreve-storage/<时间戳>/backup-manifest.json` 生成 Manifest，并在主库同步审计副本。
 
 ### 5. 从云端快照恢复 (restore)
 
@@ -175,9 +175,9 @@ cd ~/projects/dc-skills && uv run python cloudreve-storage/scripts/cli.py prune 
 cd ~/projects/dc-skills && uv run python cloudreve-storage/scripts/cli.py prune --category db --keep 5 -y
 ```
 
-## 输出规范说明 (OUTPUT.md)
+## 输出规范说明 (输出规范.md)
 
-本技能产物完全遵循 `docs/specs/OUTPUT.md` 统一产物树规约：
+本技能产物完全遵循 `docs/specs/输出规范.md` 统一产物树规约：
 - 主输出参数统一为 `--output`。
 - 默认 Manifest 落盘路径为 `<cwd>/skills-output/agentops/cloudreve-storage/<时间戳>/backup-manifest.json`。
 - 若在外部工作项目目录执行，产物落盘后自动向主库统一树 `<master>/skills-output/agentops/cloudreve-storage/<时间戳>/` 复制审计副本（`commit_final`），形成设备操作追溯日志。

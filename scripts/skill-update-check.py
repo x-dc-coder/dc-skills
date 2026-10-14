@@ -13,7 +13,7 @@ SKILL 外部依赖「更新通道」统一扫描器（只读、零副作用、�
   pypi     pypi.org/pypi/<pkg>/json（paper-reader 引擎）
   github   api.github.com/repos/<o>/<r>/releases/latest
   self     无公开 registry 的自更新二进制：只报当前版本 + 官方升级方式
-  baseline 系统包（apt/nvm 管理）：不联网，仅与 ENVIRONMENT.md 登记值比对漂移
+  baseline 系统包（apt/nvm 管理）：不联网，仅与 环境依赖.md 登记值比对漂移
 
 用法：
   skill-update-check                # 全量扫描
@@ -37,10 +37,10 @@ from datetime import datetime
 from pathlib import Path
 
 SKILLS_ROOT = Path(__file__).resolve().parent.parent
-# 2026-09-24 文档归类：ENVIRONMENT.md 移至 docs/arch/；保留根级回退兼容旧检出
-ENVIRONMENT_MD = SKILLS_ROOT / "docs" / "arch" / "ENVIRONMENT.md"
+# 2026-09-24 文档归类：环境依赖.md 移至 docs/arch/；保留根级回退兼容旧检出
+ENVIRONMENT_MD = SKILLS_ROOT / "docs" / "arch" / "环境依赖.md"
 if not ENVIRONMENT_MD.exists():
-    ENVIRONMENT_MD = SKILLS_ROOT / "ENVIRONMENT.md"
+    ENVIRONMENT_MD = SKILLS_ROOT / "环境依赖.md"
 
 # ── 依赖登记表（通道驱动；新增依赖只需在此加一行）────────────────────────────
 TRACKED_DEPS: list[dict] = [
@@ -240,10 +240,10 @@ def probe_venv_version(rel_venv: str, dist: str) -> str | None:
     return None
 
 
-# ══ ENVIRONMENT.md 登记基线 ═════════════════════════════════════════════════
+# ══ 环境依赖.md 登记基线 ═════════════════════════════════════════════════
 
 def read_env_baseline() -> dict[str, str]:
-    """解析 ENVIRONMENT.md 依赖登记表 → {工具名: 登记版本}。"""
+    """解析 环境依赖.md 依赖登记表 → {工具名: 登记版本}。"""
     baseline: dict[str, str] = {}
     if not ENVIRONMENT_MD.exists():
         return baseline
@@ -319,12 +319,12 @@ def scan(no_network: bool = False) -> list[dict]:
             "drift": None,
         }
 
-        # 通用登记漂移检测：任何通道都对照 ENVIRONMENT.md 登记值
+        # 通用登记漂移检测：任何通道都对照 环境依赖.md 登记值
         key = dep.get("baseline_key", dep["id"])
         registered = baseline.get(key) or baseline.get(dep.get("bin", ""))
         entry["registered_version"] = registered
         if local_ver and registered and parse_semver(registered) != parse_semver(local_ver):
-            entry["drift"] = f"ENVIRONMENT.md 登记 {registered} ≠ 实际 {local_ver}"
+            entry["drift"] = f"环境依赖.md 登记 {registered} ≠ 实际 {local_ver}"
 
         if local_ver is None:
             entry["status"] = "MISSING"
@@ -353,7 +353,7 @@ def scan(no_network: bool = False) -> list[dict]:
         elif dep["channel"] == "baseline":
             if registered is None:
                 entry["status"] = "NO_BASELINE"
-                entry["detail"] = "ENVIRONMENT.md 无登记"
+                entry["detail"] = "环境依赖.md 无登记"
             elif entry["drift"]:
                 entry["status"] = "DRIFT"
                 entry["detail"] = entry["drift"]
@@ -378,7 +378,7 @@ GROUP_ORDER = [
     ("UPDATE_AVAILABLE", "🆙 可更新"),
     ("UP_TO_DATE", "✅ 已是最新"),
     ("SELF_UPDATE", "❓ 无公开版本通道（需手动核对）"),
-    ("DRIFT", "📋 登记漂移（ENVIRONMENT.md 与实机不一致）"),
+    ("DRIFT", "📋 登记漂移（环境依赖.md 与实机不一致）"),
     ("BASELINE_OK", "📌 系统包（与登记值一致）"),
     ("NO_BASELINE", "📌 系统包（无登记基线）"),
     ("MISSING", "⛔ 缺失"),
@@ -429,7 +429,7 @@ def render(reports: list[dict], focus: str | None = None) -> None:
     # 跨通道登记漂移汇总（含 npm/pypi/github/self 等非 baseline 通道）
     drift_items = [r for r in reports if r.get("drift") and r["status"] != "DRIFT"]
     if drift_items:
-        print(f"\n📋 ENVIRONMENT.md 登记漂移汇总（{len(drift_items)}）")
+        print(f"\n📋 环境依赖.md 登记漂移汇总（{len(drift_items)}）")
         for r in drift_items:
             print(f"   {r['id']:<12} {r['drift']}   → 建议同步更新登记表")
 

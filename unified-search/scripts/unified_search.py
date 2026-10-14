@@ -82,7 +82,7 @@ _sanitize_no_proxy_env()
 SKILL_DIR = Path(__file__).resolve().parent.parent          # ~/projects/dc-skills/unified-search
 SCRIPT_DIR = Path(__file__).resolve().parent                # .../scripts
 CONFIG_PATH = SKILL_DIR / "config.json"
-# 全局运行时状态（docs/specs/OUTPUT.md C-8 登记）：跨项目共享的配额/历史/缓存，
+# 全局运行时状态（docs/specs/输出规范.md C-8 登记）：跨项目共享的配额/历史/缓存，
 # 不得放技能目录内；按 cwd 拆分会破坏配额感知，故固定全局位置。
 STATE_ROOT = Path(os.environ.get("DC_SKILLS_STATE_DIR",
                                  Path.home() / ".local" / "state" / "dc-skills"))
@@ -1135,7 +1135,7 @@ def save_history(cfg: dict, query: str, top_results: list[dict], mode: str = "ge
     hcfg = cfg.get("history", {})
     if not hcfg.get("enabled", True):
         return
-    # 遵循 OUTPUT.md C-8：全局运行时状态落 ~/.local/state/dc-skills/unified-search/，不得写进技能目录
+    # 遵循 输出规范.md C-8：全局运行时状态落 ~/.local/state/dc-skills/unified-search/，不得写进技能目录
     db_path = DB_PATH
     init_db(db_path)
     with sqlite3.connect(db_path) as conn:
@@ -1154,7 +1154,7 @@ def save_history(cfg: dict, query: str, top_results: list[dict], mode: str = "ge
 
 def query_history(query: str, cfg: dict, limit: int = 5) -> dict:
     hcfg = cfg.get("history", {})
-    # 遵循 OUTPUT.md C-8：全局运行时状态落 ~/.local/state/dc-skills/unified-search/
+    # 遵循 输出规范.md C-8：全局运行时状态落 ~/.local/state/dc-skills/unified-search/
     db_path = DB_PATH
     if not db_path.exists():
         return {"mode": "history", "query": query, "results": [], "note": "no history db yet"}

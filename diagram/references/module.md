@@ -68,7 +68,7 @@ uv run python -m scripts.cli \
   --json-file docs/module/json/<module_name>.json
 ```
 
-产物默认落**统一产物树**（docs/specs/OUTPUT.md C-1）：`<cwd>/skills-output/drawing/diagram-module/<时间戳>/module-diagram.png`——`<cwd>` 即运行时的当前目录，无项目推断、无兜底分叉。如需自定义路径：
+产物默认落**统一产物树**（docs/specs/输出规范.md C-1）：`<cwd>/skills-output/drawing/diagram-module/<时间戳>/module-diagram.png`——`<cwd>` 即运行时的当前目录，无项目推断、无兜底分叉。如需自定义路径：
 
 ```bash
 cd ~/projects/dc-skills/diagram-module
@@ -130,7 +130,7 @@ cd ~/projects/dc-skills/diagram-module
 uv run python -m scripts.cli --json-file module.json
 ```
 
-默认输出路径：`<cwd>/skills-output/drawing/diagram-module/<时间戳>/module-diagram.png`（统一产物树，docs/specs/OUTPUT.md C-1）
+默认输出路径：`<cwd>/skills-output/drawing/diagram-module/<时间戳>/module-diagram.png`（统一产物树，docs/specs/输出规范.md C-1）
 
 ## 分辨率说明
 

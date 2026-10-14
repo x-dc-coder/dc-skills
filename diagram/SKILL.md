@@ -6,7 +6,7 @@ description: >-
   论文级，白底黑字）、终端 ASCII 架构草稿。当用户需要生成 ER 图/实体关系图/E-R 图/模块图/用例图/
   时序图/流程图/架构草稿/ASCII 架构图/系统架构草图等软件工程图表（本科毕设/课程设计论文插图）时
   使用本技能：按路由表识别类型，读对应分册规程，执行脚本生成 PNG/代码；输出统一到
-  `{cwd}/skills-output/drawing/{脚本目录}/{时间戳}/`（docs/specs/OUTPUT.md C-1）。正式可编辑图（.drawio）走 drawio-xml。
+  `{cwd}/skills-output/drawing/{脚本目录}/{时间戳}/`（docs/specs/输出规范.md C-1）。正式可编辑图（.drawio）走 drawio-xml。
   族内还有 drawio-xml（可编辑 .drawio），由本技能按需路由；设计规范类（页面/内联 SVG/数据可视化）走 frontend 族入口 design-ui。
 metadata:
   family: drawing
@@ -43,8 +43,8 @@ metadata:
 ## 2. 通用规范（所有类型一致）
 
 1. **执行环境**：遵守 AGENT.md 核心约束——先 `cd ~/projects/dc-skills` 再 `uv run python`（确保解析根 pyproject 环境）；各技能子目录无需自建 .venv，uv 自动向上查找。脚本内 `common.py`（顶层 scripts/）提供 `plan_output`，已在各 CLI 中接入。
-2. **输出路径统一产物树**（docs/specs/OUTPUT.md C-1，勿改）：
-   - 默认 → `{cwd}/skills-output/drawing/{脚本目录}/{时间戳}/{文件名}`。脚本目录名见 OUTPUT.md C-3：`diagram-er`、`diagram-ers`、`diagram-module`、`diagram-sequence`、`diagram-usecase`、`diagram-draft`，不是类型短名。`flow` 只出 Mermaid，不落这个目录
+2. **输出路径统一产物树**（docs/specs/输出规范.md C-1，勿改）：
+   - 默认 → `{cwd}/skills-output/drawing/{脚本目录}/{时间戳}/{文件名}`。脚本目录名见 输出规范.md C-3：`diagram-er`、`diagram-ers`、`diagram-module`、`diagram-sequence`、`diagram-usecase`、`diagram-draft`，不是类型短名。`flow` 只出 Mermaid，不落这个目录
    - 显式 `--output` 优先；最终产物另存主库 `skills-output/` 审计副本
 3. **论文风格**：流程图/时序图/ER 系列统一白色背景、纯黑节点、黑白打印友好（细节见各分册）。
 4. **输入格式**：er 用 SQL DDL；ers/module/usecase/sequence 用 JSON；draft 用 graph-easy 描述文本；flow 直接对话生成 Mermaid。

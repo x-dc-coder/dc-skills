@@ -76,7 +76,7 @@ Branch depending on what's available.
 ### Path B: Team mode DISABLED (Subagent 并发排查)
 
 Fan out async explore/deep subagents instead. Same rule: one hypothesis per subagent.
-遵循 `docs/arch/MODELS.md` 额度与模型分层标准：
+遵循 `docs/arch/模型渠道.md` 额度与模型分层标准：
 - **调查证据收集（主力执行）**：选用 `deepseek-v4.1-flash` 或 `gemini-3.8-flash`（低成本、大上下文）。
 - **深层因果收敛与根因裁决**：选用 `glm-5.3`（`max` 档位）。
 - **极限跨系统底层疑难**：选用 `grok-4.7`（`xhigh` 档位）。

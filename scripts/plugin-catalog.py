@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """plugin-catalog — 从 agent-map.yaml 生成 .agent-plugin/marketplace.json（声明层）。
 
-定位（2026-09-24 W3，设计见 docs/specs/SKILL-MANAGEMENT.md）：本机五农场继续走
+定位（2026-09-24 W3，设计见 docs/specs/技能管理.md）：本机五农场继续走
 skills-sync 软链（唯一通道）；marketplace.json 只是**可选的对外声明层**——让
 Claude Code / Codex / Grok 能以原生 `/plugins` 浏览器发现本仓库技能，供外发或
 插件化安装使用。生成物进 git（标注 DO NOT EDIT），不产生任何副本。

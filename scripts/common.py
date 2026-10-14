@@ -1,4 +1,4 @@
-"""Shared utilities for diagram-* / db-skill skills + 统一产物树（OUTPUT.md）。"""
+"""Shared utilities for diagram-* / db-skill skills + 统一产物树（输出规范.md）。"""
 
 from __future__ import annotations
 
@@ -16,10 +16,10 @@ DEFAULT_CONFIG_ENV = "DB_SKILL_CONFIG"
 #: 经农场软链（~/.claude/skills/<skill> 等）进入时，resolve() 回到主库，判定依然成立。
 MASTER_ROOT = Path(__file__).resolve().parent.parent
 
-#: 统一产物树根目录名（OUTPUT.md C-1）
+#: 统一产物树根目录名（输出规范.md C-1）
 OUTPUT_ROOT_NAME = "skills-output"
 
-#: 时间戳格式（OUTPUT.md C-2：进程级单次，无冒号保证 Windows 安全）
+#: 时间戳格式（输出规范.md C-2：进程级单次，无冒号保证 Windows 安全）
 TIMESTAMP_FMT = "%Y%m%d-%H%M%S"
 
 _RUN_TS: Optional[str] = None
@@ -48,7 +48,7 @@ def run_timestamp() -> str:
 
 
 def skill_family(skill_name: str) -> str:
-    """从主库 <skill_name>/SKILL.md 的 metadata.family 读族群（OUTPUT.md C-3）。
+    """从主库 <skill_name>/SKILL.md 的 metadata.family 读族群（输出规范.md C-3）。
     脚本目录（无 SKILL.md）回落约定：diagram-* → drawing；其余 → standalone。"""
     skill_md = MASTER_ROOT / skill_name / "SKILL.md"
     if skill_md.is_file():
@@ -63,7 +63,7 @@ def skill_family(skill_name: str) -> str:
 
 
 def output_root(cwd: Optional[Path] = None) -> Path:
-    """统一产物树根：<cwd>/skills-output（OUTPUT.md C-1）。"""
+    """统一产物树根：<cwd>/skills-output（输出规范.md C-1）。"""
     return (Path(cwd) if cwd else Path.cwd()).resolve() / OUTPUT_ROOT_NAME
 
 
@@ -83,7 +83,7 @@ def audit_dir(family: str, skill_name: str, ts: Optional[str] = None) -> Path:
 
 
 class OutputPlan:
-    """一次运行的产物计划（OUTPUT.md C-1/C-4）。
+    """一次运行的产物计划（输出规范.md C-1/C-4）。
 
     primary：主产物路径（显式 --output 或统一树）；audit：主库审计副本路径
     （主产物已在主库统一树内时为 None，不重复拷贝）。commit() 在落盘后调用。
@@ -105,7 +105,7 @@ class OutputPlan:
 def plan_output(family: str, skill_name: str, default_name: str,
                 explicit: Optional[str] = None,
                 cwd: Optional[Path] = None) -> OutputPlan:
-    """规划一次产物落点（OUTPUT.md C-1/C-4）。
+    """规划一次产物落点（输出规范.md C-1/C-4）。
 
     - explicit（--output）为文件路径时主产物=该路径；为目录时主产物=该目录/default_name
     - 默认主产物 = <cwd>/skills-output/<family>/<skill_name>/<ts>/default_name

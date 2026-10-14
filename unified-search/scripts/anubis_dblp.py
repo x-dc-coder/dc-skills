@@ -63,7 +63,7 @@ BROWSER_UA = (
 
 CACHE_PATH = Path(
     os.environ.get("DBLP_COOKIE_CACHE")
-    # 全局运行时状态（docs/specs/OUTPUT.md C-8 登记）：禁放技能/脚本目录内
+    # 全局运行时状态（docs/specs/输出规范.md C-8 登记）：禁放技能/脚本目录内
     or (Path.home() / ".local" / "state" / "dc-skills" / "unified-search"
         / "data" / "dblp_cookies.json")
 )

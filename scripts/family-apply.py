@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """family-apply — 按 agent-map.yaml families 段幂等标记族群元数据。
 
-语义（2026-09-24 族群化，见 docs/specs/SKILL-MANAGEMENT.md）：
+语义（2026-09-24 族群化，见 docs/specs/技能管理.md）：
 - entry：SKILL.md metadata 补 family / role: entry / load-mode: auto（进模型启动清单）
 - member：上述 + role: member + load-mode: manual + disable-model-invocation: true
   （CC/Grok/dsh 同键 kebab-case），并生成 agents/openai.yaml 的

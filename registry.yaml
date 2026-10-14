@@ -1,24 +1,24 @@
 # registry.yaml — 资产健康断言登记（不是清单的第二份）
 #
-# 定位（2026-09-24，设计见 docs/specs/SKILL-MANAGEMENT.md）：只登记**目前无家可归**的
+# 定位（2026-09-24，设计见 docs/specs/技能管理.md）：只登记**目前无家可归**的
 # 事实 + 对已有事实源的**断言与检查元数据**。归属权硬规则——
 #   技能名/启用范围      → agent-map.yaml（本文件不复记）
-#   技能格式契约        → docs/specs/SKILL-AUTHORING-RULES.md
-#   外部工具版本基线     → docs/arch/ENVIRONMENT.md（本文件只写 baseline_key 引用）
-#   模型渠道人读全字段   → docs/arch/MODELS.md（到期日在彼处机器可解析）
+#   技能格式契约        → docs/specs/技能编写规则.md
+#   外部工具版本基线     → docs/arch/环境依赖.md（本文件只写 baseline_key 引用）
+#   模型渠道人读全字段   → docs/arch/模型渠道.md（到期日在彼处机器可解析）
 # 违反归属权的字段不许加入本文件。消费者：scripts/assets-doctor。
 version: 1
 updated_at: 2026-10-01
 
 settings:
   net_timeout_s: 4
-  expiry_warn_days: 14          # 到期前 N 天转 ⚠️（来源 MODELS.md，本处只放阈值）
+  expiry_warn_days: 14          # 到期前 N 天转 ⚠️（来源 模型渠道.md，本处只放阈值）
   # 可达性白名单：实测这些码均表示"服务活着"（404/405/501 是端点语义非故障）
   reachable_http_codes: [200, 204, 301, 302, 400, 401, 403, 404, 405, 501]
 
-# ── 模型渠道（人读全字段见 docs/arch/MODELS.md；此处只记可检字段）──
+# ── 模型渠道（人读全字段见 docs/arch/模型渠道.md；此处只记可检字段）──
 models:
-  - name: deepseek-v4.1-flash          # = MODELS.md 行首 + ~/.grok/config.toml [model.*] 键
+  - name: deepseek-v4.1-flash          # = 模型渠道.md 行首 + ~/.grok/config.toml [model.*] 键
     type: model_channel
     client: grok
     location: "~/.grok/config.toml#[model.\"deepseek-v4.1-flash\"]"
@@ -26,7 +26,7 @@ models:
     upstream_url: "https://api.commandcode.ai/provider/v1"
     check_cmd: "grok inspect --json"
     asserts: [provider_registered, env_key_present, upstream_reachable, expiry_ok]
-    notes: "Chat Completions；上游 deepseek/deepseek-v4.1-flash。走 127.0.0.1:7890，不要把该域放进 no_proxy。到期日只在 MODELS.md"
+    notes: "Chat Completions；上游 deepseek/deepseek-v4.1-flash。走 127.0.0.1:7890，不要把该域放进 no_proxy。到期日只在 模型渠道.md"
   - name: step-5-preview
     type: model_channel
     client: grok
@@ -35,7 +35,7 @@ models:
     upstream_url: "http://127.0.0.1:8321/v1"
     check_cmd: "grok inspect --json"
     asserts: [provider_registered, env_key_present, upstream_reachable, expiry_ok]
-    notes: "Chat Completions，base_url 即本地 shim；shim 上游 api.stepfun.com/step_plan。人读见 MODELS.md"
+    notes: "Chat Completions，base_url 即本地 shim；shim 上游 api.stepfun.com/step_plan。人读见 模型渠道.md"
   - name: glm-5.3-flash
     type: model_channel
     client: grok
@@ -53,7 +53,7 @@ models:
     upstream_url: "https://ai.x-lf.com/v1"
     check_cmd: "grok inspect --json"
     asserts: [provider_registered, env_key_present, upstream_reachable]
-    notes: "Responses；思考档位仅 low/medium/high，xhigh 与 max 被上游拒绝。人读见 MODELS.md"
+    notes: "Responses；思考档位仅 low/medium/high，xhigh 与 max 被上游拒绝。人读见 模型渠道.md"
   - name: Atria-Dawn-Preview
     type: model_channel
     client: grok
@@ -133,7 +133,7 @@ mcp:
 # 会话级注入、无本地配置来源的 server（不可静态审计，doctor 只做出现即提示）
 session_injected_mcp: [github, tasks]
 
-# ── 外部 CLI（版本基线归属 docs/arch/ENVIRONMENT.md；未登记者以实机为准并提示补登记）──
+# ── 外部 CLI（版本基线归属 docs/arch/环境依赖.md；未登记者以实机为准并提示补登记）──
 cli:
   - name: uv
     type: cli
@@ -175,7 +175,7 @@ cli:
     location: "~/.local/bin/officecli"
     check_cmd: "officecli --version"
     asserts: [bin_present, version_probe]
-    notes: "自更新型：与 ENVIRONMENT.md 基线漂移仅 ⚠️"
+    notes: "自更新型：与 环境依赖.md 基线漂移仅 ⚠️"
   - name: codegraph
     type: cli
     bin: codegraph
@@ -198,7 +198,7 @@ cli:
     bin: xelatex
     check_cmd: "xelatex --version"
     asserts: [bin_present]
-    notes: "未进 ENVIRONMENT.md 依赖表（md-to-thesis-latex 依赖）——待补登记"
+    notes: "未进 环境依赖.md 依赖表（md-to-thesis-latex 依赖）——待补登记"
   - name: grok
     type: cli
     bin: grok

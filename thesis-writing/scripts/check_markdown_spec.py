@@ -1541,7 +1541,7 @@ def main() -> None:
     parser.add_argument("--always-write", action="store_true",
                         help="无 --output 时也落盘到统一产物树（默认仅 stdout）")
     parser.add_argument("--output", "-o", default=None,
-                        help="输出目录（默认：统一产物树 <cwd>/skills-output/thesis/thesis-writing/<时间戳>/，docs/specs/OUTPUT.md C-1）")
+                        help="输出目录（默认：统一产物树 <cwd>/skills-output/thesis/thesis-writing/<时间戳>/，docs/specs/输出规范.md C-1）")
     args = parser.parse_args()
 
     path = Path(args.md).resolve()

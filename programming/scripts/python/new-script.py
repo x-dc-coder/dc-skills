@@ -83,7 +83,7 @@ def main(
     if output is not None:
         dest = Path(output)
     else:
-        # 脚手架动作（OUTPUT.md C-10 豁免）：默认落当前目录，由用户决定去留；
+        # 脚手架动作（输出规范.md C-10 豁免）：默认落当前目录，由用户决定去留；
         # 不再落 OS temp（退出即失，且不可预期）。
         dest = Path.cwd() / filename
 

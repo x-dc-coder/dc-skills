@@ -320,7 +320,7 @@ def main(argv: Optional[list[str]] = None) -> int:
     common.add_argument("--root-sandbox", help="安全沙箱根路径，默认 /AgentBackups/")
     common.add_argument("--host-id", help="主机标识（默认当前机器短主机名）")
     common.add_argument("--outside-sandbox", action="store_true", help="显式允许操作沙箱之外的网盘目录")
-    common.add_argument("--output", help="显式指定输出产物路径/目录（对接 OUTPUT.md 统一产物树，最高优先级）")
+    common.add_argument("--output", help="显式指定输出产物路径/目录（对接 输出规范.md 统一产物树，最高优先级）")
     common.add_argument("--json", action="store_true", help="以 JSON 格式输出机器可读结果")
 
     parser = argparse.ArgumentParser(
