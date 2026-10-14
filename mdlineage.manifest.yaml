@@ -224,6 +224,10 @@ documents:
     id: docs.specs.context-budget
     kind: reference
     status: draft
+  docs/specs/全能力农场重构四阶段路线图.md:
+    id: docs.specs.farm-redesign-roadmap
+    kind: reference
+    status: active
   docs/specs/输出规范.md:
     id: docs.specs.output
     kind: reference
