@@ -40,6 +40,10 @@ import urllib.request
 from datetime import date, datetime
 from pathlib import Path
 
+# 支持同目录导入 farm_model
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from farm_model import FarmModelError, iter_members
+
 try:
     import yaml
 except ImportError:
@@ -47,6 +51,7 @@ except ImportError:
 
 ROOT = Path(__file__).resolve().parent.parent
 REGISTRY = ROOT / "registry.yaml"
+AGENT_MAP = ROOT / "agent-map.yaml"
 SKILL_MD = re.compile(r"^---\r?\n([\s\S]*?)\r?\n---", re.M)
 GROUPS = ["contract", "farm", "cli", "mcp", "models", "app_roots", "landing"]
 
@@ -139,7 +144,79 @@ def check_farm(rep: Report) -> None:
             rep.add(g, "warn", "farm", f"…另 {len(drift) - 10} 条漂移")
     if fam and "一致" not in fam[0]:
         rep.add(g, "crit", "families", fam[0])
-    if not drift and not hard:
+
+    # 族群与 standalone 依赖及三标记断言
+    if AGENT_MAP.exists():
+        try:
+            m_data = yaml.safe_load(AGENT_MAP.read_text(encoding="utf-8")) or {}
+            reg_data = yaml.safe_load(REGISTRY.read_text(encoding="utf-8")) or {}
+            reg_cli = {item["name"] for item in reg_data.get("cli") or []}
+            agent_mcps = set((m_data.get("mcps") or {}).keys())
+
+            # 1. 族群依赖闭包断言：families.<name>.requires.cli ⊆ registry.cli, requires.mcp ⊆ agent-map.mcps
+            for fname, fcfg in (m_data.get("families") or {}).items():
+                if not isinstance(fcfg, dict):
+                    continue
+                req = fcfg.get("requires") or {}
+                req_cli = req.get("cli") or []
+                missing_cli = [c for c in req_cli if c not in reg_cli]
+                if missing_cli:
+                    rep.add(g, "crit", f"family:{fname}", f"requires.cli 存在未登记 CLI: {missing_cli}")
+
+                req_mcp = req.get("mcp") or []
+                missing_mcp = [m for m in req_mcp if m not in agent_mcps]
+                if missing_mcp:
+                    rep.add(g, "crit", f"family:{fname}", f"requires.mcp 存在未纳管 MCP: {missing_mcp}")
+
+            # 2. Standalone 与 Member 技能三标记断言
+            for spec in iter_members(m_data, root=ROOT):
+                skill_dir = spec.skill_path
+                if not skill_dir.is_dir():
+                    continue
+                skill_md = skill_dir / "SKILL.md"
+                if not skill_md.is_file():
+                    continue
+                txt = skill_md.read_text(encoding="utf-8", errors="replace")
+                mt = SKILL_MD.match(txt)
+                if not mt:
+                    continue
+                try:
+                    fm = yaml.safe_load(mt.group(1)) or {}
+                except yaml.YAMLError:
+                    continue
+
+                meta = fm.get("metadata") or {}
+                dmi = fm.get("disable-model-invocation") is True
+                oa_path = skill_dir / "agents" / "openai.yaml"
+
+                if spec.role == "standalone":
+                    if meta.get("family") is not None:
+                        rep.add(g, "crit", spec.name, f"standalone 技能不应包含 metadata.family（当前: {meta.get('family')}）")
+                    if spec.load_mode == "manual":
+                        if meta.get("load-mode") != "manual":
+                            rep.add(g, "crit", spec.name, "standalone manual 技能缺 metadata.load-mode: manual")
+                        if not dmi:
+                            rep.add(g, "crit", spec.name, "standalone manual 技能缺 disable-model-invocation: true")
+                        if not oa_path.exists():
+                            rep.add(g, "crit", spec.name, "standalone manual 技能缺 agents/openai.yaml")
+                        else:
+                            try:
+                                od = yaml.safe_load(oa_path.read_text(encoding="utf-8")) or {}
+                                if (od.get("policy") or {}).get("allow_implicit_invocation") is not False:
+                                    rep.add(g, "crit", spec.name, "standalone manual openai.yaml 未禁隐式调用")
+                            except yaml.YAMLError:
+                                rep.add(g, "crit", spec.name, "standalone manual openai.yaml 语法损坏")
+                    elif spec.load_mode == "auto":
+                        if dmi:
+                            rep.add(g, "crit", spec.name, "standalone auto 技能不应有 disable-model-invocation")
+                        if oa_path.exists():
+                            rep.add(g, "crit", spec.name, "standalone auto 技能不应有 agents/openai.yaml")
+        except FarmModelError as err:
+            rep.add(g, "crit", "farm-model", f"农场模型校验失败: {err}")
+        except Exception as e:
+            rep.add(g, "crit", "farm-assert", f"农场模型断言异常: {e}")
+
+    if not drift and not hard and not [i for i in rep.by(g) if i["level"] == "crit"]:
         rep.add(g, "ok", "farm", "农场零漂移（skills-sync --check）" +
                 ("；族群标记一致" if fam else ""))
 
@@ -152,7 +229,9 @@ OK_NONZERO = {"graph-easy", "mysql"}  # --version 退出码非零属正常的白
 def check_cli(rep: Report, reg: dict, deep: bool) -> None:
     g = "cli"
     import shutil
-    env_md = ROOT / "docs" / "arch" / "ENVIRONMENT.md"
+    env_md = ROOT / "docs" / "arch" / "环境依赖.md"
+    if not env_md.exists():
+        env_md = ROOT / "docs" / "arch" / "ENVIRONMENT.md"
     baselines: dict[str, str] = {}
     if env_md.exists():
         in_cli_table = False
@@ -267,6 +346,17 @@ def check_mcp(rep: Report, reg: dict, offline: bool, deep: bool) -> None:
     registered = {"claude-code": claude_json,
                   "grok": _grok_mcp_names() | claude_json,  # Grok 兼容读 ~/.claude.json
                   "dsh": _dsh_mcp_names()}
+    # 检查 ~/.grok/config.toml 中的安全标记块完整性
+    grok_cfg_path = Path.home() / ".grok" / "config.toml"
+    if grok_cfg_path.exists():
+        grok_txt = grok_cfg_path.read_text(encoding="utf-8", errors="replace")
+        has_begin = "# BEGIN dc-farm mcp" in grok_txt
+        has_end = "# END dc-farm mcp" in grok_txt
+        if has_begin != has_end:
+            rep.add(g, "crit", "grok-mcp-marker", "Grok config.toml 标记块单侧缺失（损坏）")
+        elif has_begin and has_end:
+            rep.add(g, "ok", "grok-mcp-marker", "Grok config.toml dc-farm 标记块完整闭合")
+
     for item in reg.get("mcp") or []:
         name = item["name"]
         loc0 = str(item.get("location") or "")
@@ -294,6 +384,11 @@ def check_mcp(rep: Report, reg: dict, offline: bool, deep: bool) -> None:
                 rep.add(g, "ok" if ok else "warn", name,
                         f"HTTP {code}（{'可达' if ok else '不可达'}）" if ok else
                         f"不可达（HTTP {code or '超时'}）")
+
+        # 检查 tool_count_baseline
+        if "tool_count_baseline" in item:
+            baseline_count = item["tool_count_baseline"]
+            rep.add(g, "ok", f"{name}:tool_count", f"工具数基线已登记: {baseline_count}")
     # codegraph 索引新鲜度（不用 codegraph status——其 pendingChanges 不可信）
     link = ROOT / ".codegraph"
     projs = [Path(os.path.realpath(link)) / "codegraph.db"] if link.is_symlink() else []
@@ -336,7 +431,9 @@ def check_models(rep: Report, reg: dict, offline: bool) -> None:
     warn_days = int(settings.get("expiry_warn_days") or 14)
     grok_cfg = (Path.home() / ".grok" / "config.toml").read_text(encoding="utf-8") \
         if (Path.home() / ".grok" / "config.toml").exists() else ""
-    models_md = ROOT / "docs" / "arch" / "MODELS.md"
+    models_md = ROOT / "docs" / "arch" / "模型渠道.md"
+    if not models_md.exists():
+        models_md = ROOT / "docs" / "arch" / "MODELS.md"
     expiry: dict[str, str] = {}
     if models_md.exists():
         for line in models_md.read_text(encoding="utf-8").splitlines():
@@ -450,6 +547,27 @@ def check_app_roots(rep: Report, reg: dict) -> None:
             rep.add(g, "warn", item["name"], f"计数变化（{detail}）—— App 更新后请同步 registry.yaml")
         else:
             rep.add(g, "ok", item["name"], f"计数与基线一致（{counts}）")
+
+        # Bundled 技能三桶对账（若为 grok-bundled，结合 ~/.grok/config.toml [skills] disabled 检查状态）
+        if item["name"] == "grok-bundled":
+            grok_cfg_p = Path.home() / ".grok" / "config.toml"
+            if grok_cfg_p.exists():
+                try:
+                    import tomli
+                    g_data = tomli.loads(grok_cfg_p.read_text(encoding="utf-8"))
+                    disabled_skills = set((g_data.get("skills") or {}).get("disabled") or [])
+                    bundled_dir_names = {d.name for d in dirs}
+                    disabled_in_bundled = bundled_dir_names & disabled_skills
+                    active_bundled = bundled_dir_names - disabled_skills
+                    rep.add(
+                        g,
+                        "ok",
+                        "grok-bundled-status",
+                        f"Bundled 技能状态对账完成: {len(active_bundled)} 启用, {len(disabled_in_bundled)} 禁用 ({'/'.join(sorted(disabled_in_bundled)) or '无'})",
+                    )
+                except Exception as e:
+                    rep.add(g, "warn", "grok-bundled-status", f"Grok config.toml [skills] 读取失败: {e}")
+
         if "no_name_collision" in (item.get("asserts") or []):
             hits = sorted({p.parent.name for p in skill_mds} & master_names)
             if hits:
@@ -474,9 +592,10 @@ def check_landing(rep: Report, reg: dict) -> None:
 def render(rep: Report, args: argparse.Namespace, started: float) -> int:
     counts = rep.counts()
     crit, warn = counts["crit"], counts["warn"]
+    exit_code = 2 if crit else (1 if warn and (args.check or args.strict) else 0)
     if args.json:
         print(json.dumps({"counts": counts, "items": rep.items,
-                          "exit": 2 if crit else (1 if warn and (args.check or args.strict) else 0)},
+                          "exit": exit_code},
                          ensure_ascii=False, indent=2))
     else:
         mark = {"ok": "✅", "warn": "⚠️", "crit": "🚨"}
@@ -501,11 +620,7 @@ def render(rep: Report, args: argparse.Namespace, started: float) -> int:
             todo = [i["name"] for i in rep.items if i["level"] == "crit"] or \
                    [i["name"] for i in rep.items if i["level"] == "warn"][:3]
             print(f"待办: {', '.join(dict.fromkeys(todo))}")
-    if crit:
-        return 2
-    if warn and (args.check or args.strict):
-        return 1
-    return 0
+    return exit_code
 
 
 def main() -> None:
@@ -520,23 +635,33 @@ def main() -> None:
     args.only = set(args.only.split(",")) if args.only else None
     started = time.time()
 
-    reg = load_registry()
+    try:
+        reg = load_registry()
+    except Exception as e:
+        print(f"🚨 致命错误：读取 registry 失败: {e}", file=sys.stderr)
+        sys.exit(3)
+
     rep = Report()
     groups = args.only or set(GROUPS)
-    if "contract" in groups:
-        check_contract(rep)
-    if "farm" in groups:
-        check_farm(rep)
-    if "cli" in groups:
-        check_cli(rep, reg, args.deep)
-    if "mcp" in groups:
-        check_mcp(rep, reg, args.offline, args.deep)
-    if "models" in groups:
-        check_models(rep, reg, args.offline)
-    if "app_roots" in groups or "landing" in groups:
-        check_app_roots(rep, reg)
-    if "landing" in groups:
-        check_landing(rep, reg)
+    try:
+        if "contract" in groups:
+            check_contract(rep)
+        if "farm" in groups:
+            check_farm(rep)
+        if "cli" in groups:
+            check_cli(rep, reg, args.deep)
+        if "mcp" in groups:
+            check_mcp(rep, reg, args.offline, args.deep)
+        if "models" in groups:
+            check_models(rep, reg, args.offline)
+        if "app_roots" in groups or "landing" in groups:
+            check_app_roots(rep, reg)
+        if "landing" in groups:
+            check_landing(rep, reg)
+    except Exception as e:
+        print(f"🚨 运行期异常（Fatal Execution Error）: {e}", file=sys.stderr)
+        sys.exit(3)
+
     sys.exit(render(rep, args, started))
 
 
