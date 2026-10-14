@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
-"""family-apply — 按 agent-map.yaml families 段幂等标记族群元数据。
+"""family-apply — 按 agent-map.yaml families 与 standalone 段幂等标记族群元数据。
 
-语义（2026-09-24 族群化，见 docs/specs/技能管理.md）：
+语义（2026-09-24 族群化，2026-10 阶段二泛化）：
 - entry：SKILL.md metadata 补 family / role: entry / load-mode: auto（进模型启动清单）
-- member：上述 + role: member + load-mode: manual + disable-model-invocation: true
-  （CC/Grok/dsh 同键 kebab-case），并生成 agents/openai.yaml 的
-  policy.allow_implicit_invocation: false（Codex 侧 manual-only，仍可 $name 显式调用）
-- 顺带清理存量违规：顶层 version: → metadata.version（字符串，B3a）；顶层 whenToUse:
-  整行删除（触发信息以 description 为准，B3）
+- member：metadata 补 family / role: member / load-mode: <auto|manual>
+  - 若 load-mode 为 manual：写 disable-model-invocation: true 并生成 agents/openai.yaml
+    （policy.allow_implicit_invocation: false）
+  - 若 load-mode 为 auto：移除 disable-model-invocation 与 agents/openai.yaml（如有）
+- standalone：SKILL.md metadata 补 role: standalone / load-mode: <auto|manual>，并移除 metadata.family
+  - 若 load-mode 为 manual：写 disable-model-invocation: true 并生成 agents/openai.yaml
+  - 若 load-mode 为 auto：移除 disable-model-invocation 与 agents/openai.yaml（如有）
+- 顺带清理存量违规：顶层 version: → metadata.version（字符串，B3a）；顶层 whenToUse: 整行删除
 
 用法：
   cd ~/projects/dc-skills && uv run python scripts/family-apply.py           # dry-run
@@ -23,6 +26,10 @@ import sys
 from pathlib import Path
 
 import yaml
+
+# 支持同目录导入 farm_model
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from farm_model import FarmModelError, SkillLoadSpec, iter_members
 
 ROOT = Path(__file__).resolve().parent.parent
 MANIFEST = ROOT / "agent-map.yaml"
@@ -91,8 +98,19 @@ def first_clause(desc: str) -> str:
     return m[0].strip() if m and m[0].strip() else desc
 
 
-def mark_frontmatter(fm: str, family: str, role: str) -> tuple[str, list[str]]:
-    """文本级改造 frontmatter，返回 (新 fm, 变更说明)。幂等。"""
+def mark_frontmatter(
+    fm: str,
+    role: str,
+    load_mode: str,
+    family: str | None = None,
+) -> tuple[str, list[str]]:
+    """文本级改造 frontmatter，返回 (新 fm, 变更说明)。幂等。
+
+    参数：
+      role: "entry" | "member" | "standalone"
+      load_mode: "auto" | "manual"
+      family: 族名，standalone 时为 None
+    """
     changes: list[str] = []
     lines = fm.split("\n")
     out: list[str] = []
@@ -113,35 +131,51 @@ def mark_frontmatter(fm: str, family: str, role: str) -> tuple[str, list[str]]:
         i += 1
     lines = out
 
-    # metadata 合并
-    want = {"family": family, "role": role, "load-mode": "auto" if role == "entry" else "manual"}
+    # metadata 期望键值组装
+    want: dict[str, str] = {}
+    if family is not None:
+        want["family"] = family
+    want["role"] = role
+    want["load-mode"] = load_mode
     if version_val:
         want["version"] = version_val
+
     meta_idx = next((n for n, ln in enumerate(lines) if re.match(r"^metadata:", ln)), None)
     if meta_idx is None:
-        if not any(re.match(r"^\s{2}family:", ln) for ln in lines):
-            block = ["metadata:"] + [f"  {k}: {v}" for k, v in want.items()]
-            lines = lines + block
-            changes.append("新增 metadata 块（family/role/load-mode）")
+        block = ["metadata:"] + [f"  {k}: {v}" for k, v in want.items()]
+        lines = lines + block
+        changes.append("新增 metadata 块（" + "/".join(want.keys()) + "）")
     else:
         head = lines[meta_idx]
         m_inline = re.match(r"^metadata:\s*\{([^}]*)\}\s*$", head)
-        existing = {re.match(r"^\s+(\S+?):", ln).group(1) for ln in lines[meta_idx + 1:]
-                    if re.match(r"^\s+\S+?:", ln)} if not m_inline else set()
         if m_inline:
             inner = [p.strip() for p in m_inline.group(1).split(",") if p.strip()]
-            existing = {p.split(":", 1)[0].strip() for p in inner}
             if not inner:
                 lines[meta_idx:meta_idx + 1] = ["metadata:"] + [f"  {k}: {v}" for k, v in want.items()]
-                changes.append("metadata: {} → 块形式（family/role/load-mode）")
+                changes.append("metadata: {} → 块形式（" + "/".join(want.keys()) + "）")
             else:
                 merged = dict(p.split(":", 1) for p in inner)
+                if family is None and "family" in merged:
+                    del merged["family"]
+                    changes.append("移除 metadata.family（standalone 技能）")
                 merged.update({k: str(v) for k, v in want.items()})
                 lines[meta_idx:meta_idx + 1] = ["metadata:"] + [
-                    f"  {k}: {v}" for k, v in merged.items()]
-                changes.append("metadata 行内 map → 块形式并合并族群键")
+                    f"  {k}: {v}" for k, v in merged.items()
+                ]
+                changes.append("metadata 行内 map → 块形式并合并键")
         else:
-            # 既有键：值不同则更新（家族改名/角色翻转）；缺失键：插入
+            # 块形式 metadata：
+            # 1. standalone 场景下若已有 family 行，予以删除
+            if family is None:
+                del_indices = [
+                    n for n in range(meta_idx + 1, len(lines))
+                    if re.match(r"^  family:", lines[n])
+                ]
+                for idx in reversed(del_indices):
+                    lines.pop(idx)
+                    changes.append("移除 metadata.family（standalone 技能）")
+
+            # 2. 既有键：值不同则更新；缺失键：插入
             updated, added = [], []
             for k, v in want.items():
                 hit = next((n for n in range(meta_idx + 1, len(lines))
@@ -159,16 +193,16 @@ def mark_frontmatter(fm: str, family: str, role: str) -> tuple[str, list[str]]:
             if added:
                 changes.append(f"metadata 补键: {', '.join(k for k, _ in added)}")
 
-    # member：disable-model-invocation（顶层，kebab）；entry：清理降级残留
-    if role == "member":
+    # disable-model-invocation（顶层，kebab）：仅当 load_mode == "manual" 时需要
+    if load_mode == "manual":
         if not any(ln.strip() == "disable-model-invocation: true" for ln in lines):
             lines.append("disable-model-invocation: true")
-            changes.append("新增 disable-model-invocation: true（CC/Grok/dsh manual-only）")
+            changes.append("新增 disable-model-invocation: true（manual-only 显式触发）")
     else:
         stripped = [ln for ln in lines if ln.strip() != "disable-model-invocation: true"]
         if len(stripped) != len(lines):
             lines = stripped
-            changes.append("移除 disable-model-invocation（升为 entry，恢复自动触发）")
+            changes.append("移除 disable-model-invocation（auto 加载，恢复自动触发）")
 
     return "\n".join(lines), changes
 
@@ -187,65 +221,85 @@ def gen_openai_yaml(skill_name: str, desc: str) -> str:
     )
 
 
+def apply_skill(spec: SkillLoadSpec, *, apply: bool) -> tuple[int, list[str]]:
+    """对单个技能执行 frontmatter 标记与 openai.yaml 管理，返回 (变更计数, 日志行列表)。"""
+    d = spec.skill_path
+    skill_md = d / "SKILL.md"
+    logs: list[str] = []
+    if not skill_md.is_file():
+        logs.append(f"🚨 [{spec.family or 'standalone'}] {spec.name}: SKILL.md 缺失")
+        return 0, logs
+
+    txt = skill_md.read_text(encoding="utf-8")
+    fm, body, _ = split_frontmatter(txt)
+    if not fm:
+        logs.append(f"🚨 [{spec.family or 'standalone'}] {spec.name}: 无 frontmatter（B1 违规）")
+        return 0, logs
+
+    new_fm, changes = mark_frontmatter(
+        fm=fm,
+        role=spec.role,
+        load_mode=spec.load_mode,
+        family=spec.family,
+    )
+
+    yaml_path = d / "agents" / "openai.yaml"
+    oa_change = None
+
+    if spec.load_mode == "auto":
+        if yaml_path.exists():
+            if apply:
+                yaml_path.unlink()
+                oa_change = "删除残留 agents/openai.yaml（auto 加载）"
+            else:
+                oa_change = "将删除残留 agents/openai.yaml（auto 加载）"
+    elif spec.load_mode == "manual":
+        want = gen_openai_yaml(spec.name, extract_description(fm))
+        have = yaml_path.read_text(encoding="utf-8") if yaml_path.exists() else None
+        if have != want:
+            oa_change = "生成/刷新 agents/openai.yaml"
+            if apply:
+                yaml_path.parent.mkdir(parents=True, exist_ok=True)
+                yaml_path.write_text(want, encoding="utf-8")
+
+    tag_scope = f"{spec.family or 'standalone'}/{spec.role}"
+    if changes or oa_change:
+        tag = "写入" if apply else "计划"
+        logs.append(f"[{tag}] {spec.name}（{tag_scope}，{spec.load_mode}）")
+        for c in changes:
+            logs.append(f"    - {c}")
+        if oa_change:
+            logs.append(f"    - {oa_change}")
+        if apply and changes:
+            skill_md.write_text(f"---\n{new_fm}\n---\n{body}", encoding="utf-8")
+        return 1, logs
+    else:
+        logs.append(f"[一致] {spec.name}（{tag_scope}）")
+        return 0, logs
+
+
 def main() -> None:
-    ap = argparse.ArgumentParser(description="按 families 段幂等标记族群元数据")
+    ap = argparse.ArgumentParser(description="按 agent-map.yaml families 与 standalone 段幂等标记族群元数据")
     ap.add_argument("--apply", action="store_true", help="实际写入（默认 dry-run）")
     args = ap.parse_args()
 
     m = yaml.safe_load(MANIFEST.read_text(encoding="utf-8"))
     fams = m.get("families") or {}
-    if not fams:
-        sys.exit("agent-map.yaml 无 families 段")
+    standalone = m.get("standalone") or {}
+    if not fams and not standalone:
+        sys.exit("agent-map.yaml 无 families 或 standalone 段")
+
+    try:
+        specs = list(iter_members(m, root=ROOT))
+    except FarmModelError as err:
+        sys.exit(f"🚨 农场模型校验失败: {err}")
 
     n_changed = 0
-    for fname, f in sorted(fams.items()):
-        entry, members = f.get("entry"), list(f.get("members") or [])
-        for name, role in [(entry, "entry")] + [(x, "member") for x in members]:
-            d = ROOT / name
-            skill_md = d / "SKILL.md"
-            if not skill_md.is_file():
-                print(f"🚨 [{fname}] {name}: SKILL.md 缺失")
-                continue
-            txt = skill_md.read_text(encoding="utf-8")
-            fm, body, _ = split_frontmatter(txt)
-            if not fm:
-                print(f"🚨 [{fname}] {name}: 无 frontmatter（B1 违规）")
-                continue
-            new_fm, changes = mark_frontmatter(fm, fname, role)
-            new_txt = f"---\n{new_fm}\n---{body}" if changes else txt
-
-            # Codex openai.yaml（仅 member；entry 升位后清理残留）
-            yaml_path = d / "agents" / "openai.yaml"
-            oa_change = None
-            if role == "entry" and yaml_path.exists():
-                if args.apply:
-                    yaml_path.unlink()
-                    print(f"    - 删除残留 agents/openai.yaml（升为 entry）")
-                else:
-                    print(f"    - 将删除残留 agents/openai.yaml（升为 entry）")
-            if role == "member":
-                want = gen_openai_yaml(name, extract_description(fm))
-                have = yaml_path.read_text(encoding="utf-8") if yaml_path.exists() else None
-                if have != want:
-                    oa_change = "生成/刷新 agents/openai.yaml"
-                    if args.apply:
-                        yaml_path.parent.mkdir(parents=True, exist_ok=True)
-                        yaml_path.write_text(want, encoding="utf-8")
-
-            if changes or oa_change:
-                n_changed += 1
-                tag = "写入" if args.apply else "计划"
-                print(f"[{tag}] {name}（{fname}/{role}）")
-                for c in changes:
-                    print(f"    - {c}")
-                if oa_change:
-                    print(f"    - {oa_change}")
-                if args.apply and changes:
-                    # 注意：split_frontmatter 的 m.end() 已消费闭合 --- 后的换行，
-                    # 重构时必须补回，否则 --- 与正文首行粘连（严格 frontmatter 解析器会失败）
-                    skill_md.write_text(f"---\n{new_fm}\n---\n{body}", encoding="utf-8")
-            else:
-                print(f"[一致] {name}（{fname}/{role}）")
+    for spec in specs:
+        changed, logs = apply_skill(spec, apply=args.apply)
+        n_changed += changed
+        for line in logs:
+            print(line)
 
     suffix = "" if args.apply else "（加 --apply 执行）"
     print(f"\n{'已写入' if args.apply else 'dry-run 计划'}: {n_changed} 个技能需要变更{suffix}")

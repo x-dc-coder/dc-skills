@@ -20,6 +20,9 @@ from pathlib import Path
 
 import yaml
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from farm_model import FarmModelError, SkillLoadSpec, iter_members
+
 ROOT = Path(__file__).resolve().parent.parent
 MANIFEST = ROOT / "agent-map.yaml"
 
@@ -111,8 +114,11 @@ def sync_farm(farm_dir: str, names: set[str], master: Path, check: bool) -> list
 
 
 def check_families(m: dict, master: Path) -> list[str]:
-    """族群标记一致性（2026-09-24）：member ⇔ load-mode:manual + disable-model-invocation
-    + Codex openai.yaml（allow_implicit_invocation:false）；entry ⇔ role:entry 且非 manual。
+    """技能标记一致性校验（阶段二：支持 entry、member、standalone 及覆写）：
+    - role 与 family 匹配校验（standalone 必须无 family，entry/member 必须匹配所属 family）；
+    - load-mode 匹配校验（与 resolve_load 计算结果一致）；
+    - manual 模式：必须有 disable-model-invocation: true 与 agents/openai.yaml（禁隐式调用）；
+    - auto 模式：不得有 disable-model-invocation，且不得有 agents/openai.yaml。
     返回问题行列表（空=一致）。"""
     import re as _re
 
@@ -129,41 +135,54 @@ def check_families(m: dict, master: Path) -> list[str]:
             return {"__yaml_error__": True}
 
     problems: list[str] = []
-    for fname, f in sorted((m.get("families") or {}).items()):
-        entry, members = f.get("entry"), list(f.get("members") or [])
-        for name, role in [(entry, "entry")] + [(x, "member") for x in members]:
-            d = master / name
-            if not d.is_dir():
-                problems.append(f"  ! [{fname}] {role} {name}: 目录缺失")
-                continue
-            fm = frontmatter(d)
-            if fm.get("__yaml_error__") or not fm:
-                problems.append(f"  ! [{fname}] {role} {name}: frontmatter 缺失或 YAML 错误")
-                continue
-            meta = fm.get("metadata") or {}
-            if meta.get("family") != fname or meta.get("role") != role:
-                problems.append(f"  ! [{fname}] {role} {name}: metadata.family/role 应为 {fname}/{role}")
-            dmi = fm.get("disable-model-invocation") is True
-            if role == "member":
-                if meta.get("load-mode") != "manual":
-                    problems.append(f"  ! [{fname}] member {name}: load-mode 应为 manual")
-                if not dmi:
-                    problems.append(f"  ! [{fname}] member {name}: 缺 disable-model-invocation: true")
-                oa = d / "agents" / "openai.yaml"
-                if not oa.exists():
-                    problems.append(f"  ! [{fname}] member {name}: 缺 agents/openai.yaml")
-                else:
-                    try:
-                        od = _yaml.safe_load(oa.read_text(encoding="utf-8")) or {}
-                        if (od.get("policy") or {}).get("allow_implicit_invocation") is not False:
-                            problems.append(f"  ! [{fname}] member {name}: openai.yaml 未禁隐式调用")
-                    except _yaml.YAMLError:
-                        problems.append(f"  ! [{fname}] member {name}: openai.yaml YAML 错误")
+    try:
+        specs = list(iter_members(m, root=master))
+    except FarmModelError as err:
+        return [f"  ! 农场模型校验失败: {err}"]
+
+    for spec in specs:
+        scope = spec.family or "standalone"
+        d = spec.skill_path
+        if not d.is_dir():
+            problems.append(f"  ! [{scope}] {spec.role} {spec.name}: 目录缺失")
+            continue
+        fm = frontmatter(d)
+        if fm.get("__yaml_error__") or not fm:
+            problems.append(f"  ! [{scope}] {spec.role} {spec.name}: frontmatter 缺失或 YAML 错误")
+            continue
+        meta = fm.get("metadata") or {}
+        if spec.role == "standalone":
+            if meta.get("family") is not None:
+                problems.append(f"  ! [{scope}] standalone {spec.name}: 不应有 metadata.family（当前: {meta.get('family')}）")
+            if meta.get("role") != "standalone":
+                problems.append(f"  ! [{scope}] standalone {spec.name}: metadata.role 应为 standalone")
+        else:
+            if meta.get("family") != spec.family or meta.get("role") != spec.role:
+                problems.append(f"  ! [{scope}] {spec.role} {spec.name}: metadata.family/role 应为 {spec.family}/{spec.role}")
+
+        if meta.get("load-mode") != spec.load_mode:
+            problems.append(f"  ! [{scope}] {spec.role} {spec.name}: load-mode 应为 {spec.load_mode}（当前: {meta.get('load-mode')}）")
+
+        dmi = fm.get("disable-model-invocation") is True
+        oa = d / "agents" / "openai.yaml"
+        if spec.load_mode == "manual":
+            if not dmi:
+                problems.append(f"  ! [{scope}] {spec.role} {spec.name}: 缺 disable-model-invocation: true")
+            if not oa.exists():
+                problems.append(f"  ! [{scope}] {spec.role} {spec.name}: 缺 agents/openai.yaml")
             else:
-                if dmi:
-                    problems.append(f"  ! [{fname}] entry {name}: 不应有 disable-model-invocation")
-                if meta.get("load-mode") == "manual":
-                    problems.append(f"  ! [{fname}] entry {name}: load-mode 不应为 manual")
+                try:
+                    od = _yaml.safe_load(oa.read_text(encoding="utf-8")) or {}
+                    if (od.get("policy") or {}).get("allow_implicit_invocation") is not False:
+                        problems.append(f"  ! [{scope}] {spec.role} {spec.name}: openai.yaml 未禁隐式调用")
+                except _yaml.YAMLError:
+                    problems.append(f"  ! [{scope}] {spec.role} {spec.name}: openai.yaml YAML 错误")
+        else:
+            # load_mode == "auto"
+            if dmi:
+                problems.append(f"  ! [{scope}] {spec.role} {spec.name}: 不应有 disable-model-invocation")
+            if oa.exists():
+                problems.append(f"  ! [{scope}] {spec.role} {spec.name}: auto 模式不应有 agents/openai.yaml")
     return problems
 
 
