@@ -2,6 +2,6 @@
 # 由 scripts/family-apply.py 生成；SKILL.md description 变更后需重跑刷新。
 interface:
   display_name: "Cloudreve Storage"
-  short_description: "Cloudreve storage and backup management"
+  short_description: "Cloudreve workflows workflows"
 policy:
   allow_implicit_invocation: false

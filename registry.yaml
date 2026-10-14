@@ -146,6 +146,12 @@ cli:
     bin: gh
     check_cmd: "gh --version"
     asserts: [bin_present, version_probe]
+  - name: git
+    type: cli
+    bin: git
+    check_cmd: "git --version"
+    asserts: [bin_present, version_probe]
+    notes: "环境依赖.md 基线 2.55.0；供 software.requires.cli"
   - name: lark-cli
     type: cli
     bin: lark-cli

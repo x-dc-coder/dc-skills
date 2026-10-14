@@ -472,6 +472,10 @@ documents:
     id: skill.paper-reader
     kind: reference
     status: active
+  proxy-ops/SKILL.md:
+    id: skill.proxy-ops
+    kind: reference
+    status: active
   programming/references/code-smells.md:
     id: programming.references.code-smells
     kind: reference
