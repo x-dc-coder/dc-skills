@@ -228,6 +228,10 @@ documents:
     id: docs.specs.farm-redesign-roadmap
     kind: reference
     status: active
+  docs/specs/全资产治理.md:
+    id: docs.specs.universal-assets-governance
+    kind: reference
+    status: active
   docs/specs/输出规范.md:
     id: docs.specs.output
     kind: reference
