@@ -320,14 +320,17 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
       flex-wrap: wrap;
       gap: 12px;
     }}
+    .title-group {{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }}
     .title-group h1 {{
       font-size: 20px;
       font-weight: 600;
       letter-spacing: -0.02em;
-      display: flex;
-      align-items: center;
-      gap: 10px;
       color: #fff;
+      margin: 0;
     }}
     .badge-sub {{
       font-size: 11px;
@@ -391,26 +394,34 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
       font-weight: 500;
       display: flex;
       gap: 14px;
-      align-items: center;
-      margin-top: 4px;
+      align-items: baseline;
+      margin-top: 2px;
       font-family: var(--font-mono);
     }}
     .kpi-dot-item {{
       display: inline-flex;
-      align-items: center;
+      align-items: baseline;
       gap: 5px;
-      font-size: 12px;
     }}
     .kpi-dot {{
       width: 6px;
       height: 6px;
       border-radius: 50%;
       display: inline-block;
+      align-self: center;
     }}
     .kpi-dot-item strong {{
-      font-size: 18px;
+      font-size: 26px;
       font-weight: 600;
-      margin-right: 1px;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      margin-right: 2px;
+    }}
+    .kpi-dot-item .kpi-unit {{
+      font-size: 12px;
+      color: #71717a;
+      font-weight: 400;
+      font-family: -apple-system, sans-serif;
     }}
 
     .toolbar {{
@@ -595,6 +606,7 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
       color: var(--text-muted);
       margin-top: 4px;
       line-height: 1.45;
+      max-width: 82ch;
     }}
 
     .skill-side {{
@@ -806,17 +818,20 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
       <div class="card">
         <div class="label">全资产巡检状态</div>
         <div class="val kpi-doctor">
-          <span class="kpi-dot-item" style="color: {'var(--danger)' if doctor.get('crit', 0) > 0 else '#52525b'};">
-            <span class="kpi-dot" style="background: {'var(--danger)' if doctor.get('crit', 0) > 0 else '#52525b'};"></span>
-            <strong>{doctor.get('crit', 0)}</strong> 异常
+          <span class="kpi-dot-item">
+            <span class="kpi-dot" style="background: {'#ef4444' if doctor.get('crit', 0) > 0 else '#52525b'};"></span>
+            <strong style="color: {'#ef4444' if doctor.get('crit', 0) > 0 else '#52525b'};">{doctor.get('crit', 0)}</strong>
+            <span class="kpi-unit">异常</span>
           </span>
-          <span class="kpi-dot-item" style="color: {'#f59e0b' if doctor.get('warn', 0) > 0 else '#52525b'};">
+          <span class="kpi-dot-item">
             <span class="kpi-dot" style="background: {'#f59e0b' if doctor.get('warn', 0) > 0 else '#52525b'};"></span>
-            <strong>{doctor.get('warn', 0)}</strong> 警告
+            <strong style="color: {'#f59e0b' if doctor.get('warn', 0) > 0 else '#52525b'};">{doctor.get('warn', 0)}</strong>
+            <span class="kpi-unit">警告</span>
           </span>
-          <span class="kpi-dot-item" style="color: #10b981;">
+          <span class="kpi-dot-item">
             <span class="kpi-dot" style="background: #10b981;"></span>
-            <strong style="color: #f4f4f5;">{doctor.get('ok', 0)}</strong> 正常
+            <strong style="color: #f4f4f5;">{doctor.get('ok', 0)}</strong>
+            <span class="kpi-unit">正常</span>
           </span>
         </div>
       </div>
@@ -1015,6 +1030,23 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
         const membersCount = memberSkills.length;
         const famTitle = FAMILY_TITLES[f.name] || f.name;
 
+        // 计算族内异常与警告
+        let famCrits = 0;
+        let famWarns = 0;
+        const allFamSkills = (entrySkill ? [entrySkill] : []).concat(memberSkills);
+        allFamSkills.forEach(s => {{
+          if (s.status === 'crit') famCrits++;
+          if (s.status === 'warn') famWarns++;
+        }});
+
+        let alertBadgeHtml = '';
+        if (famCrits > 0) {{
+          alertBadgeHtml += `<span class="tag" style="background:rgba(239,68,68,0.12); color:#ef4444; border:1px solid rgba(239,68,68,0.25);">● ${{famCrits}} 异常</span>`;
+        }}
+        if (famWarns > 0) {{
+          alertBadgeHtml += `<span class="tag" style="background:rgba(245,158,11,0.12); color:#f59e0b; border:1px solid rgba(245,158,11,0.25);">● ${{famWarns}} 警告</span>`;
+        }}
+
         const headerDiv = document.createElement('div');
         headerDiv.className = 'family-header';
         headerDiv.onclick = () => {{
@@ -1034,6 +1066,7 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
             <span class="family-cn">${{famTitle}}</span>
           </div>
           <div class="family-badges">
+            ${{alertBadgeHtml}}
             ${{depsHtml ? `<span style="display:inline-flex; gap:4px;">${{depsHtml}}</span>` : ''}}
             <span class="tag tag-entry">1 入口</span>
             ${{memberBadgeHtml}}
@@ -1058,8 +1091,7 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
                 <div class="skill-info">
                   <div class="skill-title-line">
                     <span class="skill-name">${{entrySkill.name}}</span>
-                    <span class="tag tag-entry">${{entrySkill.role}}</span>
-                    <span class="tag tag-auto">${{entrySkill.load_mode}}</span>
+                    <span class="tag tag-entry">entry · auto</span>
                   </div>
                   <div class="skill-desc-text">${{entrySkill.description || '—'}}</div>
                   ${{warnHintHtml}}
@@ -1093,8 +1125,7 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
                   <div class="skill-title-line">
                     <span style="color:#52525b; font-family:var(--font-mono); font-weight:400; font-size:13px;">├─</span>
                     <span class="skill-name">${{m.name}}</span>
-                    <span class="tag tag-member">${{m.role}}</span>
-                    <span class="tag tag-manual">${{m.load_mode}}</span>
+                    <span class="tag tag-member">member · manual</span>
                   </div>
                   <div class="skill-desc-text" style="padding-left:18px;">${{m.description || '—'}}</div>
                   ${{mWarnHintHtml}}
@@ -1163,8 +1194,7 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
               <div class="skill-info">
                 <div class="skill-title-line">
                   <span class="skill-name">${{s.name}}</span>
-                  <span class="tag tag-standalone">${{s.role}}</span>
-                  <span class="tag tag-manual">${{s.load_mode}}</span>
+                  <span class="tag tag-standalone">standalone · manual</span>
                 </div>
                 <div class="skill-desc-text">${{s.description || '—'}}</div>
                 ${{sWarnHintHtml}}

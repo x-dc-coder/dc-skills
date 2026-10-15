@@ -224,6 +224,10 @@ documents:
     id: docs.specs.universal-assets-governance
     kind: reference
     status: active
+  docs/specs/技能资产快照与驾驶舱规格.md:
+    id: docs.specs.skills-snapshot-and-dashboard
+    kind: reference
+    status: active
   docs/specs/输出规范.md:
     id: docs.specs.output
     kind: reference
