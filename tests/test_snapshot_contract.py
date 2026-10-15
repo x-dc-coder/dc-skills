@@ -55,8 +55,8 @@ class TestSnapshotContract:
         assert summary["skills_total"] == 31
         assert summary["families_total"] == 6
         assert set(summary["agents"]) == {"claude-code", "grok", "dsh", "zcode", "codex"}
-        assert summary["load_modes"]["auto"] == 10
-        assert summary["load_modes"]["manual"] == 21
+        assert summary["load_modes"]["auto"] == 9
+        assert summary["load_modes"]["manual"] == 22
         assert summary["roles"]["entry"] == 6
         assert summary["roles"]["member"] == 16
         assert summary["roles"]["standalone"] == 9

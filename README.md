@@ -16,9 +16,6 @@
 │   ├── INDEX.md           # ⭐ 全局文档索引（唯一文档地图）
 ├── pyproject.toml / uv.lock / .venv/   # 统一依赖与虚拟环境（轻量 skill 共享）
 │
-├── lark-cli/              # 飞书/Lark 聚合技能（28 域统一入口）
-│   ├── SKILL.md           # 路由表 + 共享底座 + 维护命令
-│   └── resources/         # CLI 不内嵌的机器资源（scripts/创意资产/模板）
 ├── diagram/               # 图表聚合入口。flow 在 references/flow.md，没有 diagram-flow 目录
 │   ├── SKILL.md           # 路由表 + 通用规范
 │   └── references/        # 各类型规程分册（er/ers/module/usecase/sequence/flow/draft）
@@ -73,7 +70,7 @@ uv run python scripts/skills-sync          # 物化全部农场（含 dsh 的 th
 uv run python scripts/skills-sync --check  # 只检查漂移，不修改
 ```
 
-- 安装器着陆区 `~/.agents/skills/`：Orca 官方技能（orca-cli/orchestration/computer-use）常驻该区，由 `npx skills update <名> --global` 官方通道更新，不收编主库；其他来源新技能出现时 `mv` 进主库 → 在 `agent-map.yaml` 登记 → 跑 skills-sync。
+- 安装器着陆区 `~/.agents/skills/`：软件官方技能常驻该区走官方更新，不收编主库——Orca 系（orca-cli/orchestration/computer-use，源 `stablyai/orca`）与 lark 官方 28 域（`lark-*`，源 `larksuite/cli`），由 `npx skills update <名> --global` 维护；其他来源新技能出现时 `mv` 进主库 → 在 `agent-map.yaml` 登记 → 跑 skills-sync。
 - 各 App 自带技能不收编主库：`~/.grok/bundled/skills/`、`~/.codex/skills/.system/` 与各插件市场缓存由 App 自行管理更新；同名用户技能会覆盖 App 本体，收编等于制造随 App 更新而过期的分叉。
 - 全机技能台账与自注册监控：`uv run python scripts/skillctl inventory`（主库 vs App 自管根、重名与着陆区漂移）。
 
@@ -85,7 +82,7 @@ uv run python scripts/skills-sync --check  # 只检查漂移，不修改
 |------|------|-------------|------|
 | **A. 统一共享** | `.venv/` 符号链接 | diagram 聚合的脚本目录（diagram-er/ers/module/sequence/usecase）、db-skill、word-extractor、unified-search、github-workflow、thesis-writing、paper-metrics | 依赖轻量（Pillow/sqlglot/psycopg2/requests/pytest 等），共享一份 venv |
 | **B. 独立重型** | skill 内 `venvs/` | paper-reader | 含 GPU 模型权重（5GB+），不可合并，`.gitignore` 已忽略 |
-| **C. 无统一 venv** | 系统/Windows Python 或二进制 | diagram-draft/flow、design-ui/diagram/dataviz（纯文档）、lark-cli（Node）、drawio-xml（npx）、kimi-webbridge、md-to-thesis-latex、thesis-ref-check、proxy-ops、unified-gateway、wsl-windows-bridge | 无统一 venv（系统/Windows Python 或自带运行时） |
+| **C. 无统一 venv** | 系统/Windows Python 或二进制 | diagram-draft/flow、design-ui/diagram/dataviz（纯文档）、drawio-xml（npx）、kimi-webbridge、md-to-thesis-latex、thesis-ref-check、proxy-ops、unified-gateway、wsl-windows-bridge | 无统一 venv（系统/Windows Python 或自带运行时） |
 
 ## 统一执行约定（所有 Python skill 必须遵守）
 
@@ -200,7 +197,7 @@ bash ~/projects/dc-skills/paper-reader/scripts/bootstrap.sh
 
 Node 工具（非 Python 依赖，完整登记表见 docs/arch/环境依赖.md）：
 - `@mermaid-js/mermaid-cli`（mmdc）：用于 diagram 聚合的 sequence 类渲染 Mermaid 到 PNG（推荐用 `npx` 调用，避免全局安装）。
-- `lark-cli`：lark-cli 聚合技能硬依赖（Node 全局安装）。
+- `lark-cli`：lark 官方 28 域技能（驻着陆区）与 `lark-cli skills read` 的硬依赖（Node 全局安装）。
 - `keenable`：unified-search 硬依赖（安装/认证/MCP 配置见 unified-search/references/keenable-setup.md）。
 
 ## WSL ↔ Windows 桥接 Skill

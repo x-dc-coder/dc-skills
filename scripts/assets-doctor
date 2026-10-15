@@ -572,25 +572,35 @@ def check_app_roots(rep: Report, reg: dict) -> None:
     rep.add(g, "ok", "app_roots-summary", f"{len(reg.get('app_roots') or [])} 个 App 自管根对账完成")
 
 
-# ── (g) 着陆区（2026-10-15 政策翻转：Orca 官方技能常驻，不再要求为空；单独成组便于 --only） ──────────
+# ── (g) 着陆区（2026-10-15 政策翻转：软件官方技能常驻，不再要求为空；单独成组便于 --only） ──────────
 
 ORCA_OFFICIAL_SKILLS = {"orca-cli", "orchestration", "computer-use"}
+# lark 官方 28 域（源 larksuite/cli，2026-10-15 进驻着陆区）
+LARK_OFFICIAL_SKILLS = {
+    "lark-approval", "lark-apps", "lark-attendance", "lark-base", "lark-calendar",
+    "lark-contact", "lark-doc", "lark-drive", "lark-event", "lark-im", "lark-mail",
+    "lark-markdown", "lark-meeting", "lark-minutes", "lark-note", "lark-okr",
+    "lark-openapi-explorer", "lark-shared", "lark-sheets", "lark-skill-maker",
+    "lark-slides", "lark-task", "lark-vc", "lark-vc-agent", "lark-whiteboard",
+    "lark-wiki", "lark-workflow-meeting-summary", "lark-workflow-standup-report",
+}
+EXPECTED_LANDING_RESIDENTS = ORCA_OFFICIAL_SKILLS | LARK_OFFICIAL_SKILLS
 
 
 def check_landing(rep: Report, reg: dict) -> None:
     g = "landing"
     root = Path(os.path.expanduser("~/.agents/skills"))
     residents = sorted([p.name for p in root.iterdir() if p.name != ".skill-lock.json"]) if root.is_dir() else []
-    unexpected = [n for n in residents if n not in ORCA_OFFICIAL_SKILLS]
+    unexpected = [n for n in residents if n not in EXPECTED_LANDING_RESIDENTS]
     if unexpected:
         rep.add(g, "warn", "agents-landing",
-                f"着陆区出现非 Orca 官方技能（{len(unexpected)} 个: {unexpected[:5]}…）—— 评估是否 mv 进主库登记",
+                f"着陆区出现非官方预期技能（{len(unexpected)} 个: {unexpected[:5]}…）—— 评估是否 mv 进主库登记",
                 hint="mv ~/.agents/skills/<name> ~/projects/dc-skills/ → agent-map 登记 → skills-sync")
     elif residents:
         rep.add(g, "ok", "agents-landing",
-                f"着陆区 {len(residents)} 个 Orca 官方技能（{'/'.join(residents)}），官方通道自更新 ✅")
+                f"着陆区 {len(residents)} 个官方技能（orca {len(ORCA_OFFICIAL_SKILLS)} + lark {len(LARK_OFFICIAL_SKILLS)}），官方通道自更新 ✅")
     else:
-        rep.add(g, "warn", "agents-landing", "着陆区为空——Orca 官方技能未安装（orca skills install / npx skills add stablyai/orca -g）")
+        rep.add(g, "warn", "agents-landing", "着陆区为空——官方技能未安装（npx skills add stablyai/orca / larksuite/cli -g）")
 
 
 # ── 输出 ───────────────────────────────────────────────────────────────────
