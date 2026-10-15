@@ -258,7 +258,7 @@ app_roots:
   - name: codex-plugins
     type: app_root
     location: "~/.codex/plugins/cache"
-    count_baseline: {skill_md: 21}
+    count_baseline: {skill_md: 25}
     asserts: [count_unchanged, no_name_collision]
   - name: claude-plugins
     type: app_root
