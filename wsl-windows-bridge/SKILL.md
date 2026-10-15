@@ -3,8 +3,7 @@ name: wsl-windows-bridge
 description: >
   WSL→Windows 跨边界框架：本地调用通道（pythonw.exe 直调无弹窗首选 / cmd.exe / EXE / PowerShell）+ SSH 特权与 Agent 门禁通道（Session 0 CLI / Session 1 GUI 计划任务投递）+ GPU 资源治理。覆盖 GPU 训练/推理、Windows Python 环境、注册表、WMI、COM、Word UI 自动化测试。涉及跨系统调用、Windows 侧程序、Agent 协同或真机门禁测试时使用。
 metadata:
-  family: bridge
-  role: entry
+  role: standalone
   load-mode: auto
 ---
 # WSL → Windows 桥接 Skill

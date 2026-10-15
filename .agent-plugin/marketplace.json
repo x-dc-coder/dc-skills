@@ -1,29 +1,11 @@
 {
   "name": "dc-skills",
-  "description": "dc-skills 技能农场：10 族群 / 31 技能的插件市场声明层（本机走 skills-sync 软链，本文件供原生 /plugins 发现与外发）",
+  "description": "dc-skills 技能农场：6 族群 / 31 技能的插件市场声明层（本机走 skills-sync 软链，本文件供原生 /plugins 发现与外发）",
   "owner": {
     "name": "x-dc-coder"
   },
   "x-generated-by": "由 scripts/plugin-catalog.py 从 agent-map.yaml 生成，DO NOT EDIT；改族群请改 agent-map 后重跑 --apply",
   "plugins": [
-    {
-      "name": "dc-bridge",
-      "description": "bridge 族群：入口 wsl-windows-bridge（单体族）",
-      "source": ".",
-      "strict": false,
-      "skills": [
-        "./wsl-windows-bridge"
-      ]
-    },
-    {
-      "name": "dc-db",
-      "description": "db 族群：入口 db-skill（单体族）",
-      "source": ".",
-      "strict": false,
-      "skills": [
-        "./db-skill"
-      ]
-    },
     {
       "name": "dc-drawing",
       "description": "drawing 族群：入口 diagram + 1 个 manual 成员",
@@ -64,24 +46,6 @@
         "./unified-search",
         "./kimi-webbridge",
         "./vision-workflow"
-      ]
-    },
-    {
-      "name": "dc-lark",
-      "description": "lark 族群：入口 lark-cli（单体族）",
-      "source": ".",
-      "strict": false,
-      "skills": [
-        "./lark-cli"
-      ]
-    },
-    {
-      "name": "dc-meta",
-      "description": "meta 族群：入口 dc-skill-creator（单体族）",
-      "source": ".",
-      "strict": false,
-      "skills": [
-        "./dc-skill-creator"
       ]
     },
     {

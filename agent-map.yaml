@@ -68,18 +68,15 @@ base:
   - unified-search      # 10 源聚合搜索
   - kimi-webbridge      # 真实浏览器控制
   - vision-workflow     # 视觉任务编排
-  # ── db（单体入口）──
-  - db-skill            # 只处理 MySQL/PostgreSQL
-  # ── bridge（单体入口，不归 db-skill）──
-  - wsl-windows-bridge  # WSL→Windows 跨边界框架
-  - word-extractor      # .docx 高精度提取（standalone manual，加载语义见文末 standalone 段）
-  # ── lark（单体族，28 域已内聚）──
-  - lark-cli            # 飞书全家桶统一入口
+  # ── standalone（不设族群；auto/manual 见文末 standalone 段，2026-10-15 单体族解散）──
+  - db-skill            # 只处理 MySQL/PostgreSQL（standalone auto）
+  - wsl-windows-bridge  # WSL→Windows 跨边界框架（standalone auto）
+  - word-extractor      # .docx 高精度提取（standalone manual）
+  - lark-cli            # 飞书全家桶统一入口，28 域内聚（standalone auto）
   # ── dshplugin（entry 与 member 都在 base，否则成员没有自动入口）──
   - dsh-plugin-troubleshooting  # DSH 插件故障排查（entry，auto）
   - dsh-ui-optimization         # DSH 插件 UI 优化（member；plugin-specialist 预设亦挂载）
-  # ── meta（entry: dc-skill-creator）──
-  - dc-skill-creator    # 本仓库技能创建工具（validate/new_skill/check_triggers）
+  - dc-skill-creator    # 本仓库技能创建工具（standalone auto；validate/new_skill/check_triggers）
   # ── standalone manual 运维技能 ──
   - proxy-ops
   - cloudreve-storage   # Cloudreve 云存储（standalone manual，2026-10-15 出 agentops）
@@ -156,6 +153,19 @@ standalone:
   agent-balances:
     load: manual
     description: "查询各编程 Agent 额度与用量余额（2026-10-15 出 agentops 转单体）"
+  # ── 2026-10-15 单体族解散：四技能转 standalone auto（保持原 entry 自动触发不变）──
+  db-skill:
+    load: auto
+    description: "MySQL/PostgreSQL 查询与写入"
+  wsl-windows-bridge:
+    load: auto
+    description: "WSL→Windows 跨边界框架：本地调用/SSH 特权/GPU 治理"
+  lark-cli:
+    load: auto
+    description: "飞书/Lark 全家桶统一入口（28 域聚合）"
+  dc-skill-creator:
+    load: auto
+    description: "本仓库技能创建工具：脚手架生成 + 规则校验"
 
 mcps:
   codegraph:
@@ -206,18 +216,6 @@ families:
   info:              # 信息与视觉：搜索/真实浏览器/图像理解
     entry: unified-search
     members: [kimi-webbridge, vision-workflow]
-  db:                # 数据库（单体族，不硬凑）
-    entry: db-skill
-    members: []
-  bridge:            # WSL→Windows 跨边界框架（单体族；被多族复用的基础框架）
-    entry: wsl-windows-bridge
-    members: []
-  lark:              # 飞书协作（单体族，28 域已内聚）
-    entry: lark-cli
-    members: []
   dshplugin:         # DSH 插件：排查 + UI 优化（plugin-specialist 预设作用域）
     entry: dsh-plugin-troubleshooting
     members: [dsh-ui-optimization]
-  meta:              # 仓库元工作：本仓库技能创建/校验（单体族）
-    entry: dc-skill-creator
-    members: []

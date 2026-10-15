@@ -53,13 +53,13 @@ class TestSnapshotContract:
 
         summary = doc["summary"]
         assert summary["skills_total"] == 31
-        assert summary["families_total"] == 10
+        assert summary["families_total"] == 6
         assert set(summary["agents"]) == {"claude-code", "grok", "dsh", "zcode", "codex"}
         assert summary["load_modes"]["auto"] == 10
         assert summary["load_modes"]["manual"] == 21
-        assert summary["roles"]["entry"] == 10
+        assert summary["roles"]["entry"] == 6
         assert summary["roles"]["member"] == 16
-        assert summary["roles"]["standalone"] == 5
+        assert summary["roles"]["standalone"] == 9
         assert summary["doctor"]["warn"] == 1
 
         skills = doc["skills"]

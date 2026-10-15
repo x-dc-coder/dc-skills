@@ -8,8 +8,7 @@ description: >
   （那些写到客户端技能目录，破坏单一物理副本）。规约见 技能编写规则.md 与 技能管理.md。
 metadata:
   version: "0.1"
-  family: meta
-  role: entry
+  role: standalone
   load-mode: auto
 ---
 
@@ -57,9 +56,10 @@ uv run python scripts/skills-sync && uv run python scripts/skillctl lint
 1. **命名**（唯一硬卡点）：kebab-case，`^[a-z0-9-]+$`，≤64，须等于目录名；当场用
    `validate.py` 的 R2 逻辑验，不合规立即给归一化建议。查重：主库 + `archive/` + App 自管根。
 2. **族群**（键必须存在于 `agent-map.yaml` 的 `families`）：thesis / drawing / frontend /
-   software / info / db / bridge / lark / dshplugin / meta。
+   software / info / dshplugin。
    都不匹配就省略 `--family`，脚本写成 `role: standalone`、`load-mode: auto`。
-   不要传 `--family standalone`，也不要传已删除的 coding、infra、repo。
+   不要传 `--family standalone`，也不要传已删除的 coding、infra、repo、db、bridge、lark、meta
+   （2026-10-15 单体族解散，这四个已转 standalone）。
    传了 `--family` 就是该族 member（`load-mode: manual`，骨架写上 `disable-model-invocation: true`，不进模型清单，`/name` 显式触发）。`agents/openai.yaml` 仍由随后的 `family-apply --apply` 生成。
    新的族群入口要改 `families.<族>.entry`，本脚手架不会把新技能写成 entry。
 3. **能力 + 触发场景**（自由文本）：CLI 不代写 quality，但先用 `check_triggers.py` 预检重叠；

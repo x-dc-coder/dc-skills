@@ -57,10 +57,12 @@ def test_codegraph_is_a_member() -> None:
 
 def test_creator_lists_live_families() -> None:
     body = skill_text("dc-skill-creator").split("---", 2)[2]
-    for name in ("frontend", "software", "bridge", "dshplugin"):
+    for name in ("frontend", "software", "info", "dshplugin"):
         assert name in body
     assert "不要传 `--family standalone`" in body
     assert "已删除的 coding、infra、repo" in body
+    for dissolved in ("db", "bridge", "lark", "meta"):
+        assert f"`--family {dissolved}`" not in body
 
 
 def test_design_ui_points_at_real_files() -> None:

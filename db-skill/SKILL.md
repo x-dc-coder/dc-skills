@@ -4,8 +4,7 @@ description: >
   项目内 MySQL / PostgreSQL 的查询与写入。当用户要跑 CRUD、从项目配置读取连接、
   限制返回行数、把结果落成 JSON 时使用。WSL 调用 Windows、GPU、注册表读 wsl-windows-bridge。
 metadata:
-  family: db
-  role: entry
+  role: standalone
   load-mode: auto
 ---
 # DB Skill
