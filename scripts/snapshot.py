@@ -264,6 +264,15 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
     doctor = summary.get("doctor") or {}
     load_modes = summary.get("load_modes") or {}
 
+    raw_ts = meta.get("generated_at") or "—"
+    try:
+        cleaned_ts = raw_ts.replace("T", " ").split(".")[0]
+    except Exception:
+        cleaned_ts = raw_ts
+
+    master_commit = meta.get("master_commit") or "—"
+    duration_str = f"{meta.get('duration_ms', 0):.0f} ms"
+
     doc_json = json.dumps(doc, ensure_ascii=False)
 
     html_content = f"""<!DOCTYPE html>
@@ -274,23 +283,21 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
   <title>dc-skills · 全机技能资产驾驶舱</title>
   <style>
     :root {{
-      --bg: #090d16;
-      --card-bg: #131c2e;
-      --card-hover: #18243c;
-      --border: #24344d;
-      --border-subtle: #1e2c42;
-      --text: #f8fafc;
-      --text-muted: #8e9fb5;
-      --primary: #38bdf8;
-      --primary-glow: rgba(56, 189, 248, 0.15);
+      --bg: #09090b;
+      --card-bg: #121215;
+      --card-hover: #18181b;
+      --border: rgba(255, 255, 255, 0.07);
+      --border-subtle: rgba(255, 255, 255, 0.04);
+      --text: #f4f4f5;
+      --text-muted: #71717a;
+      --primary: #f4f4f5;
       --success: #10b981;
-      --success-bg: rgba(16, 185, 129, 0.15);
+      --success-bg: rgba(16, 185, 129, 0.12);
       --warning: #f59e0b;
-      --warning-bg: rgba(245, 158, 11, 0.15);
+      --warning-bg: rgba(245, 158, 11, 0.12);
       --danger: #ef4444;
-      --danger-bg: rgba(239, 68, 68, 0.15);
-      --info: #818cf8;
-      --info-bg: rgba(129, 140, 248, 0.15);
+      --danger-bg: rgba(239, 68, 68, 0.12);
+      --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
     }}
     * {{ box-sizing: border-box; margin: 0; padding: 0; }}
     body {{
@@ -299,6 +306,7 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
       color: var(--text);
       line-height: 1.5;
       padding: 24px 20px;
+      -webkit-font-smoothing: antialiased;
     }}
     .container {{ max-width: 1340px; margin: 0 auto; }}
 
@@ -313,359 +321,454 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
       gap: 12px;
     }}
     .title-group h1 {{
-      font-size: 24px;
-      font-weight: 700;
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
+      color: #fff;
     }}
     .badge-sub {{
-      font-size: 12px;
-      background: var(--primary-glow);
-      color: var(--primary);
-      padding: 2px 8px;
+      font-size: 11px;
+      font-family: var(--font-mono);
+      background: rgba(255, 255, 255, 0.06);
+      color: #a1a1aa;
+      padding: 2px 7px;
       border-radius: 4px;
-      font-weight: 600;
-      border: 1px solid rgba(56, 189, 248, 0.3);
+      font-weight: 500;
+      border: 1px solid var(--border);
     }}
     .meta-bar {{
-      font-size: 13px;
-      color: var(--text-muted);
       display: flex;
-      gap: 16px;
+      gap: 8px;
+      align-items: center;
       flex-wrap: wrap;
+    }}
+    .meta-pill {{
+      background: #121215;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }}
+    .meta-pill strong {{
+      color: #e4e4e7;
+      font-weight: 500;
     }}
 
     .kpis {{
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
-      margin-bottom: 24px;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
     }}
     .card {{
       background: var(--card-bg);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 16px 20px;
+      border-radius: 8px;
+      padding: 14px 18px;
     }}
-    .card .label {{ font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }}
-    .card .val {{ font-size: 26px; font-weight: 700; display: flex; align-items: baseline; gap: 8px; }}
-    .card .sub {{ font-size: 12px; color: var(--text-muted); font-weight: 400; }}
+    .card .label {{ font-size: 12px; color: var(--text-muted); margin-bottom: 6px; font-weight: 500; }}
+    .card .val {{
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      color: #f4f4f5;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }}
+    .card .sub {{ font-size: 12px; color: #71717a; font-weight: 400; font-family: -apple-system, sans-serif; }}
+
+    .kpi-doctor {{
+      font-size: 13px;
+      font-weight: 500;
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      margin-top: 4px;
+      font-family: var(--font-mono);
+    }}
+    .kpi-dot-item {{
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+    }}
+    .kpi-dot {{
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      display: inline-block;
+    }}
+    .kpi-dot-item strong {{
+      font-size: 18px;
+      font-weight: 600;
+      margin-right: 1px;
+    }}
 
     .toolbar {{
       background: var(--card-bg);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 14px 18px;
-      margin-bottom: 22px;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 12px;
       display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
+      gap: 10px;
       align-items: center;
       justify-content: space-between;
+      flex-wrap: nowrap;
+      overflow-x: auto;
     }}
     .tool-group-left {{
       display: flex;
-      gap: 10px;
-      flex: 1;
-      min-width: 300px;
-      flex-wrap: wrap;
-    }}
-    .tool-group-right {{
-      display: flex;
       gap: 8px;
       align-items: center;
+      flex-shrink: 0;
     }}
     .search-box {{
-      flex: 1;
-      min-width: 220px;
-      background: #060911;
+      width: 220px;
+      max-width: 240px;
+      height: 32px;
+      background: #09090b;
       border: 1px solid var(--border);
       color: var(--text);
-      padding: 8px 12px;
+      padding: 0 10px;
       border-radius: 6px;
-      font-size: 14px;
+      font-size: 13px;
     }}
-    .search-box:focus {{ outline: none; border-color: var(--primary); }}
+    .search-box:focus {{ outline: none; border-color: rgba(255, 255, 255, 0.2); }}
     .filter-select {{
-      background: #060911;
+      height: 32px;
+      background: #09090b;
       border: 1px solid var(--border);
-      color: var(--text);
-      padding: 8px 10px;
-      border-radius: 6px;
-      font-size: 13px;
-      cursor: pointer;
-    }}
-
-    .btn-toggle {{
-      background: #060911;
       color: var(--text-muted);
-      border: 1px solid var(--border);
-      padding: 8px 14px;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.15s ease;
-    }}
-    .btn-toggle.active {{
-      background: rgba(56, 189, 248, 0.15);
-      color: var(--primary);
-      border-color: rgba(56, 189, 248, 0.4);
-    }}
-    .btn-sub {{
-      background: transparent;
-      color: var(--text-muted);
-      border: 1px solid var(--border);
-      padding: 7px 12px;
+      padding: 0 10px;
       border-radius: 6px;
       font-size: 12px;
       cursor: pointer;
     }}
-    .btn-sub:hover {{ background: #1e2c42; color: #fff; }}
+    .filter-select:focus {{ outline: none; border-color: rgba(255, 255, 255, 0.2); color: var(--text); }}
 
-    /* ── 族群聚合视图 (Family View) ── */
+    .segmented-control {{
+      background: #09090b;
+      padding: 3px;
+      border-radius: 7px;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      display: inline-flex;
+      gap: 2px;
+      flex-shrink: 0;
+    }}
+    .segmented-btn {{
+      background: transparent;
+      color: #71717a;
+      border: none;
+      border-radius: 5px;
+      height: 26px;
+      padding: 0 12px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }}
+    .segmented-btn.active {{
+      background: #27272a;
+      color: #f4f4f5;
+      font-weight: 600;
+    }}
+
+    .btn-sub {{
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      height: 32px;
+      padding: 0 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }}
+    .btn-sub:hover {{ background: #18181b; color: #f4f4f5; border-color: rgba(255, 255, 255, 0.15); }}
+
+    .legend-bar {{
+      font-size: 12px;
+      color: #71717a;
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+      padding: 0 4px;
+      flex-wrap: wrap;
+    }}
+    .legend-bar span strong {{ color: #a1a1aa; }}
+
+    /* ── 族群聚合卡片 ── */
     .family-card {{
       background: var(--card-bg);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      margin-bottom: 20px;
+      border-radius: 8px;
+      margin-bottom: 14px;
       overflow: hidden;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
     }}
     .family-header {{
-      padding: 14px 20px;
-      background: linear-gradient(90deg, rgba(56, 189, 248, 0.08) 0%, rgba(19, 28, 46, 0.8) 100%);
+      padding: 11px 16px;
+      background: #141418;
       border-bottom: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
       align-items: center;
       cursor: pointer;
       user-select: none;
+      transition: background 0.15s ease;
     }}
+    .family-header:hover {{ background: #18181e; }}
     .family-title-wrap {{
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
+    }}
+    .fold-arrow {{
+      color: var(--text-muted);
+      font-size: 11px;
+      width: 12px;
+      display: inline-block;
+      font-family: var(--font-mono);
     }}
     .family-title {{
-      font-size: 17px;
-      font-weight: 700;
-      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      color: #f4f4f5;
+      font-family: var(--font-mono);
     }}
     .family-cn {{
-      font-size: 13px;
+      font-size: 12px;
       color: var(--text-muted);
       font-weight: 400;
     }}
     .family-badges {{
       display: flex;
-      gap: 8px;
+      gap: 6px;
       align-items: center;
     }}
     .family-body {{
-      padding: 20px;
+      padding: 14px 16px;
     }}
 
-    /* 👑 入口技能卡片 */
+    /* 入口技能卡片 */
     .entry-container {{
-      background: rgba(56, 189, 248, 0.04);
-      border: 1px solid rgba(56, 189, 248, 0.35);
-      border-left: 5px solid var(--primary);
-      border-radius: 8px;
-      padding: 16px 18px;
-      margin-bottom: 16px;
+      background: #18181c;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-left: 3px solid #10b981;
+      border-radius: 6px;
+      padding: 12px 14px;
+      margin-bottom: 12px;
     }}
-    .entry-badge {{
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(56, 189, 248, 0.2);
-      color: var(--primary);
-      font-size: 11px;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 4px;
-      margin-bottom: 8px;
-      border: 1px solid rgba(56, 189, 248, 0.3);
+    .entry-container.no-members {{
+      margin-bottom: 0;
     }}
     .skill-row-main {{
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
+      align-items: center;
       gap: 16px;
       flex-wrap: wrap;
     }}
-    .skill-info {{ flex: 1; min-width: 280px; }}
+    .skill-info {{ flex: 1; min-width: 260px; }}
     .skill-title-line {{
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-size: 16px;
-      font-weight: 700;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
       color: #fff;
     }}
-    .skill-desc-text {{
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-top: 6px;
-      line-height: 1.5;
+    .skill-title-line .skill-name {{
+      font-family: var(--font-mono);
     }}
-    .skill-side {{
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 8px;
+    .skill-desc-text {{
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      line-height: 1.45;
     }}
 
-    /* ↳ 族内从属技能树 */
-    .member-tree {{
-      margin-left: 20px;
-      padding-left: 18px;
-      border-left: 2px dashed #334155;
-    }}
-    .member-tree-header {{
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-bottom: 10px;
+    .skill-side {{
       display: flex;
+      flex-direction: row;
       align-items: center;
-      gap: 8px;
+      gap: 14px;
+      flex-shrink: 0;
+    }}
+
+    /* 从属技能树 */
+    .member-tree {{
+      margin-left: 12px;
+      padding-left: 14px;
+      border-left: 1px dashed rgba(255, 255, 255, 0.1);
     }}
     .member-list {{
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
     }}
     .member-item {{
-      background: #090f1d;
+      background: #121215;
       border: 1px solid var(--border-subtle);
       border-radius: 6px;
-      padding: 12px 16px;
+      padding: 10px 14px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 16px;
       flex-wrap: wrap;
-      transition: border-color 0.15s;
+      transition: border-color 0.15s, background 0.15s;
     }}
     .member-item:hover {{
-      border-color: #475569;
-      background: #0d1527;
+      border-color: rgba(255, 255, 255, 0.12);
+      background: #16161a;
     }}
 
     /* 独立技能专区 */
     .standalone-card {{
       background: var(--card-bg);
-      border: 1px solid rgba(129, 140, 248, 0.3);
-      border-radius: 10px;
-      margin-top: 24px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-top: 14px;
       overflow: hidden;
     }}
-    .standalone-header {{
-      padding: 14px 20px;
-      background: linear-gradient(90deg, rgba(129, 140, 248, 0.1) 0%, rgba(19, 28, 46, 0.8) 100%);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }}
 
-    /* 徽标与点阵 */
+    /* 标签与胶囊 */
     .tag {{
       display: inline-flex;
       align-items: center;
-      padding: 2px 7px;
+      padding: 1px 6px;
       border-radius: 4px;
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 500;
+      font-family: var(--font-mono);
       white-space: nowrap;
     }}
-    .tag-entry {{ background: var(--primary); color: #021224; }}
-    .tag-member {{ background: rgba(148, 163, 184, 0.2); color: #cbd5e1; }}
-    .tag-standalone {{ background: var(--info-bg); color: var(--info); border: 1px solid rgba(129, 140, 248, 0.3); }}
-    .tag-auto {{ background: var(--success-bg); color: var(--success); }}
-    .tag-manual {{ background: var(--warning-bg); color: var(--warning); }}
+    .tag-entry {{
+      background: rgba(16, 185, 129, 0.12);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }}
+    .tag-member, .tag-manual {{
+      background: rgba(255, 255, 255, 0.05);
+      color: #a1a1aa;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }}
+    .tag-standalone {{
+      background: rgba(161, 161, 170, 0.1);
+      color: #d4d4d8;
+      border: 1px solid rgba(161, 161, 170, 0.2);
+    }}
+    .tag-auto {{
+      background: rgba(16, 185, 129, 0.12);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }}
+    .tag-zero {{
+      color: #52525b;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }}
 
+    /* Agent 矩阵点阵 */
     .agent-matrix {{
       display: flex;
-      gap: 5px;
+      gap: 4px;
       align-items: center;
     }}
     .dot-box {{
-      width: 22px;
-      height: 22px;
+      width: 20px;
+      height: 20px;
       border-radius: 4px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 10px;
-      font-weight: 700;
+      font-family: var(--font-mono);
+      font-weight: 600;
       cursor: help;
     }}
-    .dot-mounted {{ background: var(--success-bg); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.4); }}
-    .dot-missing {{ background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.4); }}
-    .dot-extra {{ background: var(--warning-bg); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.4); }}
-    .dot-unmounted {{ background: rgba(148, 163, 184, 0.08); color: #475569; }}
-
-    .badge-status {{
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 12px;
-      font-weight: 600;
-      padding: 3px 8px;
-      border-radius: 4px;
+    .dot-mounted {{
+      background: rgba(16, 185, 129, 0.08);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.2);
     }}
-    .status-ok {{ background: var(--success-bg); color: var(--success); }}
-    .status-warn {{ background: var(--warning-bg); color: var(--warning); }}
-    .status-crit {{ background: var(--danger-bg); color: var(--danger); }}
+    .dot-missing {{
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }}
+    .dot-extra {{
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+    }}
+    .dot-unmounted {{
+      background: rgba(255, 255, 255, 0.03);
+      color: #52525b;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }}
+
+    .commit-cell {{
+      font-size: 11px;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      white-space: nowrap;
+    }}
 
     .deps-pill {{
-      background: #060911;
-      padding: 2px 7px;
+      background: #09090b;
+      padding: 2px 6px;
       border-radius: 4px;
       border: 1px solid var(--border);
       font-size: 11px;
+      font-family: var(--font-mono);
       color: var(--text-muted);
+      white-space: nowrap;
     }}
 
-    /* ── 平铺表格视图 (Flat Table View) ── */
+    /* 平铺表格视图 */
     .table-container {{
       background: var(--card-bg);
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 8px;
       overflow-x: auto;
     }}
     table {{
       width: 100%;
       border-collapse: collapse;
       text-align: left;
-      font-size: 14px;
+      font-size: 13px;
     }}
     th, td {{
-      padding: 12px 16px;
+      padding: 10px 14px;
       border-bottom: 1px solid var(--border);
       vertical-align: middle;
     }}
     th {{
-      background: #090f1d;
-      font-weight: 600;
+      background: #141418;
+      font-weight: 500;
       color: var(--text-muted);
-      font-size: 13px;
+      font-size: 12px;
       white-space: nowrap;
     }}
-    tr:hover {{ background: rgba(56, 189, 248, 0.03); }}
+    tr:hover {{ background: rgba(255, 255, 255, 0.02); }}
 
     footer {{
       margin-top: 32px;
       text-align: center;
       font-size: 12px;
-      color: var(--text-muted);
+      color: #52525b;
+      font-family: var(--font-mono);
     }}
   </style>
 </head>
@@ -673,12 +776,13 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
   <div class="container">
     <header>
       <div class="title-group">
-        <h1>dc-skills · 技能农场驾驶舱 <span class="badge-sub">v1.1</span></h1>
+        <h1>dc-skills · 技能农场驾驶舱</h1>
+        <span class="badge-sub">v1.1</span>
       </div>
       <div class="meta-bar">
-        <span>生成时间: <strong>{html.escape(meta.get('generated_at', '—'))}</strong></span>
-        <span>Commit: <strong>{html.escape(meta.get('master_commit') or '—')}</strong></span>
-        <span>耗时: <strong>{meta.get('duration_ms', 0)} ms</strong></span>
+        <span class="meta-pill">生成时间 <strong>{cleaned_ts}</strong></span>
+        <span class="meta-pill">Commit <strong>{master_commit}</strong></span>
+        <span class="meta-pill">耗时 <strong>{duration_str}</strong></span>
       </div>
     </header>
 
@@ -693,23 +797,26 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
       </div>
       <div class="card">
         <div class="label">启动清单注入状态</div>
-        <div class="val" style="color: var(--primary);">
-          {load_modes.get('auto', 0)} <span class="sub">Auto (入口)</span>
-          <span style="color: var(--text-muted); font-size: 16px; margin: 0 4px;">/</span>
-          {load_modes.get('manual', 0)} <span class="sub">Manual (按需)</span>
+        <div class="val" style="color: var(--text);">
+          <span>{load_modes.get('auto', 0)}</span> <span class="tag tag-auto" style="margin-left: 4px;">Auto 入口</span>
+          <span style="color: #3f3f46; font-size: 16px; margin: 0 8px; font-weight: 300;">/</span>
+          <span style="color: #a1a1aa;">{load_modes.get('manual', 0)}</span> <span class="tag tag-manual" style="margin-left: 4px;">Manual 按需</span>
         </div>
       </div>
       <div class="card">
         <div class="label">全资产巡检状态</div>
-        <div class="val">
-          <span style="color: {'var(--danger)' if doctor.get('crit',0)>0 else 'var(--success)'};">
-            🚨 {doctor.get('crit', 0)}
+        <div class="val kpi-doctor">
+          <span class="kpi-dot-item" style="color: {'var(--danger)' if doctor.get('crit', 0) > 0 else '#52525b'};">
+            <span class="kpi-dot" style="background: {'var(--danger)' if doctor.get('crit', 0) > 0 else '#52525b'};"></span>
+            <strong>{doctor.get('crit', 0)}</strong> 异常
           </span>
-          <span style="color: var(--warning); margin-left: 10px;">
-            ⚠️ {doctor.get('warn', 0)}
+          <span class="kpi-dot-item" style="color: {'#f59e0b' if doctor.get('warn', 0) > 0 else '#52525b'};">
+            <span class="kpi-dot" style="background: {'#f59e0b' if doctor.get('warn', 0) > 0 else '#52525b'};"></span>
+            <strong>{doctor.get('warn', 0)}</strong> 警告
           </span>
-          <span style="color: var(--success); margin-left: 10px;">
-            ✅ {doctor.get('ok', 0)}
+          <span class="kpi-dot-item" style="color: #10b981;">
+            <span class="kpi-dot" style="background: #10b981;"></span>
+            <strong style="color: #f4f4f5;">{doctor.get('ok', 0)}</strong> 正常
           </span>
         </div>
       </div>
@@ -717,41 +824,47 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
 
     <div class="toolbar">
       <div class="tool-group-left">
-        <input type="text" id="searchInput" class="search-box" placeholder="搜索技能名称、描述、族群或依赖...">
+        <input type="text" id="searchInput" class="search-box" placeholder="搜索技能、描述或依赖...">
         <select id="familyFilter" class="filter-select">
-          <option value="all">全家族群 (All Families)</option>
+          <option value="all">全部族群</option>
         </select>
         <select id="roleFilter" class="filter-select">
-          <option value="all">全角色 (Role: All)</option>
-          <option value="entry">Entry (👑 族群入口)</option>
-          <option value="member">Member (↳ 族内成员)</option>
-          <option value="standalone">Standalone (🛠️ 独立技能)</option>
+          <option value="all">全部角色</option>
+          <option value="entry">Entry (入口)</option>
+          <option value="member">Member (成员)</option>
+          <option value="standalone">Standalone (独立)</option>
         </select>
         <select id="loadFilter" class="filter-select">
-          <option value="all">全模式 (Load: All)</option>
-          <option value="auto">Auto (随上下文注入)</option>
-          <option value="manual">Manual (按需显式调用)</option>
+          <option value="all">全部模式</option>
+          <option value="auto">Auto (自动注入)</option>
+          <option value="manual">Manual (按需调用)</option>
         </select>
         <select id="statusFilter" class="filter-select">
-          <option value="all">全状态 (Status: All)</option>
-          <option value="ok">✅ 正常</option>
-          <option value="warn">⚠️ 警告</option>
-          <option value="crit">🚨 异常</option>
+          <option value="all">全部状态</option>
+          <option value="ok">正常</option>
+          <option value="warn">警告</option>
+          <option value="crit">异常</option>
         </select>
       </div>
 
-      <div class="tool-group-right">
-        <button id="btnViewFamily" class="btn-toggle active" onclick="switchView('family')">🏢 族群聚合视图</button>
-        <button id="btnViewTable" class="btn-toggle" onclick="switchView('table')">📋 平铺表格</button>
+      <div class="tool-group-right" style="display:flex; gap:8px; align-items:center; flex-shrink:0;">
+        <div class="segmented-control">
+          <button id="btnViewFamily" class="segmented-btn active" onclick="switchView('family')">族群视图</button>
+          <button id="btnViewTable" class="segmented-btn" onclick="switchView('table')">平铺表格</button>
+        </div>
         <button class="btn-sub" onclick="toggleAllFamilies(true)">全部展开</button>
         <button class="btn-sub" onclick="toggleAllFamilies(false)">全部折叠</button>
       </div>
     </div>
 
-    <!-- 1. 族群聚合视图 (默认) -->
-    <div id="familyView">
-      <!-- JS 渲染各个族群卡片与从属树 -->
+    <div class="legend-bar">
+      <span><strong style="color:#10b981;">3px 绿线 / Auto</strong> 入口网关技能（随上下文注入启动清单）</span>
+      <span><strong style="color:#a1a1aa;">Member / Manual</strong> 从属技能（不占启动上下文，/name 显式调用或由入口路由）</span>
+      <span><strong style="color:#d4d4d8;">Standalone</strong> 独立运维技能（不入族群，全 Agent 挂载，Manual 按需调用）</span>
     </div>
+
+    <!-- 1. 族群聚合视图 (默认) -->
+    <div id="familyView"></div>
 
     <!-- 2. 平铺表格视图 (可选) -->
     <div id="tableView" style="display: none;">
@@ -763,15 +876,13 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
               <th>族群</th>
               <th>角色</th>
               <th>加载模式</th>
-              <th>5 大 Agent 挂载点 (C / G / D / Z / X)</th>
+              <th>5 大 Agent 挂载 (C / G / D / Z / X)</th>
               <th>依赖 (CLI / MCP)</th>
               <th>上次更新</th>
               <th>巡检状态</th>
             </tr>
           </thead>
-          <tbody id="skillsTbody">
-            <!-- JS 渲染 -->
-          </tbody>
+          <tbody id="skillsTbody"></tbody>
         </table>
       </div>
     </div>
@@ -805,11 +916,9 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
     let currentView = 'family';
     let familyCollapsedState = {{}};
 
-    // 建立名称索引
     const skillMap = {{}};
     skills.forEach(s => {{ skillMap[s.name] = s; }});
 
-    // 填充族群下拉列表
     const famNames = Array.from(new Set(skills.map(s => s.family).filter(Boolean))).sort();
     const familySelect = document.getElementById('familyFilter');
     famNames.forEach(f => {{
@@ -820,7 +929,7 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
     }});
     const optNone = document.createElement('option');
     optNone.value = "__none__";
-    optNone.textContent = "🛠️ 独立技能 (Standalone)";
+    optNone.textContent = "独立技能 (Standalone)";
     familySelect.appendChild(optNone);
 
     function agentChar(agent) {{
@@ -840,16 +949,20 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
     }}
 
     function renderDepsPills(deps) {{
-      if (!deps) return '—';
+      if (!deps) return '';
       const clis = (deps.cli || []).map(c => `<span class="deps-pill">CLI:${{c}}</span>`).join('');
       const mcps = (deps.mcp || []).map(m => `<span class="deps-pill">MCP:${{m}}</span>`).join('');
-      return (clis + mcps) || '<span style="color:#64748b;">无</span>';
+      return (clis + mcps);
     }}
 
     function renderStatusBadge(s) {{
-      const stClass = s.status === 'ok' ? 'status-ok' : (s.status === 'warn' ? 'status-warn' : 'status-crit');
-      const icon = s.status === 'ok' ? '✅' : (s.status === 'warn' ? '⚠️' : '🚨');
-      return `<span class="badge-status ${{stClass}}" title="${{s.status_hint || ''}}">${{icon}} ${{s.status}}</span>`;
+      if (s.status === 'ok') {{
+        return `<span style="color:#71717a; font-size:12px; font-family:var(--font-mono); display:inline-flex; align-items:center; gap:5px;"><span style="color:#10b981; font-size:9px;">●</span> OK</span>`;
+      }}
+      if (s.status === 'warn') {{
+        return `<span style="background:rgba(245,158,11,0.12); color:#f59e0b; border:1px solid rgba(245,158,11,0.25); padding:2px 7px; border-radius:4px; font-size:11px; font-weight:600; font-family:var(--font-mono); display:inline-flex; align-items:center; gap:5px;"><span style="font-size:9px;">●</span> WARN</span>`;
+      }}
+      return `<span style="background:rgba(239,68,68,0.12); color:#ef4444; border:1px solid rgba(239,68,68,0.25); padding:2px 7px; border-radius:4px; font-size:11px; font-weight:600; font-family:var(--font-mono); display:inline-flex; align-items:center; gap:5px;"><span style="font-size:9px;">●</span> CRIT</span>`;
     }}
 
     function filterMatches(s, q, fam, role, load, status) {{
@@ -870,7 +983,6 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
       return true;
     }}
 
-    // ── 渲染族群聚合视图 ──
     function renderFamilyView() {{
       const container = document.getElementById('familyView');
       container.innerHTML = '';
@@ -883,16 +995,12 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
 
       let renderedAny = false;
 
-      // 遍历 12 族群
       familiesList.forEach(f => {{
         const entrySkill = skillMap[f.entry];
         const memberSkills = (f.members || []).map(mName => skillMap[mName]).filter(Boolean);
 
-        // 过滤
         const matchEntry = entrySkill && filterMatches(entrySkill, q, fam, role, load, status);
         const matchedMembers = memberSkills.filter(m => filterMatches(m, q, fam, role, load, status));
-
-        // 如果用户按族群筛选，或者搜索命中族群名，全显
         const matchFamilyDirect = fam === f.name || (q && f.name.toLowerCase().includes(q));
 
         if (!matchEntry && matchedMembers.length === 0 && !matchFamilyDirect) {{
@@ -907,7 +1015,6 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
         const membersCount = memberSkills.length;
         const famTitle = FAMILY_TITLES[f.name] || f.name;
 
-        // 族群头部
         const headerDiv = document.createElement('div');
         headerDiv.className = 'family-header';
         headerDiv.onclick = () => {{
@@ -915,43 +1022,51 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
           renderFamilyView();
         }};
 
+        const depsHtml = renderDepsPills(f.deps);
+        const memberBadgeHtml = membersCount === 0 
+          ? `<span class="tag tag-zero">0 成员</span>`
+          : `<span class="tag tag-member">${{membersCount}} 成员</span>`;
+
         headerDiv.innerHTML = `
           <div class="family-title-wrap">
-            <span class="family-title">📁 ${{f.name}}</span>
+            <span class="fold-arrow">${{isCollapsed ? '▸' : '▾'}}</span>
+            <span class="family-title">${{f.name}}</span>
             <span class="family-cn">${{famTitle}}</span>
           </div>
           <div class="family-badges">
-            <span class="deps-pill">依赖: ${{renderDepsPills(f.deps)}}</span>
-            <span class="tag tag-entry">1 入口 (Auto)</span>
-            <span class="tag tag-member">${{membersCount}} 成员 (Manual)</span>
-            <span class="btn-sub" style="padding:2px 8px; font-size:11px;">${{isCollapsed ? '展开 +' : '折叠 -'}}</span>
+            ${{depsHtml ? `<span style="display:inline-flex; gap:4px;">${{depsHtml}}</span>` : ''}}
+            <span class="tag tag-entry">1 入口</span>
+            ${{memberBadgeHtml}}
           </div>
         `;
         card.appendChild(headerDiv);
 
-        // 族群主体
         if (!isCollapsed) {{
           const bodyDiv = document.createElement('div');
           bodyDiv.className = 'family-body';
 
-          // 1. 渲染 Entry 技能
           if (entrySkill) {{
             const entryDiv = document.createElement('div');
-            entryDiv.className = 'entry-container';
+            entryDiv.className = 'entry-container' + (membersCount === 0 ? ' no-members' : '');
+            
+            const warnHintHtml = entrySkill.status !== 'ok'
+              ? `<div style="font-size:12px; color:#f59e0b; margin-top:4px; font-family:var(--font-mono);">${{entrySkill.status_hint}}</div>`
+              : '';
+
             entryDiv.innerHTML = `
-              <div class="entry-badge">👑 族群入口网关 · Auto 随上下文注入启动清单</div>
               <div class="skill-row-main">
                 <div class="skill-info">
                   <div class="skill-title-line">
-                    <span>${{entrySkill.name}}</span>
+                    <span class="skill-name">${{entrySkill.name}}</span>
                     <span class="tag tag-entry">${{entrySkill.role}}</span>
                     <span class="tag tag-auto">${{entrySkill.load_mode}}</span>
                   </div>
                   <div class="skill-desc-text">${{entrySkill.description || '—'}}</div>
+                  ${{warnHintHtml}}
                 </div>
                 <div class="skill-side">
                   <div class="agent-matrix">${{renderMatrixDots(entrySkill.mounts)}}</div>
-                  <div style="font-size:12px; color:var(--text-muted);">${{entrySkill.last_commit || '—'}}</div>
+                  <div class="commit-cell">${{entrySkill.last_commit || '—'}}</div>
                   <div>${{renderStatusBadge(entrySkill)}}</div>
                 </div>
               </div>
@@ -959,15 +1074,9 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
             bodyDiv.appendChild(entryDiv);
           }}
 
-          // 2. 渲染 Member 技能树
           if (memberSkills.length > 0) {{
             const treeDiv = document.createElement('div');
             treeDiv.className = 'member-tree';
-            treeDiv.innerHTML = `
-              <div class="member-tree-header">
-                <span>↳ 族内从属技能树 (Member · Manual 模式 · 不占启动上下文 · 仅按需调用或入口路由)</span>
-              </div>
-            `;
 
             const listDiv = document.createElement('div');
             listDiv.className = 'member-list';
@@ -975,19 +1084,24 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
             memberSkills.forEach(m => {{
               const itemDiv = document.createElement('div');
               itemDiv.className = 'member-item';
+              const mWarnHintHtml = m.status !== 'ok'
+                ? `<div style="font-size:12px; color:#f59e0b; margin-top:4px; font-family:var(--font-mono); padding-left:18px;">${{m.status_hint}}</div>`
+                : '';
+
               itemDiv.innerHTML = `
                 <div class="skill-info">
-                  <div class="skill-title-line" style="font-size:15px;">
-                    <span style="color:#94a3b8; font-weight:400;">├─</span>
-                    <span>${{m.name}}</span>
+                  <div class="skill-title-line">
+                    <span style="color:#52525b; font-family:var(--font-mono); font-weight:400; font-size:13px;">├─</span>
+                    <span class="skill-name">${{m.name}}</span>
                     <span class="tag tag-member">${{m.role}}</span>
                     <span class="tag tag-manual">${{m.load_mode}}</span>
                   </div>
-                  <div class="skill-desc-text" style="padding-left:22px;">${{m.description || '—'}}</div>
+                  <div class="skill-desc-text" style="padding-left:18px;">${{m.description || '—'}}</div>
+                  ${{mWarnHintHtml}}
                 </div>
                 <div class="skill-side">
                   <div class="agent-matrix">${{renderMatrixDots(m.mounts)}}</div>
-                  <div style="font-size:12px; color:var(--text-muted);">${{m.last_commit || '—'}}</div>
+                  <div class="commit-cell">${{m.last_commit || '—'}}</div>
                   <div>${{renderStatusBadge(m)}}</div>
                 </div>
               `;
@@ -996,11 +1110,6 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
 
             treeDiv.appendChild(listDiv);
             bodyDiv.appendChild(treeDiv);
-          }} else {{
-            const emptyNote = document.createElement('div');
-            emptyNote.style.cssText = 'padding: 4px 12px; color:#64748b; font-size:12px; font-style:italic;';
-            emptyNote.textContent = '单体族群 · 暂无下属成员技能';
-            bodyDiv.appendChild(emptyNote);
           }}
 
           card.appendChild(bodyDiv);
@@ -1009,7 +1118,7 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
         container.appendChild(card);
       }});
 
-      // 3. 渲染独立技能专区 (Standalone)
+      // 独立技能专区
       const standaloneSkills = skills.filter(s => s.role === 'standalone');
       const matchedStandalone = standaloneSkills.filter(s => filterMatches(s, q, fam, role, load, status));
 
@@ -1017,45 +1126,70 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
         renderedAny = true;
         const standCard = document.createElement('div');
         standCard.className = 'standalone-card';
-        standCard.innerHTML = `
-          <div class="standalone-header">
-            <div class="family-title-wrap">
-              <span class="family-title" style="color:var(--info);">🛠️ 独立手动技能 (Standalone)</span>
-              <span class="family-cn">全 Agent 挂载 · 不入族群 · Manual 按需触发 · 零启动上下文占用</span>
-            </div>
+        const isCollapsed = Boolean(familyCollapsedState['__standalone__']);
+
+        const sHeader = document.createElement('div');
+        sHeader.className = 'family-header';
+        sHeader.onclick = () => {{
+          familyCollapsedState['__standalone__'] = !familyCollapsedState['__standalone__'];
+          renderFamilyView();
+        }};
+        sHeader.innerHTML = `
+          <div class="family-title-wrap">
+            <span class="fold-arrow">${{isCollapsed ? '▸' : '▾'}}</span>
+            <span class="family-title" style="color:#e4e4e7;">standalone</span>
+            <span class="family-cn">独立手动技能 (全 Agent 挂载 · Manual 显式调用 · 零启动上下文)</span>
+          </div>
+          <div class="family-badges">
             <span class="tag tag-standalone">${{matchedStandalone.length}} 技能</span>
           </div>
-          <div class="family-body">
-            <div class="member-list">
-              ${{matchedStandalone.map(s => `
-                <div class="member-item" style="border-color:rgba(129, 140, 248, 0.2);">
-                  <div class="skill-info">
-                    <div class="skill-title-line" style="font-size:15px;">
-                      <span>${{s.name}}</span>
-                      <span class="tag tag-standalone">${{s.role}}</span>
-                      <span class="tag tag-manual">${{s.load_mode}}</span>
-                    </div>
-                    <div class="skill-desc-text">${{s.description || '—'}}</div>
-                  </div>
-                  <div class="skill-side">
-                    <div class="agent-matrix">${{renderMatrixDots(s.mounts)}}</div>
-                    <div style="font-size:12px; color:var(--text-muted);">${{s.last_commit || '—'}}</div>
-                    <div>${{renderStatusBadge(s)}}</div>
-                  </div>
-                </div>
-              `).join('')}}
-            </div>
-          </div>
         `;
+        standCard.appendChild(sHeader);
+
+        if (!isCollapsed) {{
+          const sBody = document.createElement('div');
+          sBody.className = 'family-body';
+          const listDiv = document.createElement('div');
+          listDiv.className = 'member-list';
+
+          matchedStandalone.forEach(s => {{
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'member-item';
+            const sWarnHintHtml = s.status !== 'ok'
+              ? `<div style="font-size:12px; color:#f59e0b; margin-top:4px; font-family:var(--font-mono);">${{s.status_hint}}</div>`
+              : '';
+
+            itemDiv.innerHTML = `
+              <div class="skill-info">
+                <div class="skill-title-line">
+                  <span class="skill-name">${{s.name}}</span>
+                  <span class="tag tag-standalone">${{s.role}}</span>
+                  <span class="tag tag-manual">${{s.load_mode}}</span>
+                </div>
+                <div class="skill-desc-text">${{s.description || '—'}}</div>
+                ${{sWarnHintHtml}}
+              </div>
+              <div class="skill-side">
+                <div class="agent-matrix">${{renderMatrixDots(s.mounts)}}</div>
+                <div class="commit-cell">${{s.last_commit || '—'}}</div>
+                <div>${{renderStatusBadge(s)}}</div>
+              </div>
+            `;
+            listDiv.appendChild(itemDiv);
+          }});
+
+          sBody.appendChild(listDiv);
+          standCard.appendChild(sBody);
+        }}
+
         container.appendChild(standCard);
       }}
 
       if (!renderedAny) {{
-        container.innerHTML = '<div class="card" style="text-align:center; padding:48px; color:var(--text-muted);">未匹配到任何技能或族群</div>';
+        container.innerHTML = '<div class="card" style="text-align:center; padding:48px; color:var(--text-muted); font-size:13px;">未匹配到任何技能或族群</div>';
       }}
     }}
 
-    // ── 渲染平铺表格视图 ──
     function renderTableView() {{
       const tbody = document.getElementById('skillsTbody');
       tbody.innerHTML = '';
@@ -1069,7 +1203,7 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
       const filtered = skills.filter(s => filterMatches(s, q, fam, role, load, status));
 
       if (filtered.length === 0) {{
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#94a3b8; padding:32px;">未匹配到任何技能条目</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#71717a; padding:32px; font-size:13px;">未匹配到任何技能条目</td></tr>';
         return;
       }}
 
@@ -1077,18 +1211,22 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
         const tr = document.createElement('tr');
         const roleClass = s.role === 'entry' ? 'tag-entry' : (s.role === 'member' ? 'tag-member' : 'tag-standalone');
         const loadClass = s.load_mode === 'auto' ? 'tag-auto' : 'tag-manual';
+        const warnHintHtml = s.status !== 'ok'
+          ? `<div style="font-size:11px; color:#f59e0b; margin-top:2px; font-family:var(--font-mono);">${{s.status_hint}}</div>`
+          : '';
 
         tr.innerHTML = `
           <td>
-            <div style="font-weight:600; color:#fff;">${{s.name}}</div>
+            <div style="font-weight:600; color:#fff; font-family:var(--font-mono);">${{s.name}}</div>
             <div style="font-size:12px; color:var(--text-muted); max-width:320px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${{s.description || '—'}}</div>
+            ${{warnHintHtml}}
           </td>
-          <td>${{s.family || '—'}}</td>
+          <td style="font-family:var(--font-mono); color:#d4d4d8;">${{s.family || '—'}}</td>
           <td><span class="tag ${{roleClass}}">${{s.role}}</span></td>
           <td><span class="tag ${{loadClass}}">${{s.load_mode}}</span></td>
           <td><div class="agent-matrix">${{renderMatrixDots(s.mounts)}}</div></td>
-          <td style="font-size:12px;">${{renderDepsPills(s.deps)}}</td>
-          <td style="font-size:12px; color:var(--text-muted);">${{s.last_commit || '—'}}</td>
+          <td style="font-size:12px;">${{renderDepsPills(s.deps) || '—'}}</td>
+          <td class="commit-cell">${{s.last_commit || '—'}}</td>
           <td>${{renderStatusBadge(s)}}</td>
         `;
         tbody.appendChild(tr);
@@ -1116,6 +1254,7 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
       familiesList.forEach(f => {{
         familyCollapsedState[f.name] = !expand;
       }});
+      familyCollapsedState['__standalone__'] = !expand;
       if (currentView === 'family') {{
         renderFamilyView();
       }}
@@ -1127,7 +1266,6 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
     document.getElementById('loadFilter').addEventListener('change', renderAll);
     document.getElementById('statusFilter').addEventListener('change', renderAll);
 
-    // 默认展示族群聚合视图
     renderAll();
   </script>
 </body>

@@ -5,3 +5,7 @@ metadata:
   # Gradual adoption: documents without metadata are warnings, not errors.
   # Set this to true once the corpus is fully onboarded.
   required: false
+links:
+  # 2026-10-15: MDL404 代码围栏路径探知（mdlineage v0.5.0+，issue #5）。
+  # corpus 档只校验解析后落在语料根内的相对路径；机器路径/URL/占位符走 MDL403 口径。
+  codeFences: corpus

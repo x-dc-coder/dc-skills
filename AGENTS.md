@@ -5,7 +5,8 @@
 仓库启用 `githooks/pre-commit`（首次克隆后执行 `git config core.hooksPath githooks` 启用）。
 每次提交自动跑三项检查，任一失败即拒绝提交：
 
-1. `mdlineage check --changed`——失效 Markdown 链接拦截（写作规范 B10 的执行器）
+1. `mdlineage check --changed`——失效链接与代码围栏路径拦截（MDL401/MDL404，写作规范 B10 的执行器；
+   存量教学噪声经 `.mdlineage-baseline.json` 债务管理）
 2. 路由不变量测试——入口 description 与正文不得指向已删除的族/技能
 3. `skills-sync --check`——agent-map.yaml 与各 Agent 软链农场零漂移
 

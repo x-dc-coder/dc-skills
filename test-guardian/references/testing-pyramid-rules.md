@@ -299,6 +299,7 @@ tests/
 - 纯 stdlib（`ast` + `pathlib` + `argparse`），零依赖，任何环境可跑。
 - 用法：
   ```bash
+  # 在目标项目内执行（已按 §5 拷贝 check_test_hygiene.py 到该项目 tools/）
   python tools/check_test_hygiene.py tests/ --own-packages app,wordprod
   python tools/check_test_hygiene.py tests/ --rules R2,R4      # 只跑部分规则
   python tools/check_test_hygiene.py tests/ --rules naming     # 命名门禁

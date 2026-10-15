@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "generatedAt": "2026-10-15T11:23:28.676Z",
+  "codes": {
+    "MDL404": [
+      "AGENTS.md",
+      "debugging/references/methodology/partial-runtime-evidence.md",
+      "debugging/references/runtimes/bundled-js-binary.md",
+      "debugging/references/tools/ghidra.md",
+      "debugging/references/tools/pwndbg.md",
+      "debugging/references/tools/pwntools.md",
+      "programming/references/go/one-liners.md",
+      "test-guardian/references/testing-pyramid-rules.md"
+    ]
+  }
+}
