@@ -1,5 +1,14 @@
 # Agent 技能项目（dc-skills）
 
+## 提交门禁（pre-commit）
+
+仓库启用 `githooks/pre-commit`（首次克隆后执行 `git config core.hooksPath githooks` 启用）。
+每次提交自动跑三项检查，任一失败即拒绝提交：
+
+1. `mdlineage check --changed`——失效 Markdown 链接拦截（写作规范 B10 的执行器）
+2. 路由不变量测试——入口 description 与正文不得指向已删除的族/技能
+3. `skills-sync --check`——agent-map.yaml 与各 Agent 软链农场零漂移
+
 ## 核心约束：Python 脚本执行目录
 
 **所有 skill 中的 Python 脚本必须先 `cd` 到 `~/projects/dc-skills` 再通过 uv 执行**，绝不能依赖用户当前项目的 `pyproject.toml`。
@@ -12,6 +21,10 @@ cd ~/projects/dc-skills && uv run python <skill-name>/scripts/<script>.py ...
 
 - `cd ~/projects/dc-skills` 确保 uv 的 `pyproject.toml` 解析起点正确
 - 技能脚本位于各自的子目录下，如 `github-workflow/scripts/github_bootstrap.py`
+- 已登记例外（2026-10-15）：`github-workflow` 全部脚本与 `test-guardian audit --staged` 需要以
+  目标仓库为 cwd（脚本从 git remote / 暂存区取上下文），用
+  `uv run --project ~/projects/dc-skills python ~/projects/dc-skills/<skill>/scripts/<script>.py`
+  固定依赖环境、保持当前目录不变
 
 ### 为什么是 `cd` 而非 `--directory`
 

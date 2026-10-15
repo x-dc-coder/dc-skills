@@ -11,13 +11,12 @@
 ```
 ~/projects/dc-skills/
 ├── README.md              # 本说明文档
-├── AGENT.md              # 执行约束（cd ~/projects/dc-skills 再 uv run）；CLAUDE.md/AGENTS.md 为兼容软链
-├── AGENT.md              # 三条铁律（执行目录/输出/单一副本）；CLAUDE.md、AGENTS.md 为兼容软链
-├── docs/                  # 文档归类：specs（规范）/ arch（登记）/ runbook（手册）/ research（档案）
+├── AGENTS.md              # 执行约束与三条铁律（唯一实体，无软链）
+├── docs/                  # 文档归类：specs（规范）/ arch（登记）/ runbook（手册）/ research（档案，历史快照）
 │   ├── INDEX.md           # ⭐ 全局文档索引（唯一文档地图）
 ├── pyproject.toml / uv.lock / .venv/   # 统一依赖与虚拟环境（轻量 skill 共享）
 │
-├── lark-cli/              # 飞书/Lark 聚合技能（23 域统一入口）
+├── lark-cli/              # 飞书/Lark 聚合技能（28 域统一入口）
 │   ├── SKILL.md           # 路由表 + 共享底座 + 维护命令
 │   └── resources/         # CLI 不内嵌的机器资源（scripts/创意资产/模板）
 ├── diagram/               # 图表聚合入口。flow 在 references/flow.md，没有 diagram-flow 目录
@@ -39,10 +38,9 @@
 │
 ├── db-skill/              # MySQL/PostgreSQL 工具
 ├── word-extractor/        # .docx 提取
-├── unified-search/        # 7 源聚合搜索（含 keenable 源，原 keenable-cli 已并入）
+├── unified-search/        # 10 源聚合搜索（含 keenable 源，原 keenable-cli 已并入）
 ├── github-workflow/       # GitHub-first git 工作流（gh CLI）
 ├── drawio-xml/            # .drawio 图表（MCP 协同，npx 按需拉取）
-├── officecli/             # Office 文档（docx/xlsx/pptx）
 ├── kimi-webbridge/        # 真实浏览器控制（daemon）
 ├── vision-workflow/       # 视觉任务编排（Vision MCP）
 ├── thesis-writing/  thesis-ref-check/  md-to-thesis-latex/   # 论文写作族
@@ -50,7 +48,6 @@
 │
 ├── paper-reader/          # ⚠️ 例外：持有独立重型 venvs
 │   └── venvs/             # marker ~5.1GB / mineru ~613MB（GPU 模型权重，不共享）
-├── thesis-export/         # 论文 Markdown→docx 导出编排（原 ~/.dsh/skills 真实目录）
 ├── debugging/ git-master/ programming/ remove-ai-slops/  # omo vendor 4 技能（oh-my-openagent 4.17.1）
 ├── dsh-ui-optimization/  dsh-plugin-troubleshooting/     # DSH 插件技能（plugin-specialist 预设）
 └── wsl-windows-bridge/    # WSL→Windows 桥接（系统 Python，不纳入统一 .venv）
@@ -58,13 +55,13 @@
 
 ## 技能农场：全机唯一物理目录 + 各 Agent 软链接
 
-主库是全机唯一物理技能目录（git 仓库，远端为 GitHub）。每个 Agent 只通过自己技能目录里的软链接看到启用技能；未登记的技能对任何 Agent 不可见。唯一事实源为根目录 `agent-map.yaml`，由 `scripts/skills-sync` 物化：
+主库是全机唯一物理技能目录（git 仓库，远端为 GitHub）。每个 Agent 只通过自己技能目录里的软链接看到启用技能；未登记的技能对任何 Agent 不可见。唯一事实源为根目录 `agent-map.yaml`，由 [`scripts/skills-sync`](scripts/skills-sync) 物化：
 
 | Agent | 农场目录 | 默认技能 |
 |-------|---------|---------|
 | Claude Code | `~/.claude/skills` | base |
 | Grok | `~/.grok/skills` | base |
-| dsh | `~/.dsh/skills` | base + extra（thesis-export / dsh-ui-optimization） |
+| dsh | `~/.dsh/skills` | base |
 | zcode | `~/.zcode/skills` | base |
 | Codex | `~/.codex/skills` | base |
 
@@ -86,7 +83,7 @@ uv run python scripts/skills-sync --check  # 只检查漂移，不修改
 |------|------|-------------|------|
 | **A. 统一共享** | `.venv/` 符号链接 | diagram 聚合的脚本目录（diagram-er/ers/module/sequence/usecase）、db-skill、word-extractor、unified-search、github-workflow、thesis-writing、paper-metrics | 依赖轻量（Pillow/sqlglot/psycopg2/requests/pytest 等），共享一份 venv |
 | **B. 独立重型** | skill 内 `venvs/` | paper-reader | 含 GPU 模型权重（5GB+），不可合并，`.gitignore` 已忽略 |
-| **C. 无统一 venv** | 系统/Windows Python 或二进制 | diagram-draft/flow、design-ui/diagram/dataviz（纯文档）、lark-cli（Node）、drawio-xml（npx）、officecli（二进制）、kimi-webbridge、md-to-thesis-latex、thesis-ref-check、wsl-windows-bridge | 无统一 venv（系统/Windows Python 或自带运行时） |
+| **C. 无统一 venv** | 系统/Windows Python 或二进制 | diagram-draft/flow、design-ui/diagram/dataviz（纯文档）、lark-cli（Node）、drawio-xml（npx）、kimi-webbridge、md-to-thesis-latex、thesis-ref-check、wsl-windows-bridge | 无统一 venv（系统/Windows Python 或自带运行时） |
 
 ## 统一执行约定（所有 Python skill 必须遵守）
 
@@ -111,7 +108,7 @@ diagram 聚合技能（er/ers/module/sequence/usecase 五类）使用 Python 包
 cd ~/projects/dc-skills/diagram-er && uv run python -m scripts.cli ...
 ```
 
-这是因为 `-m scripts.cli` 要求 `scripts/` 在 cwd 下；脚本内 `sys.path` 引用顶层 `scripts/common.py`
+这是因为 `-m scripts.cli` 要求 `scripts/` 在 cwd 下；脚本内 `sys.path` 引用顶层 [`scripts/common.py`](scripts/common.py)
 （`plan_output`，实现 docs/specs/输出规范.md C-1）。其 `.venv` 符号链接确保 uv 仍解析到统一环境。
 类型路由与使用规范见 `diagram/SKILL.md`。
 
