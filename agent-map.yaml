@@ -72,7 +72,6 @@ base:
   - db-skill            # 只处理 MySQL/PostgreSQL（standalone auto）
   - wsl-windows-bridge  # WSL→Windows 跨边界框架（standalone auto）
   - word-extractor      # .docx 高精度提取（standalone manual）
-  - lark-cli            # 飞书全家桶统一入口，28 域内聚（standalone auto）
   # ── dshplugin（entry 与 member 都在 base，否则成员没有自动入口）──
   - dsh-plugin-troubleshooting  # DSH 插件故障排查（entry，auto）
   - dsh-ui-optimization         # DSH 插件 UI 优化（member；plugin-specialist 预设亦挂载）
@@ -81,6 +80,7 @@ base:
   - proxy-ops
   - cloudreve-storage   # Cloudreve 云存储（standalone manual，2026-10-15 出 agentops）
   - agent-balances      # 查询各编程 Agent 额度与用量（standalone manual，2026-10-15 出 agentops）
+  - unified-gateway     # 本地统一模型网关运维（standalone manual）
 
 # 按需技能：默认不进任何农场。目前为空；新的按需技能写在这里，再放进某个 agent 的 extra。
 on_demand:
@@ -153,16 +153,17 @@ standalone:
   agent-balances:
     load: manual
     description: "查询各编程 Agent 额度与用量余额（2026-10-15 出 agentops 转单体）"
-  # ── 2026-10-15 单体族解散：四技能转 standalone auto（保持原 entry 自动触发不变）──
+  unified-gateway:
+    load: manual
+    description: "统一大模型网关运维：渠道增删、测速诊断、冷却复位与路由调优"
+  # ── 2026-10-15 单体族解散：三技能转 standalone auto（保持原 entry 自动触发不变）──
+  # （lark-cli 已于同日退役：官方 28 域技能改走社区 skills CLI 驻着陆区，见技能管理.md 变更日志）
   db-skill:
     load: auto
     description: "MySQL/PostgreSQL 查询与写入"
   wsl-windows-bridge:
     load: auto
     description: "WSL→Windows 跨边界框架：本地调用/SSH 特权/GPU 治理"
-  lark-cli:
-    load: auto
-    description: "飞书/Lark 全家桶统一入口（28 域聚合）"
   dc-skill-creator:
     load: auto
     description: "本仓库技能创建工具：脚手架生成 + 规则校验"
