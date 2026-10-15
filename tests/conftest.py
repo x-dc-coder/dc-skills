@@ -15,6 +15,8 @@ import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
 SCRIPTS_DIR = ROOT / "scripts"
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
 
 
 def load_script_module(script_name: str, module_name: str | None = None, reload: bool = False) -> Any:

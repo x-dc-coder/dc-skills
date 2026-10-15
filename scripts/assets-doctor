@@ -40,9 +40,10 @@ import urllib.request
 from datetime import date, datetime
 from pathlib import Path
 
-# 支持同目录导入 farm_model
+# 支持同目录导入 farm_model 与 snapshot
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from farm_model import FarmModelError, iter_members
+from snapshot import build_snapshot, export_snapshot, render_html_dashboard
 
 try:
     import yaml
@@ -620,6 +621,19 @@ def render(rep: Report, args: argparse.Namespace, started: float) -> int:
             todo = [i["name"] for i in rep.items if i["level"] == "crit"] or \
                    [i["name"] for i in rep.items if i["level"] == "warn"][:3]
             print(f"待办: {', '.join(dict.fromkeys(todo))}")
+
+    # 导出快照或生成 HTML 驾驶舱
+    if getattr(args, "export_snapshot", False) or getattr(args, "html", False):
+        snap_doc = build_snapshot(rep, started, offline=getattr(args, "offline", False))
+        if getattr(args, "export_snapshot", False):
+            snap_p = export_snapshot(snap_doc, getattr(args, "snapshot_path", None))
+            if not getattr(args, "json", False):
+                print(f"\n[snapshot] 已导出状态快照: {snap_p}")
+        if getattr(args, "html", False):
+            html_p = render_html_dashboard(snap_doc, getattr(args, "html_path", None))
+            if not getattr(args, "json", False):
+                print(f"[dashboard] 已生成离线驾驶舱: {html_p}")
+
     return exit_code
 
 
@@ -631,6 +645,10 @@ def main() -> None:
     ap.add_argument("--offline", action="store_true", help="跳过网络检查")
     ap.add_argument("--only", help="只跑指定组，逗号分隔（contract/farm/cli/mcp/models/app_roots/landing）")
     ap.add_argument("--deep", action="store_true", help="MCP 真握手（默认关）")
+    ap.add_argument("--export-snapshot", action="store_true", help="导出 JSON 状态快照（默认 ~/.local/state/dc-skills/skills-snapshot.json）")
+    ap.add_argument("--snapshot-path", help="快照输出目标路径（供 monitor-panel 消费）")
+    ap.add_argument("--html", action="store_true", help="生成离线可读 HTML 技能驾驶舱（默认 skills-output/dashboard/skills-dashboard.html）")
+    ap.add_argument("--html-path", help="HTML 驾驶舱输出目标路径")
     args = ap.parse_args()
     args.only = set(args.only.split(",")) if args.only else None
     started = time.time()
