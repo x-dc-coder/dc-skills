@@ -47,8 +47,9 @@
 │   └── venvs/             # marker ~5.1GB / mineru ~613MB（GPU 模型权重，不共享）
 ├── debugging/ git-master/ programming/ remove-ai-slops/  # omo vendor 4 技能（oh-my-openagent 4.17.1）
 ├── dsh-ui-optimization/  dsh-plugin-troubleshooting/     # DSH 插件技能（plugin-specialist 预设）
-├── proxy-ops/ agent-balances/ cloudreve-storage/          # 运维与用量单体技能
-├── unified-gateway/       # 本地统一模型网关运维（standalone manual）
+├── agent-infra/           # Agent 基础设施族群入口（统揽网关运维与各 Agent 额度对账）
+├── unified-gateway/ agent-balances/  # Agent-Infra 成员技能（网关运维与额度用量）
+├── proxy-ops/ cloudreve-storage/     # 运维与云存储单体技能
 └── wsl-windows-bridge/    # WSL→Windows 桥接（系统 Python，不纳入统一 .venv）
 ```
 
@@ -82,7 +83,7 @@ uv run python scripts/skills-sync --check  # 只检查漂移，不修改
 |------|------|-------------|------|
 | **A. 统一共享** | `.venv/` 符号链接 | diagram 聚合的脚本目录（diagram-er/ers/module/sequence/usecase）、db-skill、word-extractor、unified-search、github-workflow、thesis-writing、paper-metrics | 依赖轻量（Pillow/sqlglot/psycopg2/requests/pytest 等），共享一份 venv |
 | **B. 独立重型** | skill 内 `venvs/` | paper-reader | 含 GPU 模型权重（5GB+），不可合并，`.gitignore` 已忽略 |
-| **C. 无统一 venv** | 系统/Windows Python 或二进制 | diagram-draft/flow、design-ui/diagram/dataviz（纯文档）、drawio-xml（npx）、kimi-webbridge、md-to-thesis-latex、thesis-ref-check、proxy-ops、unified-gateway、wsl-windows-bridge | 无统一 venv（系统/Windows Python 或自带运行时） |
+| **C. 无统一 venv** | 系统/Windows Python 或二进制 | diagram-draft/flow、design-ui/diagram/dataviz（纯文档）、drawio-xml（npx）、kimi-webbridge、md-to-thesis-latex、thesis-ref-check、agent-infra、unified-gateway、proxy-ops、wsl-windows-bridge | 无统一 venv（系统/Windows Python 或自带运行时） |
 
 ## 统一执行约定（所有 Python skill 必须遵守）
 

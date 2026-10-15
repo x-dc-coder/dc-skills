@@ -920,7 +920,8 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
       frontend: "前端设计 (Frontend UI/UX)",
       info: "信息检索与视觉 (Search & Web)",
       docs: "办公文档 (Office Documents)",
-      dshplugin: "DSH 插件治理 (DSH Plugin)"
+      dshplugin: "DSH 插件治理 (DSH Plugin)",
+      "agent-infra": "Agent 基础设施 (Agent Infra)"
     }};
 
     let currentView = 'family';

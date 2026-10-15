@@ -3,8 +3,9 @@ name: unified-gateway
 description: >
   统一大模型网关运维：新增渠道、连通性与TTFT/TPS测速、刷新冷却熔断、调整路由权重。当用户显式调用 /unified-gateway 或需要添加大模型渠道、测试模型响应速度与流式吞吐、刷新或复位网关冷却状态、调整候选模型优先级与权重、或同步配置到 Grok CLI 时使用。Use when managing local model gateway channels, benchmarking TTFT and streaming decode TPS, clearing channel cooldowns, tuning routing weights, or updating Grok model configurations. 只负责本机 8320 网关与 Grok 客户端配置；不负责模型权重训练与外部中转服务搭建。
 metadata:
+  family: agent-infra
   version: "1.0"
-  role: standalone
+  role: member
   load-mode: manual
 disable-model-invocation: true
 ---

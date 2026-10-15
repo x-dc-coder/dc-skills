@@ -3,8 +3,9 @@ name: agent-balances
 description: >
   查询本机各编程 Agent 的额度与用量余额（Grok/Codex/Cursor/ZCode 等，数字与 Orca 状态栏同源）。当用户要查 agent 余额、对账用量、监控额度、或把结果导出 JSON 喂给 monitor-panel 时使用。查余额、查额度、agent usage、quota、balance、各 agent 用量。
 metadata:
+  family: agent-infra
   version: "0.1"
-  role: standalone
+  role: member
   load-mode: manual
   requires-bins: "node, powershell"
 disable-model-invocation: true

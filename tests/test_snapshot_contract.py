@@ -52,18 +52,18 @@ class TestSnapshotContract:
         assert "master_commit" in meta
 
         summary = doc["summary"]
-        assert summary["skills_total"] == 31
-        assert summary["families_total"] == 6
+        assert summary["skills_total"] == 32
+        assert summary["families_total"] == 7
         assert set(summary["agents"]) == {"claude-code", "grok", "dsh", "zcode", "codex"}
-        assert summary["load_modes"]["auto"] == 9
+        assert summary["load_modes"]["auto"] == 10
         assert summary["load_modes"]["manual"] == 22
-        assert summary["roles"]["entry"] == 6
-        assert summary["roles"]["member"] == 16
-        assert summary["roles"]["standalone"] == 9
+        assert summary["roles"]["entry"] == 7
+        assert summary["roles"]["member"] == 18
+        assert summary["roles"]["standalone"] == 7
         assert summary["doctor"]["warn"] == 1
 
         skills = doc["skills"]
-        assert len(skills) == 31
+        assert len(skills) == 32
 
         skill_map = {s["name"]: s for s in skills}
         assert "proxy-ops" in skill_map
@@ -93,7 +93,7 @@ class TestSnapshotContract:
 
         loaded = json.loads(target.read_text(encoding="utf-8"))
         assert loaded["schema_version"] == 1
-        assert loaded["summary"]["skills_total"] == 31
+        assert loaded["summary"]["skills_total"] == 32
 
     def test_render_html_dashboard_offline(self, tmp_path):
         rep = DummyReport()
