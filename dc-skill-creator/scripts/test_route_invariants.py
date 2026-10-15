@@ -26,6 +26,10 @@ def description(name: str) -> str:
     return desc
 
 
+def _norm(text: str) -> str:
+    return " ".join(text.split())
+
+
 def test_db_skill_does_not_own_infra() -> None:
     desc = description("db-skill")
     assert "MySQL" in desc
@@ -37,10 +41,7 @@ def test_db_skill_does_not_own_infra() -> None:
     assert "wsl-windows-bridge" in body
 
 
-def test_programming_exposes_member_triggers() -> None:
-    desc = description("programming")
-    for token in ("commit", "提交", "崩溃", "调用链", "假绿", "deslop", "github-workflow"):
-        assert token in desc, token
+def test_programming_body_routing_contract() -> None:
     body = skill_text("programming").split("---", 2)[2]
     assert "一次提交只打开 git-master 或 github-workflow 其中一个" in body
     assert "不限 .py/.rs/.ts/.go" in body
@@ -102,20 +103,47 @@ def test_dshplugin_entry_is_on_every_farm() -> None:
     assert not data.get("on_demand")
 
 
-def test_entry_descriptions_keep_member_phrases() -> None:
-    prog = description("programming")
-    assert "代码 deslop" in prog
-    assert "结果错误" in prog
-    assert "squash" in prog
-    assert "preview" in prog
-    assert "论文的 AI 腔不在这里" in prog
-    thesis = description("thesis-writing")
-    assert "paper-metrics" in thesis
-    assert "md-to-thesis-latex" in thesis
-    assert "封面拼接" in thesis
-    assert "用我的浏览器" in description("unified-search")
-    assert "机制图" in description("design-ui")
-    assert "插件前端丑" in description("dsh-plugin-troubleshooting")
+def test_entry_covers_declared_triggers() -> None:
+    """完备性锁（2026-10-16 C+）：agent-map triggers 声明是触发短语唯一事实源。
+
+    每个 auto 入口的 description 必须覆盖本族全部声明短语；声明键必须等于成员全集
+    （新增成员必须声明触发短语并补进入口 description，缺一即红）。"""
+    data = yaml.safe_load((ROOT / "agent-map.yaml").read_text(encoding="utf-8"))
+    problems: list[str] = []
+    for fam, fcfg in data["families"].items():
+        members_cfg = fcfg.get("members", [])
+        member_set = set(members_cfg) if isinstance(members_cfg, dict) else set(members_cfg)
+        triggers = fcfg.get("triggers")
+        assert triggers is not None, (
+            f"族群 {fam} 缺 triggers 声明（触发短语唯一事实源，写法见 agent-map 头注释）"
+        )
+        assert set(triggers) == member_set, (
+            f"族群 {fam} 的 triggers 声明键与成员集不一致: {set(triggers) ^ member_set}"
+        )
+        desc = _norm(description(fcfg["entry"]))
+        for member, phrases in triggers.items():
+            for phrase in phrases:
+                if _norm(phrase) not in desc:
+                    problems.append(
+                        f"{fam}/{member}: 触发短语 {phrase!r} 未出现在入口 {fcfg['entry']} description"
+                    )
+    for name, cfg in data.get("standalone", {}).items():
+        if cfg.get("load") != "auto":
+            continue
+        phrases = cfg.get("triggers")
+        assert phrases, f"standalone auto 技能 {name} 缺 triggers 声明"
+        desc = _norm(description(name))
+        for phrase in phrases:
+            if _norm(phrase) not in desc:
+                problems.append(f"standalone/{name}: 触发短语 {phrase!r} 未出现在自身 description")
+    assert not problems, "\n".join(problems)
+
+
+def test_cross_family_redirect_phrases_stay() -> None:
+    """跨族反路由句是实测误触发抑制器（C+ 决议保留），简化 description 时不得删除。"""
+    assert "论文的 AI 腔不在这里，走 paper-metrics" in _norm(description("programming"))
+    assert "论文 AI 腔走 paper-metrics" in _norm(description("thesis-writing"))
+    assert "DSH client 插件界面走 dsh-plugin-troubleshooting" in _norm(description("design-ui"))
 
 
 def test_output_docs_do_not_teach_retired_paths() -> None:

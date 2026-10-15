@@ -157,12 +157,15 @@ standalone:
   db-skill:
     load: auto
     description: "MySQL/PostgreSQL 查询与写入"
+    triggers: [MySQL, PostgreSQL, CRUD]
   wsl-windows-bridge:
     load: auto
     description: "WSL→Windows 跨边界框架：本地调用/SSH 特权/GPU 治理"
+    triggers: [GPU, 注册表, 跨系统调用]
   dc-skill-creator:
     load: auto
     description: "本仓库技能创建工具：脚手架生成 + 规则校验"
+    triggers: [新建技能, create a skill]
 
 mcps:
   codegraph:
@@ -194,28 +197,57 @@ mcps:
 #           manual + disable-model-invocation: true；Codex 侧生成 agents/openai.yaml 的
 #           policy.allow_implicit_invocation: false），经 /name 或 $name 显式触发
 # 成员覆写：members: {name: auto} 可把个别成员提回 auto（映射形式）；列表形式全 manual
+# 触发短语声明层（2026-10-16 C+ 定调）：triggers = {成员: [用户原话短语]}，是路由触发短语的
+#   唯一事实源；test_route_invariants 完备性锁校验「入口 description ⊇ 全族声明短语、
+#   声明键 = 成员全集」。新增成员/调整触发词 = 改本段 + 同步补入口 description。
+#   standalone auto 技能的 triggers 在 standalone 段同名键下声明（校验自身 description）。
 families:
   thesis:            # 学术论文：写作→检查→导出/排版全流程
     entry: thesis-writing
     members: [thesis-ref-check, md-to-thesis-latex, paper-metrics, paper-reader]
+    triggers:
+      thesis-ref-check: [术语检查]
+      md-to-thesis-latex: [md-to-thesis-latex, 封面拼接, 生成毕设 PDF]
+      paper-metrics: [paper-metrics, 论文 AI 腔]
+      paper-reader: [读论文 PDF, MinerU]
   drawing:           # 图表生成：软件工程图表（drawio-xml 为可编辑格式补充）
     entry: diagram
     members: [drawio-xml]
+    triggers:
+      drawio-xml: [drawio-xml, .drawio, 可编辑]
   frontend:          # 前端设计：2026-08-29 同批创建的设计规范三件套（页面/内联 SVG/数据可视化）
     entry: design-ui
     members: [design-diagram, design-dataviz]
+    triggers:
+      design-diagram: [内联 SVG, 机制图]
+      design-dataviz: [图表配色, 仪表盘]
   software:          # 软件工程：omo 4 技能为核心（debugging/git-master/programming/remove-ai-slops，
     entry: programming   # oh-my-openagent 4.17.1 vendored）+ test-guardian + repo 工程并入
     members: [debugging, git-master, remove-ai-slops, test-guardian, github-workflow, codegraph-explore]
+    triggers:
+      debugging: [崩溃, 静默失败, 结果错误, 内存泄漏, 卡死]
+      git-master: [commit, 提交, rebase, squash, blame, bisect, 查谁写的]
+      remove-ai-slops: [代码 deslop, 去掉代码里的 AI 味]
+      test-guardian: [假绿, 测试门禁]
+      github-workflow: [初始化仓库, gh, PR, issue, preview, publish, github-workflow]
+      codegraph-explore: [调用链, 谁在调用, 大仓影响面]
     requires:
       cli: [git, gh]
       mcp: [codegraph]
   info:              # 信息与视觉：搜索/真实浏览器/图像理解
     entry: unified-search
     members: [kimi-webbridge, vision-workflow]
+    triggers:
+      kimi-webbridge: [用我的浏览器, 登录态]
+      vision-workflow: [OCR, 识图, 截图核验]
   dshplugin:         # DSH 插件：排查 + UI 优化（plugin-specialist 预设作用域）
     entry: dsh-plugin-troubleshooting
     members: [dsh-ui-optimization]
+    triggers:
+      dsh-ui-optimization: [美化 DSH 插件界面, 插件前端丑]
   agent-infra:       # Agent 基础设施：模型网关调度 + 编程 Agent 额度用量对账
     entry: agent-infra
     members: [unified-gateway, agent-balances]
+    triggers:
+      unified-gateway: [渠道增删, 测速, 冷却复位, 权重调优]
+      agent-balances: [余额, 用量配额]

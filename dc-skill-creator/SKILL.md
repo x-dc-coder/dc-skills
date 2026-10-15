@@ -61,6 +61,7 @@ uv run python scripts/skills-sync && uv run python scripts/skillctl lint
    不要传 `--family standalone`，也不要传已删除的 coding、infra、repo、db、bridge、lark、meta
    （2026-10-15 单体族解散，这四个已转 standalone）。
    传了 `--family` 就是该族 member（`load-mode: manual`，骨架写上 `disable-model-invocation: true`，不进模型清单，`/name` 显式触发）。`agents/openai.yaml` 仍由随后的 `family-apply --apply` 生成。
+   新成员入族后在 `families.<族>.triggers` 声明其触发短语（用户原话），并把短语补进该族入口 description——`test_route_invariants` 完备性锁会拦缺失。
    新的族群入口要改 `families.<族>.entry`，本脚手架不会把新技能写成 entry。
 3. **能力 + 触发场景**（自由文本）：CLI 不代写 quality，但先用 `check_triggers.py` 预检重叠；
    description 草稿给用户确认或编辑（关键触发词放最前 80 字符，≤1024，祈使句 Use when…）。
