@@ -44,7 +44,7 @@ Missing upstream or missing `main`/`master` is normal. Fall back to the best ava
 
 ## PR Body Evidence Attachments
 
-When a PR body needs screenshots or terminal PNGs, use the repo reference at `docs/reference/github-attachment-upload.md`. The allowed hosting path is GitHub user attachments from the authenticated web attachment flow; never commit temporary images, never use GitHub Releases for PR evidence, and never use external image hosts. Do not log browser cookies, CSRF tokens, S3 form fields, or upload headers.
+When a PR body needs screenshots or terminal PNGs, use the repo reference at [git-master/references/github-attachment-upload.md](references/github-attachment-upload.md). The allowed hosting path is GitHub user attachments from the authenticated web attachment flow; never commit temporary images, never use GitHub Releases for PR evidence, and never use external image hosts. Do not log browser cookies, CSRF tokens, S3 form fields, or upload headers.
 
 ## Commit Mode
 

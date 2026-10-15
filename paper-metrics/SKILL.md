@@ -100,7 +100,7 @@ uv run python paper-metrics/scripts/figure_profile.py --corpus <paper-analysis> 
 - `_figure_summary.json`：语料级尺寸/宽高比/题注长度分位与达标率；**读不了的图不计入分母并逐条列出**（与 S-SIZ-04 一致）。
 - 视觉/语义字段（chart_type/panel_count/axis/legend/颜色/字体/线宽/caption 语义角色）一律
   `null` + `status: NOT_IMPLEMENTED` 占位。
-- **字段来源、置信度语义、「不得把 INFERRED 当事实」红线见 `references/figure-profile-schema.md`**。
+- **字段来源、置信度语义、「不得把 INFERRED 当事实」红线见 [`references/figure-profile-schema.md`](references/figure-profile-schema.md)**。
 
 ## 快速开始
 
@@ -143,8 +143,8 @@ uv run python paper-metrics/scripts/pas_spotcheck.py --corpus <paper-analysis> -
 - **第三方复核入口**：`_domain_profile.json → corpus.profiled[].inputs[].sha256` 给出每个输入产物的哈希；`_per_paper_metrics.jsonl` 给出逐篇数值与 evidence span，可直接回指原文坐标。
 - **引擎口径冻结（issue #8 正式收口）**：OBSERVED 指标**定义在 MinerU 的 content_list.json 之上**（base_artifact 记录在产物里）；**换转换引擎 = 换输入 = 必须重锁基线**。引擎漂移（MinerU vs Marker 文本层差异）**只作为可选探针**：baseline_eval.py 的 --drift-probe N（默认关闭、报告注明为可选加分项），不进主链——中文语料 marker 覆盖为 0，进主链只会得到恒 null 列并 bump schema。
 - **词表冻结**：`data/lexicons/v1/*.json` 随发布冻结，bundle 指纹写入产物；改词表即改数值，**必须 bump 版本并重锁基线**。
-- **层红线（只做 OBSERVED）**：本技能只产出确定性规则指标（`state = OBSERVED`、`method = rule`，由 `test_profile_papers.py` / `test_determinism.py` 断言守线）。语步（move）、引用功能、论证图等 INFERRED 语义指标**未实现**，且必须同时满足 5 条准入条件才能引入（标签集冻结 + 人工标注集 κ ≥ 0.6 + 留出集 P/R/F1 + 每句可追溯输出 + 不得进 gate / 不得自报置信度）——完整检查表见 `references/metric-definitions.md`〈INFERRED 层准入检查表〉。
-- **分句前的非正文掩码（2026-09-13）**：句界只在**等长掩码副本**上判定，关键词行（`Keywords:`/`关键词：`）、行内/行间数学（`$...$`/`$$...$$`）、MinerU 的 `<sub>`/`<sup>` 标签不参与分句；掩码后不含字母的片段直接丢弃。span 仍切片回原文，语料级 before/after 差值见 `references/metric-definitions.md`〈正文口径与关键词行过滤〉。
+- **层红线（只做 OBSERVED）**：本技能只产出确定性规则指标（`state = OBSERVED`、`method = rule`，由 `test_profile_papers.py` / `test_determinism.py` 断言守线）。语步（move）、引用功能、论证图等 INFERRED 语义指标**未实现**，且必须同时满足 5 条准入条件才能引入（标签集冻结 + 人工标注集 κ ≥ 0.6 + 留出集 P/R/F1 + 每句可追溯输出 + 不得进 gate / 不得自报置信度）——完整检查表见 [`references/metric-definitions.md`](references/metric-definitions.md)〈INFERRED 层准入检查表〉。
+- **分句前的非正文掩码（2026-09-13）**：句界只在**等长掩码副本**上判定，关键词行（`Keywords:`/`关键词：`）、行内/行间数学（`$...$`/`$$...$$`）、MinerU 的 `<sub>`/`<sup>` 标签不参与分句；掩码后不含字母的片段直接丢弃。span 仍切片回原文，语料级 before/after 差值见 [`references/metric-definitions.md`](references/metric-definitions.md)〈正文口径与关键词行过滤〉。
 
 ## 指标基座：范围与块型普查（2026-09-14 起）
 
@@ -201,14 +201,14 @@ uv run python paper-metrics/scripts/pas_spotcheck.py --corpus <paper-analysis> -
 
 ## 语言分派注册表（issue #10 Phase 1）
 
-- 计算分派收敛到 `scripts/language_registry.py`：`LanguageAdapter`（协议）+ `EnglishAdapter` / `ChineseAdapter`（各自委托 `_english_metrics` 与 `_zh_metrics`），显式注册表 `ADAPTERS` + `adapter_for(code)`。
+- 计算分派收敛到 [`scripts/language_registry.py`](scripts/language_registry.py)：`LanguageAdapter`（协议）+ `EnglishAdapter` / `ChineseAdapter`（各自委托 `_english_metrics` 与 `_zh_metrics`），显式注册表 `ADAPTERS` + `adapter_for(code)`。
 - `compute_text_metrics` 只做 `adapter_for(detect_language()["language"]).compute(...)`——**不再有 `if language == "zh"` 之类的硬编码语言字面量分支**（issue #10 §14 禁止的扩展形态）。
 - 新增语言 = 加一个 adapter + 一条 `ADAPTERS` 条目，而不是在 `compute_text_metrics` 里再写一个分支；未注册代码（含 `unknown`）回退到 `EnglishAdapter`，与历史"非 zh 一律走英文路径"行为一致。
-- 三条锁测试见 `scripts/test_language_registry.py`：① 冻结 spec `lang_spec_cases.json` 全用例的判定一致性；② 注入 FakeAdapter 证明分派是数据驱动的；③ 结构化断言分派路径不再含 `== "zh"` 字面量比较。
+- 三条锁测试见 [`scripts/test_language_registry.py`](scripts/test_language_registry.py)：① 冻结 spec `lang_spec_cases.json` 全用例的判定一致性；② 注入 FakeAdapter 证明分派是数据驱动的；③ 结构化断言分派路径不再含 `== "zh"` 字面量比较。
 
 ## 指标定义（可解释性的事实源）
 
-- 每条指标的定义、公式、分母、evidence 坐标系，以及**不能推断什么**，见 `references/metric-definitions.md`。
+- 每条指标的定义、公式、分母、evidence 坐标系，以及**不能推断什么**，见 [`references/metric-definitions.md`](references/metric-definitions.md)。
 - `n_valid < 5` 时**禁止**断言"该期刊偏好 X"；只能呈现单篇表并说明样本不足。
 - 禁止任何"87/100"式百分制综合分：只输出逐指标实际值、目标区间与偏差。
 - **非正文流指标（2026-09-14，14 条）**：`S-CAP-01` 题注覆盖率、`S-NUM-02` 编号一致性、`S-REF-03` 正文引用一致性、`S-CAPL-05` 题注长度中位（读 `figures`+`tables`）；`S-SIZ-04` 图像分辨率充裕度（只读 `figures`）；**表格专属**：`S-TBL-06` 声明列数中位（按行求和 colspan）、`S-TBL-07` 空单元格占比、`S-TBL-08` 表格正文缺失率、`S-TBL-09` 表格密度（**跨流** `prose`+`tables`，中英单位不同、不可直接比较）、`S-TBL-10` 表格章节落位集中度（另给 `results_share` 作为**保守下界**）、`S-TBL-11` 数值单元格占比（同时给严格与含数字两个读数）、`S-TBL-12` 数值行占比（按行而非列——colspan 下重建列网格是猜测）、`S-TBL-13` 表格 LaTeX 残留率（**抽取缺陷**，会把数值单元格算成非数值）、`S-REF-14` 表格被引深度（**跨流** `prose`+`tables`：对得上编号的表被正文讨论了几次；未被引用的表逐个点名）。
@@ -259,7 +259,7 @@ uv run python paper-metrics/scripts/pas_spotcheck.py --corpus <paper-analysis> -
 
 > **该分类自 2026-09-15 起同时进入产物**（issue #18-9）：每条流指标记录带机器可读字段 `class`（`author_style` / `toolchain_defect`），`_domain_profile.md` 按 class **分表渲染**并标注红线，`_writing_contract.yaml` **永不接受** `toolchain_defect` 类指标。上面这张散文表与产物字段由同一份归类驱动，改一侧必须同步另一侧。
 
-> **数值口径（2026-09-15，issue #18-5）**：本文件与 `references/metric-definitions.md` 里标"池化"的实测数是**池化**口径（先合并计数再算比值），而产物 `_corpus_summary.json` 的 `metrics.<id>.mean` 是**逐篇均值的均值**（`weight_mode="equal_paper"`、`mean_basis="mean_of_per_paper_means"`）。两者可差 10% 量级（S-REF-14 实测 11%），引用时必须说明用的是哪一种，不得混用。
+> **数值口径（2026-09-15，issue #18-5）**：本文件与 [`references/metric-definitions.md`](references/metric-definitions.md) 里标"池化"的实测数是**池化**口径（先合并计数再算比值），而产物 `_corpus_summary.json` 的 `metrics.<id>.mean` 是**逐篇均值的均值**（`weight_mode="equal_paper"`、`mean_basis="mean_of_per_paper_means"`）。两者可差 10% 量级（S-REF-14 实测 11%），引用时必须说明用的是哪一种，不得混用。
 
 ### 组合用法示例（可直接抄进写作计划）
 - "本语料（中文 10 篇）表格中位 8 列、数值单元格 77.9%、题注覆盖 96.7% → 建议：用三线表、数值右对齐、每表配题注"；
@@ -268,7 +268,7 @@ uv run python paper-metrics/scripts/pas_spotcheck.py --corpus <paper-analysis> -
 
 ## 词表校准（中文 release 的质量闭环）
 
-中文词表是**策展词表**（无公开可再分发的 Hyland 对应资源，见 issue #11 B 组结论），所以它必须能被质疑、被度量。`scripts/lexicon_calibration.py` 提供四步：
+中文词表是**策展词表**（无公开可再分发的 Hyland 对应资源，见 issue #11 B 组结论），所以它必须能被质疑、被度量。[`scripts/lexicon_calibration.py`](scripts/lexicon_calibration.py) 提供四步：
 
 ```bash
 cd ~/projects/dc-skills
@@ -333,7 +333,7 @@ uv run python paper-metrics/scripts/audit_corpus.py --name ycgl-zh   # 中文语
 # 缺省输出：<cwd>/skills-output/thesis/paper-metrics/<时间戳>/（docs/specs/输出规范.md C-1）
 ```
 
-- 登记表：`data/test-corpora.json`（机器可读）+ `references/test-corpora.md`（获取方式与已知缺陷）；
+- 登记表：`data/test-corpora.json`（机器可读）+ [`references/test-corpora.md`](references/test-corpora.md)（获取方式与已知缺陷）；
 - 审计比对三样：**corpus_id**（输入内容哈希）、**expected_metrics**（语料均值）、**recorded_with**（profiler / schema / 指标层 / 词表 release 版本与指纹）；
 - 退出码 0 = 逐项 match，1 = drift，并给出归因：`inputs_changed`（输入变了，旧结论作废）/ `code_or_word_list_changed`（语料没变，版本或词表变了，数值移动可解释）/ **`unexplained_drift`（都没变数值却变了 → 确定性被破坏，必须查）**；
 - 当前状态（2026-09-15，issue #22 重登记后）：英文 **52/52 match**（含 4 条新指标的 null 断言）、中文 **57/57 match**（含 4 条新指标的实测值）；两语料 `corpus_id` 均未变——**13 条冻结英文指标在 v1.5 上逐位不变**，`code_or_word_list_changed` 归因成立。
@@ -342,12 +342,13 @@ uv run python paper-metrics/scripts/audit_corpus.py --name ycgl-zh   # 中文语
 ## 文件
 
 ```
-paper-metrics/
+paper-metrics/                                 # 以下 scripts/references 清单为节选，完整清单见目录
 ├── SKILL.md                     # 本文
 ├── scripts/                     # profile_papers / text_metrics / lexicon_loader / build_contract
 │                                # validate_draft / baseline_eval / run_pipeline / pas_spotcheck
 │                                # lexicon_calibration（词表校准+效度）/ audit_corpus（语料审计）
 │                                # canonical_import（退稿/返修稿件入语料，issue #22 配套）
+│                                # 另有 figure_profile / language_registry / stream_metrics / doc_model 等
 ├── data/
 │   ├── lexicons/v1/             # 英文 8 个冻结词表（release 1.1）
 │   ├── lexicons/v2-zh/          # 中文 8 个冻结词表（release 2.1-zh，策展）
@@ -355,6 +356,8 @@ paper-metrics/
 │   └── clause_spec_cases.json   # 分句层冻结用例（issue #22，人工核对）
 ├── references/
 │   ├── metric-definitions.md    # 指标定义/口径/证据坐标系/不能推断什么
-│   └── test-corpora.md          # 语料获取方式、已知缺陷、复现命令
+│   ├── test-corpora.md          # 语料获取方式、已知缺陷、复现命令
+│   ├── figure-profile-schema.md # 图档 profile schema
+│   └── rejected-paper-analysis.md # 退稿分析记录
 └── .venv -> ../.venv            # A 类共享环境
 ```

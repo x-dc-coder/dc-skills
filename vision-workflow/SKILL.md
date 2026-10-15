@@ -76,14 +76,14 @@ disable-model-invocation: true
 
 - `code=IMAGE_ERROR`：检查路径/格式/大小（上限 4MB），修正后重试。无扩展名附件已自动嗅探格式，若仍报错说明文件非图片。
 - `code=CLIPBOARD_NO_IMAGE`：剪贴板无图片，引导用户复制图片后重试。
-- `code=PROVIDER_ERROR` 或提示未配置 key：告知用户补 ZHIPU_API_KEY（repo 根目录 .env）并把 config.json 的 mock 改为 false；或说明当前为 mock 结果。
+- `code=PROVIDER_ERROR` 或提示未配置 key：告知用户补 ZHIPU_API_KEY（`~/.config/vision-ai/.env`）并把 `~/projects/Vision-MCP/config.json` 的 mock 改为 false；或说明当前为 mock 结果。
 - 性价比模型失败会自动升级旗舰模型（策略引擎内置），无需人工干预。
 
 ## 智谱官方视觉 MCP（zai-mcp-server，2026-09-21 接入并移植）
 
-官方 Local MCP（stdio，`npx -y @z_ai/mcp-server@latest`，v0.1.5，Apache-2.0）的 8 个工具
+官方 Local MCP（stdio，`npx -y @z_ai/mcp-server@latest`，v0.1.5，Apache-2.0）的 7 个工具
 **已逐字移植进本地 `~/projects/Vision-MCP`**（提示词见 `vision_mcp/prompts/`，同步脚本
-`scripts/sync_zai_prompts.mjs`），因此**不需要再单独挂载官方 MCP**：
+`~/projects/Vision-MCP/scripts/sync_zai_prompts.mjs`），因此**不需要再单独挂载官方 MCP**：
 
 | 工具 | 用途 | 档位 |
 |---|---|---|
@@ -113,7 +113,7 @@ UI diff 报出结构性差异。原有 8 个工具回归全部正常，本地共
 
 ## Grok 内模型补充
 
-视觉任务需要换主对话模型时，渠道、协议和代理以 `docs/arch/模型渠道.md` 为准。和本技能相关的两条：
+视觉任务需要换主对话模型时，渠道、协议和代理以 [`docs/arch/模型渠道.md`](docs/arch/模型渠道.md) 为准。和本技能相关的两条：
 
 | 模型 | 用途 |
 |---|---|

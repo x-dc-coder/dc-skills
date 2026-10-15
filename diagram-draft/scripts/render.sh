@@ -8,7 +8,7 @@ set -e
 INPUT="$1"
 OUTDIR="${2:-}"
 if [ -z "$OUTDIR" ]; then
-    # 统一产物树（docs/specs/OUTPUT.md C-1）：<cwd>/skills-output/drawing/diagram-draft/<时间戳>/
+    # 统一产物树（docs/specs/输出规范.md C-1，已改名 输出规范.md）：<cwd>/skills-output/drawing/diagram-draft/<时间戳>/
     OUTDIR=$(cd ~/projects/dc-skills && uv run python scripts/output-dir.py drawing diagram-draft)
 fi
 

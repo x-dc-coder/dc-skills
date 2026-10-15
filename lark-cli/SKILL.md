@@ -94,7 +94,7 @@ workflow-meeting-summary / workflow-standup-report），模型目录只保留本
 | 内嵌引用（相对域根） | 磁盘位置 |
 |---|---|
 | lark-sheets: `scripts/lark_*.py`（表格画像/子表检测/结构摘要，只读增强） | `resources/lark-sheets-scripts/` |
-| lark-slides: `scripts/xml_lint.py` 等（XML 校验/图标工具） | `resources/lark-slides-scripts/` |
+| lark-slides: [`resources/lark-slides-scripts/xml_lint.py`](resources/lark-slides-scripts/xml_lint.py) 等（XML 校验/图标工具） | `resources/lark-slides-scripts/` |
 | lark-apps: `creative-design/`（创意设计完整工作流 + starter 组件） | `resources/lark-apps-creative-design/` |
 | lark-mail: `assets/templates/`（官方邮件模板库） | `resources/lark-mail-assets/templates/` |
 | lark-whiteboard: `elements/*.md`（元素 schema/样式/布局规范） | `resources/lark-whiteboard-elements/` |

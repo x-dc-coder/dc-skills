@@ -36,9 +36,9 @@ Control the user's real browser (with their login sessions) via a local daemon a
 Then act on the result:
 
 - **`running: true` and `extension_connected: true`** — healthy. Proceed with the tool calls below.
-- **Anything else** (command not found, `running: false`, `extension_connected: false`, errors) — **Read `references/operations.md`** in this skill directory. It has the install / start / diagnose routing table.
+- **Anything else** (command not found, `running: false`, `extension_connected: false`, errors) — **Read [`references/operations.md`](references/operations.md)** in this skill directory. It has the install / start / diagnose routing table.
 
-Don't guess fixes here — every non-healthy state is handled in `references/operations.md`.
+Don't guess fixes here — every non-healthy state is handled in [`references/operations.md`](references/operations.md).
 
 ## Tools
 

@@ -47,7 +47,7 @@ disable-model-invocation: true
 | 修改默认分支 | `gh repo edit <o>/<r> --default-branch <b>` |
 | 查看我的仓库 / 用户信息 | `gh repo list` / `gh api user` |
 
-gh 命令全表 → `references/gh-cheatsheet.md`（替换了旧版 GitCode API 手册）。
+gh 命令全表 → [references/gh-cheatsheet.md](references/gh-cheatsheet.md)（替换了旧版 GitCode API 手册）。
 
 ## 执行环境约束
 
@@ -55,6 +55,10 @@ gh 命令全表 → `references/gh-cheatsheet.md`（替换了旧版 GitCode API 
 ```bash
 uv run --project ~/projects/dc-skills python ~/projects/dc-skills/github-workflow/scripts/<script>.py ...
 ```
+
+> 本节是 AGENTS.md 执行铁律（先 `cd ~/projects/dc-skills` 再 `uv run`）的**已登记例外**（2026-10-15）：
+> 本技能脚本必须以目标仓库为 cwd 才能从 git remote 推断 owner/repo，因此用 `--project` 固定依赖
+> 环境、保持当前目录不变。`test-guardian audit --staged` 同理。
 
 ## 输出规范（脚本 --json 模式）
 
@@ -80,7 +84,7 @@ uv run --project ~/projects/dc-skills python ~/projects/dc-skills/github-workflo
    - `preview`：写 `.git/github-workflow-review.json`
    - `publish`：外部副作用（push 到 GitHub），需用户显式确认
 3. 配置优先级：CLI args > 环境变量（`GITHUB_*`）> `~/.config/github-workflow/config.json` > 内置默认值
-4. 提交规则：优先读 `docs/rules/Git-Commit.md`（项目内）；不存在时用 `references/commit-rules.md`（内置模板）
+4. 提交规则：优先读 `docs/rules/Git-Commit.md`（项目内）；不存在时用 [`references/commit-rules.md`](references/commit-rules.md)（内置模板）
 
 ## local-only workflow
 
@@ -314,7 +318,7 @@ manifest 校验 → snapshot 比对 → 安全扫描 → 逐批 commit → 一�
 
 ### 提交规则来源
 
-优先读项目内的 `docs/rules/Git-Commit.md`，不存在时用内置模板 `references/commit-rules.md`。
+优先读项目内的 `docs/rules/Git-Commit.md`，不存在时用内置模板 [`references/commit-rules.md`](references/commit-rules.md)。
 
 ## CJK 路径
 
@@ -387,14 +391,14 @@ PR 合并（`gh pr merge --merge`）后的提交会正常计入贡献图。
 
 ## 配置文件
 
-- `references/config-format.md` — 配置格式与优先级（`~/.config/github-workflow/config.json`）
-- `references/gh-cheatsheet.md` — gh CLI 命令速查（官方能力全表）
-- `references/commit-rules.md` — 内置提交规范模板
-- `references/safety-and-ignore.md` — 安全扫描与忽略策略
+- [`references/config-format.md`](references/config-format.md) — 配置格式与优先级（`~/.config/github-workflow/config.json`）
+- [`references/gh-cheatsheet.md`](references/gh-cheatsheet.md) — gh CLI 命令速查（官方能力全表）
+- [`references/commit-rules.md`](references/commit-rules.md) — 内置提交规范模板
+- [`references/safety-and-ignore.md`](references/safety-and-ignore.md) — 安全扫描与忽略策略
 - `assets/config.example.json` — 配置模板
 
 ## 脚本
 
-- `scripts/github_bootstrap.py` — 核心 bootstrap CLI（local-only / preview / create-remote / publish / profile / adopt-existing-project）
-- `scripts/github_issues.py` — Issue 管理 CLI（薄封装 `gh issue`）
-- `scripts/lib/` — 共享模块（gh.py / config.py / git.py / preview.py / manifest.py / safety.py / adopt.py / profile.py / remote.py / common.py）
+- [`scripts/github_bootstrap.py`](scripts/github_bootstrap.py) — 核心 bootstrap CLI（local-only / preview / create-remote / publish / profile / adopt-existing-project）
+- [`scripts/github_issues.py`](scripts/github_issues.py) — Issue 管理 CLI（薄封装 `gh issue`）
+- [`scripts/lib/`](scripts/lib/) — 共享模块（gh.py / config.py / git.py / preview.py / manifest.py / safety.py / adopt.py / profile.py / remote.py / common.py）

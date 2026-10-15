@@ -16,7 +16,7 @@ disable-model-invocation: true
 # Markdown 转 ZSC 毕业论文 LaTeX Skill
 
 > **使用方式（渐进式披露）**：本文件是导航页——先读它执行工作流；具体要素（图片/表格/代码/公式/参考文献）转换时读
-> `references/conversion-rules.md`；章节特殊处理与撰写规范读 `references/chapter-specs.md`。
+> [`references/conversion-rules.md`](references/conversion-rules.md)；章节特殊处理与撰写规范读 [`references/chapter-specs.md`](references/chapter-specs.md)。
 
 ## 1. 核心职责
 
@@ -87,11 +87,11 @@ disable-model-invocation: true
 
 **注意**：Markdown 章节编号（如 `## 1.1 课题背景`）转 LaTeX 时**去掉数字编号**（LaTeX 自动编号）；第 1 章正文前必须包含 `\clearpage \setcounter{page}{1} \pagenumbering{arabic}`。
 
-**图片/表格/测试用例表/代码块/公式/列表/文本格式/参考文献的完整转换规则 → `references/conversion-rules.md`**（含 `[H]` 浮动参数、`\toprule` booktabs、`\multicolumn` 测试表、代码语言环境映射表、`\label`/`\ref`/`\eqref` 引用规范、BibTeX 等）。
+**图片/表格/测试用例表/代码块/公式/列表/文本格式/参考文献的完整转换规则 → [`references/conversion-rules.md`](references/conversion-rules.md)**（含 `[H]` 浮动参数、`\toprule` booktabs、`\multicolumn` 测试表、代码语言环境映射表、`\label`/`\ref`/`\eqref` 引用规范、BibTeX 等）。
 
 ## 6. 各章节特殊处理与撰写规范
 
-封面/摘要/目录/正文章节/参考文献/致谢的 LaTeX 模板，以及第 1-6 章内容撰写规范（字数、图表要求、UML/时序图、数据库设计、测试用例表格式）→ **`references/chapter-specs.md`**。main.tex 主文件模板也在该文件末尾。
+封面/摘要/目录/正文章节/参考文献/致谢的 LaTeX 模板，以及第 1-6 章内容撰写规范（字数、图表要求、UML/时序图、数据库设计、测试用例表格式）→ **[`references/chapter-specs.md`](references/chapter-specs.md)**。main.tex 主文件模板也在该文件末尾。
 
 ## 7. 编译流程
 
@@ -104,7 +104,7 @@ xelatex -interaction=nonstopmode main.tex
 xelatex -interaction=nonstopmode main.tex  # 确保交叉引用正确
 ```
 
-或使用 `latexmk`：`latexmk -xelatex -interaction=nonstopmode main.tex`
+`latexmk` 可等价替代以上循环（`latexmk -xelatex -interaction=nonstopmode main.tex`）；本机未安装 latexmk，缺省走上面的 xelatex 编译链。
 
 ## 8. 质量检查清单
 

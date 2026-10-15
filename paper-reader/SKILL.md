@@ -71,7 +71,7 @@ papers/              paper-conversion/         paper-merged/           paper-sum
 | `paper-merged/` | 合并产物 | ❌ ignore | 可从 PDF 重现 |
 | `paper-summaries/` | LLM 总结 | ✅ 跟踪 | 含主观分析，每次不同 |
 
-> `paper-conversion/`、`paper-merged/` 的忽略由机器级全局规则兜底（`docs/specs/输出规范.md` C-14）；
+> `paper-conversion/`、`paper-merged/` 的忽略由机器级全局规则兜底（[`docs/specs/输出规范.md`](docs/specs/输出规范.md) C-14）；
 > `paper-summaries/` 保持跟踪。个别产物需要转正时用 `git add -f <路径>`。
 
 ### 图片策略
@@ -163,7 +163,7 @@ paper_reader.py papers/ --backfill-meta
 - 版本探测**每批只做一次并缓存**（探测各引擎 venv 的解释器；WSL 下经桥接取 Windows 侧解释器）。
 - 单项失败只留 `null` + note，**绝不抛异常、绝不阻塞转换**（探测有超时上限，超时保留已产出的部分结果）。
 - `pdf_sha256` 复用预检阶段的读取，不额外全量读盘。
-- **语言三键永不写 0、永不省略**：`null` 是"没测"，`unknown` 是"这份文本没有任何可识别规则"，两者不同。冻结用例见 `scripts/lang_spec_cases.json`——**paper-metrics 的测试断言同一份文件**（`test_text_metrics.py::test_detect_language_matches_paper_reader_shared_spec`），所以两层的语言判断不会各自漂移。
+- **语言三键永不写 0、永不省略**：`null` 是"没测"，`unknown` 是"这份文本没有任何可识别规则"，两者不同。冻结用例见 [`scripts/lang_spec_cases.json`](scripts/lang_spec_cases.json)——**paper-metrics 的测试断言同一份文件**（`test_text_metrics.py::test_detect_language_matches_paper_reader_shared_spec`），所以两层的语言判断不会各自漂移。
 
 **`pdf_sha256` 的来源等级（可信度分层，issue #7）**——同一个字段可能是三种东西，引用时必须说明是哪一级：
 
@@ -205,7 +205,7 @@ paper_reader.py <papers_dir> --backfill-meta
 
 ## 文本层探针（阶段 1.5：秒级、无模型、无 GPU）
 
-`scripts/textlayer_probe.py` 独立复算 PDF 自带文本层的字符/数字/标点，与 canonical 文本对比，产出 `_textlayer_probe.json`。
+[`scripts/textlayer_probe.py`](scripts/textlayer_probe.py) 独立复算 PDF 自带文本层的字符/数字/标点，与 canonical 文本对比，产出 `_textlayer_probe.json`。
 
 **它存在的唯一理由**：`PDF → content_list.json` 这一跳**没有任何独立校验**，而这里会发生两类**静默损坏**（不报错、不告警，直接污染下游指标）。
 
@@ -275,8 +275,8 @@ cd ~/projects/dc-skills && uv run python paper-reader/scripts/paper_reader.py <p
 
 ### venv 布局
 
-- **在用**：`venvs/marker/`（当前 Marker，surya 0.22.1）、`venvs/mineru/`；
-- `venvs/marker-v1.10.2/`：**遗留 pinned venv，仓库代码从未引用**（其中 surya 是 0.17.1）。它与在用 venv 是**两套独立环境**，**不是同一环境里的重复 dist-info**——保留或删除需人工决定，不要当垃圾清理。
+- **在用引擎经 WSL→Windows 桥接**：`E:\venvs\marker\`（当前 Marker，surya 0.22.1）、`E:\venvs\mineru\`（WSL 侧挂载视图 `/mnt/e/venvs/...`；`paper_reader.py` 优先找 `SKILL_ROOT/venvs/`，缺失时回落 Windows 侧路径）；
+- `venvs/marker-v1.10.2/`（若存在）：**遗留 pinned venv，仓库代码从未引用**（其中 surya 是 0.17.1）。它与在用 venv 是**两套独立环境**，**不是同一环境里的重复 dist-info**——保留或删除需人工决定，不要当垃圾清理。
 
 ## 异常处理（三级响应）
 
@@ -375,8 +375,9 @@ paper-reader/
 ├── scripts/
 │   ├── paper_reader.py         # 主脚本（流水线编排 + CLI）
 │   └── bootstrap.sh            # 重装 venvs
-├── venvs/
-│   ├── marker/                 # Marker 独立 Python 环境
-│   └── mineru/                 # MinerU 独立 Python 环境
+├── references/                 # 4 份分册（merge-algorithm / state-file / summary-template / textlayer-probe）
+├── output/                     # 预留输出目录（当前为空）
 └── data/                       # 预留缓存目录
+
+venvs/ 不在仓库内：在用引擎环境在 Windows 侧 E:\venvs\marker|mineru（见上文 venv 布局）
 ```

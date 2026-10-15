@@ -1033,7 +1033,7 @@ def test_no_nan_tokens_in_artifacts(synthetic_corpus: Path, tmp_path: Path) -> N
 
 
 # ---------------------------------------------------------------------------
-# Test 11 (v2): CLI contract (SKILL-AUTHORING-RULES rule D1)
+# Test 11 (v2): CLI contract (技能编写规则 rule D1)
 # ---------------------------------------------------------------------------
 
 def test_cli_help_exits_zero() -> None:

@@ -177,7 +177,7 @@ cd ~/projects/dc-skills && uv run python cloudreve-storage/scripts/cli.py prune 
 
 ## 输出规范说明 (输出规范.md)
 
-本技能产物完全遵循 `docs/specs/输出规范.md` 统一产物树规约：
+本技能产物完全遵循 [`docs/specs/输出规范.md`](docs/specs/输出规范.md) 统一产物树规约：
 - 主输出参数统一为 `--output`。
 - 默认 Manifest 落盘路径为 `<cwd>/skills-output/agentops/cloudreve-storage/<时间戳>/backup-manifest.json`。
 - 若在外部工作项目目录执行，产物落盘后自动向主库统一树 `<master>/skills-output/agentops/cloudreve-storage/<时间戳>/` 复制审计副本（`commit_final`），形成设备操作追溯日志。

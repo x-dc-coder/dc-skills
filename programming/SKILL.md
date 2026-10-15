@@ -4,7 +4,7 @@ description: >
   software 族入口。当用户要 commit、提交、rebase、squash、blame、bisect、查谁写的，读 git-master；
   初始化仓库、gh、PR、issue、preview、publish，读 github-workflow；崩溃、静默失败、结果错误、内存泄漏、卡死，读 debugging；
   任意语言的调用链、谁在调用、大仓影响面，读 codegraph-explore；假绿、测试门禁，读 test-guardian；
-  代码 deslop、去掉代码里的 AI 味，读 remove-ai-slops。派发子代理、按角色组合选模型、交叉分析、架构决策、外部专家，也读本技能。写或改 .py/.pyi/.rs/.ts/.tsx/.mts/.cts/.go 时也先读本技能。
+  代码 deslop、去掉代码里的 AI 味，读 remove-ai-slops（论文的 AI 腔不在这里，走 paper-metrics）。派发子代理、按角色组合选模型、交叉分析、架构决策、外部专家，也读本技能。写或改 .py/.pyi/.rs/.ts/.tsx/.mts/.cts/.go 时也先读本技能。
   哲学：Pydantic v2、serde+thiserror、Zod、gin+sqlc+pgx，parse-don't-validate，250 行，TDD。
 metadata:
   family: software
@@ -32,7 +32,7 @@ metadata:
 
 ## 子代理派发
 
-编程或架构任务需要派发子代理、做交叉分析或请外部专家时，按「角色 → Agent → 模型」派发。终审由主会话直接承担（`grok-4.7` 官方渠道；官方余额恢复前临时终审用 `glm-5.3`），不经派发。渠道、协议、窗口、思考档位与 Agent 渠道事实见 [`references/模型渠道.md`](references/模型渠道.md)（与 `docs/arch/模型渠道.md` 同一份）。登记只记渠道事实，不决定派谁。
+编程或架构任务需要派发子代理、做交叉分析或请外部专家时，按「角色 → Agent → 模型」派发。终审由主会话直接承担（`grok-4.7` 官方渠道；官方余额恢复前临时终审用 `glm-5.3`），不经派发。渠道、协议、窗口、思考档位与 Agent 渠道事实见 [`references/模型渠道.md`](references/模型渠道.md)（与 [`docs/arch/模型渠道.md`](docs/arch/模型渠道.md) 同一份）。登记只记渠道事实，不决定派谁。
 
 1. **角色组合（Agent 承载）**。先对上角色，再按表选 Agent 与模型；同一行的模型一起用。用户点名模型或 Agent 时，按用户指定执行。
 
@@ -72,10 +72,10 @@ This skill is an index. The hard per-language rules live under `references/`. Lo
 
    | File / Language | MANDATORY reading (load `Read` tool on every file below) |
    |---|---|
-   | `.py`, `.pyi`, "Python" | `references/python/README.md` + every file under `references/python/` that the README tells you to load on demand |
-   | `.rs`, `Cargo.toml`, "Rust" | `references/rust/README.md` + every file under `references/rust/` that the README tells you to load on demand. **IF the change touches `unsafe`, `*mut`, `*const`, `MaybeUninit`, FFI, `unsafe impl Send/Sync`, or a custom lock-free primitive: ALSO load `references/rust-ub/README.md` plus every file under `references/rust-ub/`.** |
-   | `.ts`, `.tsx`, `.mts`, `.cts`, "TypeScript" | `references/typescript/README.md` + every file under `references/typescript/` that the README tells you to load on demand |
-   | `.go`, `go.mod`, `go.sum`, `.golangci.yml`, `*.proto` next to a Go module, "Go" / "Golang" | `references/go/README.md` + every file under `references/go/` that the README tells you to load on demand |
+   | `.py`, `.pyi`, "Python" | [`references/python/README.md`](references/python/README.md) + every file under [`references/python/`](references/python/) that the README tells you to load on demand |
+   | `.rs`, `Cargo.toml`, "Rust" | [`references/rust/README.md`](references/rust/README.md) + every file under [`references/rust/`](references/rust/) that the README tells you to load on demand. **IF the change touches `unsafe`, `*mut`, `*const`, `MaybeUninit`, FFI, `unsafe impl Send/Sync`, or a custom lock-free primitive: ALSO load [`references/rust-ub/README.md`](references/rust-ub/README.md) plus every file under [`references/rust-ub/`](references/rust-ub/).** |
+   | `.ts`, `.tsx`, `.mts`, `.cts`, "TypeScript" | [`references/typescript/README.md`](references/typescript/README.md) + every file under [`references/typescript/`](references/typescript/) that the README tells you to load on demand |
+   | `.go`, `go.mod`, `go.sum`, `.golangci.yml`, `*.proto` next to a Go module, "Go" / "Golang" | [`references/go/README.md`](references/go/README.md) + every file under [`references/go/`](references/go/) that the README tells you to load on demand |
 
 3. Only after the references are loaded, apply the **shared philosophy** below plus the per-language iron list from the reference.
 

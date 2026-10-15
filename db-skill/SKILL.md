@@ -23,8 +23,8 @@ metadata:
 
 | Database | Script | Driver |
 |----------|--------|--------|
-| MySQL | `scripts/mysql_tool.py` | mysqlclient / pymysql / mysql-connector-python |
-| PostgreSQL | `scripts/pg_tool.py` | psycopg2-binary |
+| MySQL | [`scripts/mysql_tool.py`](scripts/mysql_tool.py) | pymysql（本机已装；mysqlclient / mysql-connector-python 未装，脚本按需 lazy import） |
+| PostgreSQL | [`scripts/pg_tool.py`](scripts/pg_tool.py) | psycopg2-binary |
 
 ## Quick Workflow
 
@@ -37,8 +37,8 @@ metadata:
      - `config/mysql.json` or `config/pg.json`
 
 2. Run SQL through the Python runner:
-   - **MySQL**: `uv run python scripts/mysql_tool.py run --sql "SELECT * FROM users"`
-   - **PostgreSQL**: `uv run python scripts/pg_tool.py run --sql "SELECT * FROM users"`
+   - **MySQL**: `uv run python db-skill/scripts/mysql_tool.py run --sql "SELECT * FROM users"`
+   - **PostgreSQL**: `uv run python db-skill/scripts/pg_tool.py run --sql "SELECT * FROM users"`
 
 3. Keep query output bounded:
    - SELECT/CTE queries are wrapped and limited automatically.
@@ -107,7 +107,7 @@ uv run python scripts/pg_tool.py run --sql-file ./sql/report.sql --jq '.[0:10]'
 
 ## Resources
 
-- MySQL Script: `scripts/mysql_tool.py`
-- PostgreSQL Script: `scripts/pg_tool.py`
-- MySQL Config reference: `references/mysql-config.md`
-- PostgreSQL Config reference: `references/pg-config.md`
+- MySQL Script: [`scripts/mysql_tool.py`](scripts/mysql_tool.py)
+- PostgreSQL Script: [`scripts/pg_tool.py`](scripts/pg_tool.py)
+- MySQL Config reference: [`references/mysql-config.md`](references/mysql-config.md)
+- PostgreSQL Config reference: [`references/pg-config.md`](references/pg-config.md)

@@ -52,7 +52,7 @@ TRACKED_DEPS: list[dict] = [
         "channel": "npm",
         "pkg": "@larksuite/cli",
         "upgrade": "lark-cli update   或   npm i -g @larksuite/cli",
-        "notes": "飞书全家桶 23 域底座，模型目录强依赖",
+        "notes": "飞书全家桶 28 域底座，模型目录强依赖",
     },
     {
         "id": "mmdc",

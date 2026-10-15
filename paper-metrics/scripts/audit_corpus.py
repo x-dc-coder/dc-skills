@@ -48,13 +48,16 @@ import argparse
 import hashlib
 import json
 import sys
-import tempfile
 from collections import Counter
 from pathlib import Path
 
 SCRIPTS_DIR = Path(__file__).resolve().parent
-if str(SCRIPTS_DIR) not in sys.path:
-    sys.path.insert(0, str(SCRIPTS_DIR))
+MASTER_SCRIPTS = SCRIPTS_DIR.parent.parent / "scripts"
+for _p in (str(SCRIPTS_DIR), str(MASTER_SCRIPTS)):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+
+from common import plan_output  # noqa: E402  (输出规范.md C-1 默认产物树)
 
 DEFAULT_REGISTRY = SCRIPTS_DIR.parent / "data" / "test-corpora.json"
 #: Corpus means are compared exactly by default: the profiler is deterministic,
@@ -293,7 +296,7 @@ def main(argv=None) -> int:
     parser.add_argument("--corpus", type=Path, help="unregistered corpus path (report only)")
     parser.add_argument("--registry", type=Path, default=DEFAULT_REGISTRY)
     parser.add_argument("--out", type=Path, default=None,
-                        help="where to write the fresh profile (default: a temp dir)")
+                        help="where to write the fresh profile (default: unified output tree <cwd>/skills-output/thesis/paper-metrics/<ts>/)")
     parser.add_argument("--json", type=Path, default=None, help="write the audit report here")
     parser.add_argument("--tolerance", type=float, default=DEFAULT_TOLERANCE)
     args = parser.parse_args(argv)
@@ -301,7 +304,8 @@ def main(argv=None) -> int:
     if bool(args.name) == bool(args.corpus):
         parser.error("pass exactly one of --name or --corpus")
 
-    out_dir = args.out or Path(tempfile.mkdtemp(prefix="corpus-audit-"))
+    out_dir = args.out or plan_output(
+        "thesis", "paper-metrics", "corpus-audit.json").primary.parent
 
     if args.corpus:
         report = inspect_unregistered(args.corpus, out_dir)

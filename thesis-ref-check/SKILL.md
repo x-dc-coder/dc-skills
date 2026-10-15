@@ -16,7 +16,7 @@ disable-model-invocation: true
 > **职责说明**：本 skill **仅做术语一致性检查**。引用编号检查（连续性、顺序性、唯一性、尾注对应）由 `thesis-writing/scripts/check_markdown_spec.py` 自动覆盖（`_check_reference_continuity` 方法检测 REF_NUMBER_CONTINUITY / DUPLICATE / NOT_START_AT_ONE）。如需检查引用编号，请使用 thesis-writing 的 markdown spec checker：
 >
 > ```bash
-> cd ~/projects/dc-skills && uv run python thesis-writing/scripts/check_markdown_spec.py <论文文件>
+> cd ~/projects/dc-skills && uv run python thesis-writing/scripts/check_markdown_spec.py --md <论文文件> --mode undergraduate
 > ```
 
 ## 核心问题
@@ -81,7 +81,7 @@ grep -n '^# ' <论文文件>               # 一级标题位置
 - 常见替换："的"字有无（如"社区感"vs"社区的感"）、近义词替换（如"影响"vs"作用"）、顺序调换
 - 英译不一致（如"Flow"vs"心流"vs"福流"）
 
-#### 状态文件 2: `_state/changes_log.md`
+#### 状态文件 2: `.state/changes_log.md`
 
 记录扫描和修正过程中的所有发现：
 
@@ -97,15 +97,15 @@ grep -n '^# ' <论文文件>               # 一级标题位置
 
 ### 阶段三：全局检查（基于状态文件）
 
-读取 `_state/term_glossary.md`，执行以下检查：
+读取 `.state/term_glossary.md`，执行以下检查：
 
 1. 对每条术语，检查其"发现变体"列表
 2. 判断变体是否为真正的错误（有些变体是有意区分，如"工具型平台"vs"社群型平台"）
-3. 生成"修正计划"写入 `_state/changes_log.md`
+3. 生成"修正计划"写入 `.state/changes_log.md`
 
 ### 阶段四：执行修正（逐章修改）
 
-基于 `_state/` 中的分析结果，逐章修正：
+基于 `.state/` 中的分析结果，逐章修正：
 
 **术语修正策略：**
 - 以术语首次出现时的写法为准（通常摘要或第一章最规范）
@@ -113,13 +113,13 @@ grep -n '^# ' <论文文件>               # 一级标题位置
 - **例外**：如果变体出现在"概念辨析"或"文献综述"中，且有明确的目的（如对比不同学者的叫法），不要修改
 
 **执行方式：**
-- 逐章读取原文件 → 在内存中修正 → 写出修正后的章节到 `_state/chapterX_fixed.md`
-- 修正时参考 `_state/term_glossary.md`
+- 逐章读取原文件 → 在内存中修正 → 写出修正后的章节到 `.state/chapterX_fixed.md`
+- 修正时参考 `.state/term_glossary.md`
 
 ### 阶段五：合并输出
 
-1. **合并修正后的章节**：按顺序合并所有 `_state/chapterX_fixed.md`
-2. **生成修改报告**：基于 `_state/changes_log.md` 生成用户可读的报告
+1. **合并修正后的章节**：按顺序合并所有 `.state/chapterX_fixed.md`
+2. **生成修改报告**：基于 `.state/changes_log.md` 生成用户可读的报告
 
 **输出文件**（落 `<cwd>/skills-output/thesis/thesis-ref-check/<时间戳>/`，docs/specs/输出规范.md C-1/C-9；
 `--output` 可指定到论文项目目录，最终产物另存主库审计副本）：
@@ -156,7 +156,7 @@ grep -n '^# ' <论文文件>               # 一级标题位置
 1. **不要修改原文的学术内容**：只修正术语，不改变论点、数据或分析
 2. **保守替换术语**：如果变体可能是故意的（如引用不同学者的不同表述），放入"疑似不一致"区域，让用户确认
 3. **保留原始文件**：始终生成新文件，不要覆盖用户原文件
-4. **状态文件可复用**：`_state/` 目录保留，用户下次修改同一论文时可直接增量更新
+4. **状态文件可复用**：`.state/` 目录保留，用户下次修改同一论文时可直接增量更新
 5. **分批处理**：如果论文章节超过 8 章，每处理 2-3 章后更新一次状态文件，避免上下文过长
 
 ## 边界情况处理
@@ -172,7 +172,7 @@ grep -n '^# ' <论文文件>               # 一级标题位置
 本 skill **不处理引用编号**。如需检查论文引用编号（连续性、顺序性、唯一性），请使用 thesis-writing checker：
 
 ```bash
-cd ~/projects/dc-skills && uv run python thesis-writing/scripts/check_markdown_spec.py <论文文件>
+cd ~/projects/dc-skills && uv run python thesis-writing/scripts/check_markdown_spec.py --md <论文文件> --mode undergraduate
 ```
 
 该 checker 自动检测 REF_NUMBER_CONTINUITY（编号不连续）、DUPLICATE（重复引用）、NOT_START_AT_ONE（未从 [1] 开始）等问题。
@@ -185,8 +185,8 @@ cd ~/projects/dc-skills && uv run python thesis-writing/scripts/check_markdown_s
 **Skill 执行：**
 1. 检查文件大小（如 257KB）→ 判断需要分块处理
 2. 执行预分析（bash）→ 发现 8 章，2147 行
-3. 逐章扫描 → 生成 `_state/term_glossary.md`
+3. 逐章扫描 → 生成 `.state/term_glossary.md`
 4. 全局检查 → 发现 5 处术语变体
-5. 逐章修正 → 生成 `_state/chapterX_fixed.md`
+5. 逐章修正 → 生成 `.state/chapterX_fixed.md`
 6. 合并输出 → 生成 `论文初稿_完整版_修正版.md` + `论文初稿_完整版_术语修改报告.md`
 7. 向用户汇报修改概况，提供报告摘要

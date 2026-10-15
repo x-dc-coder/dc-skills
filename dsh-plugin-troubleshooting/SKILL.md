@@ -41,15 +41,15 @@ metadata:
    - `docs/user/` —— 端用户与开发者指南（guide/ 用 UI、develop/ 写插件）
 3. **命令事实源（随版本走，首选）**：`/home/dc/.nvm/versions/node/v24.16.0/lib/node_modules/@deepseek-ai/dsh/README.md`（与运行版本永远匹配；上游 apps/cli/README.md 同源）
 4. 本地安装包源码：`/home/dc/.nvm/versions/node/v24.16.0/lib/node_modules/@deepseek-ai/dsh/`（含 config/agent-presets/ 下 shipped 预设）
-5. 官方仓库克隆（离线查阅；**须定期 git pull 刷新**）：`/tmp/dsh-repo/`
+5. 官方仓库克隆（离线查阅；**须定期 git pull 刷新**；`/tmp/dsh-repo/` 不存在时先 `git clone` 到该路径）：`/tmp/dsh-repo/`
 
 文档路径约定：上述 `docs/` 均指预设根目录 `/home/dc/.dsh/.agent-presets/plugin-specialist/docs/`（不含 docs/packages/——那是打包者镜像，非上游 docs/ 结构）。
 
 ## 1. 环境事实
 
-- DSH 版本：以 `dsh --version` 实测为准（2026-09-07：0.1.2-rc.1）；DSH_HOME=`~/.dsh`
-- shipped 预设（只读）：`<dsh 安装目录>/config/agent-presets/` → standard / code / minimal / cordis
-- 用户预设：`~/.dsh/.agent-presets/` → linux-ops、standard-flash、thesis-agent、plugin-specialist（本预设）
+- DSH 版本：以 `dsh --version` 实测为准（2026-10-15：0.2.0-rc.1）；DSH_HOME=`~/.dsh`
+- shipped 预设（只读）：由 npm 包 `@deepseek-ai/dsh-agent-preset(-registry)` 承载（nvm global `node_modules/` 下；用 `dsh --dump-config` 或包源码定位）→ standard / code / minimal / cordis
+- 用户预设：`~/.dsh/.agent-presets/` → code、linux-ops、local-lean、thesis-agent、plugin-specialist（本预设）
 - 全局补丁层 `~/.dsh/cordis.patch.yml`（mcp-vision / mcp-browser / doc-autosync）；手动插件 `~/.dsh/plugins/`（dsh-crypto-randomuuid-polyfill、dsh-plugin-doctor、dsh-doc-autosync）；profile 在 `~/.dsh/profiles/<name>/`（package.json 内 dsh.profile.bundles + cordis.patch.yml + cordis.yml 根文件（boot 重写为 []，勿手编））
 - 配置层叠：空根 → `dsh.profile.bundles` → profile `cordis.patch.yml` → `$DSH_HOME/cordis.patch.yml` → `--patch`
 - 排查命令：`dsh --profile <name> --dump-config` / `dsh --profile <name> --dump-default-config` 对比定位问题层（**必须带 --profile**；web profile 可用 `dsh web --dump-config`；dump 会重写 profile 根 cordis.yml，幂等）

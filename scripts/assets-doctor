@@ -231,8 +231,6 @@ def check_cli(rep: Report, reg: dict, deep: bool) -> None:
     g = "cli"
     import shutil
     env_md = ROOT / "docs" / "arch" / "环境依赖.md"
-    if not env_md.exists():
-        env_md = ROOT / "docs" / "arch" / "ENVIRONMENT.md"
     baselines: dict[str, str] = {}
     if env_md.exists():
         in_cli_table = False
@@ -259,7 +257,7 @@ def check_cli(rep: Report, reg: dict, deep: bool) -> None:
             if bad:
                 rep.add(g, "crit", name,
                         f"配置无法加载（{item['check_cmd']}）—— 该客户端可能全量不可用",
-                        hint="修复后重跑；参见 SKILL-MANAGEMENT.md 风险台账")
+                        hint="修复后重跑；参见 技能管理.md 风险台账")
                 continue
         if "version_probe" in (item.get("asserts") or []):
             cc, cout = run_cmd([bin_, "--version"])
@@ -268,9 +266,9 @@ def check_cli(rep: Report, reg: dict, deep: bool) -> None:
                 rep.add(g, "warn", name, f"--version 异常（exit {cc}）")
             elif name in baselines and ver and baselines[name] not in ver:
                 rep.add(g, "warn", name,
-                        f"ENVIRONMENT.md 登记 {baselines[name]} ≠ 实际 {ver!r}（漂移，建议同步登记）")
+                        f"环境依赖.md 登记 {baselines[name]} ≠ 实际 {ver!r}（漂移，建议同步登记）")
             elif name not in baselines:
-                rep.add(g, "warn", name, f"未登记 ENVIRONMENT.md 基线（实际 {ver!r}）")
+                rep.add(g, "warn", name, f"未登记 环境依赖.md 基线（实际 {ver!r}）")
     rep.add(g, "ok", "cli-summary", f"{len(reg.get('cli') or [])} 个外部 CLI 巡检完成")
 
 
@@ -433,8 +431,6 @@ def check_models(rep: Report, reg: dict, offline: bool) -> None:
     grok_cfg = (Path.home() / ".grok" / "config.toml").read_text(encoding="utf-8") \
         if (Path.home() / ".grok" / "config.toml").exists() else ""
     models_md = ROOT / "docs" / "arch" / "模型渠道.md"
-    if not models_md.exists():
-        models_md = ROOT / "docs" / "arch" / "MODELS.md"
     expiry: dict[str, str] = {}
     if models_md.exists():
         for line in models_md.read_text(encoding="utf-8").splitlines():
@@ -448,7 +444,7 @@ def check_models(rep: Report, reg: dict, offline: bool) -> None:
         if "config.toml" in loc and '[model."' in loc:
             key = loc.split('#[model."')[1].split('"')[0]
             if f'[model."{key}"]' not in grok_cfg:
-                rep.add(g, "warn", name, f"~/.grok/config.toml 未见 [model.\"{key}\"]（MODELS.md 或 registry 过期）")
+                rep.add(g, "warn", name, f"~/.grok/config.toml 未见 [model.\"{key}\"]（模型渠道.md 或 registry 过期）")
         env_key = item.get("env_key")
         if env_key:
             val = os.environ.get(str(env_key))

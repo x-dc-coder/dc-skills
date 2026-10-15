@@ -42,8 +42,8 @@ metadata:
 
 ## 2. 通用规范（所有类型一致）
 
-1. **执行环境**：遵守 AGENT.md 核心约束——先 `cd ~/projects/dc-skills` 再 `uv run python`（确保解析根 pyproject 环境）；各技能子目录无需自建 .venv，uv 自动向上查找。脚本内 `common.py`（顶层 scripts/）提供 `plan_output`，已在各 CLI 中接入。
-2. **输出路径统一产物树**（docs/specs/输出规范.md C-1，勿改）：
+1. **执行环境**：遵守 [AGENTS.md](../AGENTS.md) 核心约束——先 `cd ~/projects/dc-skills` 再 `uv run python`（确保解析根 pyproject 环境）；各技能子目录无需自建 .venv，uv 自动向上查找。脚本内 `common.py`（顶层 scripts/）提供 `plan_output`，已在各 CLI 中接入。
+2. **输出路径统一产物树**（[输出规范.md](../docs/specs/输出规范.md) C-1，勿改）：
    - 默认 → `{cwd}/skills-output/drawing/{脚本目录}/{时间戳}/{文件名}`。脚本目录名见 输出规范.md C-3：`diagram-er`、`diagram-ers`、`diagram-module`、`diagram-sequence`、`diagram-usecase`、`diagram-draft`，不是类型短名。`flow` 只出 Mermaid，不落这个目录
    - 显式 `--output` 优先；最终产物另存主库 `skills-output/` 审计副本
 3. **论文风格**：流程图/时序图/ER 系列统一白色背景、纯黑节点、黑白打印友好（细节见各分册）。

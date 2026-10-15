@@ -47,11 +47,11 @@ disable-model-invocation: true
 
 ### 第 5 步：质检（SKILL 布局质检 + MCP 结构校验）
 ```bash
-python3 scripts/check-quality.py <输出文件.drawio>
+cd ~/projects/dc-skills && uv run python drawio-xml/scripts/check-quality.py <输出文件.drawio>
 # 大图/自定义视口：--viewport <宽> <高>
 # UI 弹窗等设计性覆盖：--allow-overlap <idA,idB>（可多次）
 ```
-检查：节点重叠、越界（默认 850x1100 视口）、孤立边、重复 id、XML 注释。**有问题必须修复后重新质检，通过才算交付**。MCP 结构校验在写入时已兜底，此步补布局层面的检查。
+检查：节点重叠、越界（默认 850x1100 视口）、孤立边、重复 id、XML 注释。**有问题必须修复后重新质检，通过才算交付**。MCP 结构校验在写入时已兜底，此步补布局层面的检查。论文交付图在质检通过后另跑 [scripts/check-paper-delivery.py](scripts/check-paper-delivery.py)（300DPI + 论文三件套完整性自检）。
 
 注意：质检脚本已处理容器内子元素的相对坐标（沿 parent 链转绝对坐标）与祖先-后代包含关系；UI 复刻场景中弹窗（modal）覆盖主内容区属于设计意图，用 `--allow-overlap` 显式豁免并在交付说明中注明。
 
@@ -91,7 +91,7 @@ python3 scripts/check-quality.py <输出文件.drawio>
 ## 论文级复杂图模式（架构图 / 模型结构图 / 机制传导图）
 
 > 适用：用户要求"论文插图 / 架构图 / 模型结构图 / 机制传导图 / 复杂系统图"时启用。
-> 完整模板见 `references/paper-diagram-prompts.md`（六段式 + 三类专项 + 精调速查表）。
+> 完整模板见 [`references/paper-diagram-prompts.md`](references/paper-diagram-prompts.md)（六段式 + 三类专项 + 精调速查表）。
 
 ### 流程（在默认协同工作流基础上）
 1. **规划分层**：先画骨架（顶层容器/分区/主流向）再填细节；确定流向（左右/上下/混合）与分区（列/行）
@@ -133,7 +133,7 @@ python3 scripts/check-quality.py <输出文件.drawio>
 | 流程图 | `rounded=1`（处理）/`rhombus`（判断）/`ellipse`（起止） | 判断分支标注是/否 |
 | 泳道图 | `swimlane`（泳道）+ 节点 parent 指向泳道 | 泳道横向排列 |
 
-云架构图（AWS/Azure/GCP/K8s）需要图标库语法，查 `references/drawio-quality-rules.md` 第六节，禁止猜测图标语法。
+云架构图（AWS/Azure/GCP/K8s）需要图标库语法，查 [`references/drawio-quality-rules.md`](references/drawio-quality-rules.md) 第六节，禁止猜测图标语法。
 
 ## 必须遵守的硬规则（摘要，完整版见 references/drawio-quality-rules.md）
 

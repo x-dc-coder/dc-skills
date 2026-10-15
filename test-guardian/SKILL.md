@@ -22,14 +22,14 @@ disable-model-invocation: true
 
 ## 0. 快速调用入口（CLI Tools）
 
-本技能提供纯 Python 标准库实现的通用质检工具链（无外部依赖，任何 Agent 或终端均可秒级调用）：
+本技能提供纯 Python 标准库实现的通用质检工具链（无外部依赖；用 `--project` 固定依赖环境，可保持当前目录为目标仓库）：
 
 ```bash
 # 1. 静态规则扫描（检测无断言、裸Mock、吞异常、任务编号命名）
-python ~/projects/dc-skills/test-guardian/scripts/cli.py audit tests/ --own-packages app
+uv run --project ~/projects/dc-skills python ~/projects/dc-skills/test-guardian/scripts/cli.py audit tests/ --own-packages app
 
 # 2. 增量暂存区扫描（适合 Git pre-commit，0.1秒级）
-python ~/projects/dc-skills/test-guardian/scripts/cli.py audit --staged
+uv run --project ~/projects/dc-skills python ~/projects/dc-skills/test-guardian/scripts/cli.py audit --staged
 
 # 3. 存量摸底（只打印违规警告，不阻断退出码）
 python ~/projects/dc-skills/test-guardian/scripts/cli.py audit tests/ --warn-only

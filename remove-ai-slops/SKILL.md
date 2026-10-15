@@ -24,7 +24,7 @@ The core safety invariant: **behavior is locked by green tests before a single l
 
 ## Categories (what counts as slop)
 
-The agent looks for these nine categories. The first three are stylistic, the next three are structural, the next two are about hidden cost, and the last is about behavior coverage.
+The agent looks for these ten categories: three stylistic (1–3), three structural (4–6), two hidden-cost (7–8), one behavior-coverage (9), and oversized modules (10).
 
 ### Stylistic
 1. **Obvious comments** — comments restating code, trivial docstrings, section dividers, commented-out code, vague TODOs/Notes.
@@ -68,16 +68,16 @@ The agent looks for these nine categories. The first three are stylistic, the ne
 ### Behavior coverage
 9. **Missing tests** — behavior present in changed files that is not locked by any regression test. The fix is not to remove code but to ADD the narrowest test that pins the behavior. EXCEPTION: a PROSE file (prompt, `SKILL.md`, rule, markdown) has no behavioral seam — do NOT add a text/word-count/phrase pin for it; that guards a diff, not behavior. Cover only a machine-consumed value (parsed field, sentinel a runtime greps, a doc JSON sample through its real validator) or leave it to review.
 
-### Structural
+### Oversized modules
 10. **Oversized modules** — any source file exceeding **250 pure LOC** (non-blank, non-comment lines). This is an architectural defect, not a style preference. Measure: `awk '!/^[[:space:]]*$/ && !/^[[:space:]]*(#|\/\/)/' <file> | wc -l`.
 
    **When found, do NOT just flag it. Execute a full modular refactoring:**
-   1. Run `check-no-excuse-rules.py` recursively on scope to list all violations.
+   1. Run [`check-no-excuse-rules.py`](../programming/scripts/python/check-no-excuse-rules.py) recursively on scope to list all violations（Go/TS 用变体：`programming/scripts/go/check-no-excuse-rules.sh`、`programming/scripts/typescript/check-no-excuse-rules.ts`）.
    2. For each oversized file, identify distinct responsibilities (single-responsibility principle).
    3. Plan the split: name each new file after the concept it owns (never `utils.py`, `helpers.py`, `common.py`, `part_1.py`).
    4. Present the split plan to the user before executing.
    5. Extract into clean modules with explicit `__init__.py` re-exports (re-exports ONLY, no logic in `__init__.py`).
-   6. Verify: run `check-no-excuse-rules.py` again — every file must be ≤250 pure LOC. Run tests, typecheck, lint.
+   6. Verify: run [`check-no-excuse-rules.py`](../programming/scripts/python/check-no-excuse-rules.py) again — every file must be ≤250 pure LOC. Run tests, typecheck, lint.
 
    **Forbidden escapes**:
    - Counting blanks/comments toward budget.

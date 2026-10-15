@@ -46,7 +46,7 @@ bocha（按次）与 zhipu（GLM Coding Plan 套餐按次计积分）。源健�
 
 - **keenable 源为硬依赖**：`unified_search.py` 直接调用 `keenable` CLI 二进制（config.json
   `sources.keenable.command`），未安装时该源不可用（其余源不受影响）。
-- **安装 / 认证 / 更新 / 为 AI 客户端配置 keenable MCP**：见 `references/keenable-setup.md`
+- **安装 / 认证 / 更新 / 为 AI 客户端配置 keenable MCP**：见 [`references/keenable-setup.md`](references/keenable-setup.md)
   （原 keenable-cli 技能全文迁移，含安装脚本、设备码登录、configure-mcp、CLI 参考）。
 - 用户提出"配置 keenable MCP / 安装 keenable / 登录 keenable"等工具维护诉求时，同样走本技能
   （读 keenable-setup.md 执行）。
@@ -119,7 +119,7 @@ sources disagree, conserving the 1000/month quota.
    - openalex：免费兜底，不受上述限流影响
    - zhipu：中文资讯/技术报道补充（无链接结果，仅供排序展示）
 2. **Merge**: dedup by DOI/arxiv-id/normalized-URL, cross-validated bonus
-3. **Record**: all paper links saved to `data/history.db` for later retrieval
+3. **Record**: all paper links saved to `~/.local/state/dc-skills/unified-search/history.db` for later retrieval
 4. Each result includes: title, url, pdf_url, doi, arxiv_id, year, venue, authors
 
 Academic hint keywords that trigger auto-classification: paper, 论文, research,
@@ -136,7 +136,7 @@ benchmark, dataset, arxiv, doi, citation, method, approach, novel, proposed.
 
 ### `history`
 
-Searches past results in `data/history.db`. General mode stores top-5;
+Searches past results in `~/.local/state/dc-skills/unified-search/history.db`. General mode stores top-5;
 academic mode stores top-5 + all paper links. Use this before re-searching
 a similar query to save quota.
 
@@ -148,7 +148,7 @@ Tavily and Firecrawl each have **1000 calls/month**. The script:
 - Only invokes firecrawl for arbitration when sources diverge
 - Only uses tavily `advanced` depth on explicit academic arbitration
 - Falls back to free keenable when quota exhausted
-- Tracks usage in `data/quota.json` per month
+- Tracks usage in `~/.local/state/dc-skills/unified-search/quota.json` per month
 
 **Before searching, check quota**:
 ```bash
@@ -218,14 +218,21 @@ built-in web search.
 
 ```
 unified-search/
-├── SKILL.md                  # this file
-├── config.json               # sources, keys, modes, quota
-├── scripts/
-│   └── unified_search.py     # main script
-├── data/
-│   ├── history.db            # SQLite: past searches + paper links
-│   └── quota.json            # monthly usage tracking
-└── cache/                    # reserved for future result caching
+├── SKILL.md                   # this file
+├── config.json                # sources, keys, modes, quota
+├── references/
+│   └── keenable-setup.md      # keenable install/auth/MCP setup
+└── scripts/
+    ├── unified_search.py      # main script
+    ├── anubis_dblp.py         # dblp Anubis PoW solver
+    └── ai4scholar_download.py # ai4scholar full-text download
+
+Runtime state lives OUTSIDE the repo (输出规范 C-8):
+~/.local/state/dc-skills/unified-search/
+├── history.db         # SQLite: past searches + paper links
+├── quota.json         # monthly usage tracking
+├── dblp_cookies.json  # Anubis PoW cookies (~1h)
+└── cache/             # result cache
 ```
 
 ## Zhipu 源（GLM 套餐 web_search，2026-09-21 接入验收）
@@ -255,19 +262,19 @@ zhipu 贡献 GLM-5.3 中文报道 6 条且 `sources_failed` 为空；51 个既�
 
 | 项 | 值 |
 |---|---|
-| REST 基址 | @@BT@@https://ai4scholar.net/graph/v1@@BT@@（Semantic Scholar 形态） |
-| 认证 | @@BT@@Authorization: Bearer <AI4SCHOLAR_API_KEY>@@BT@@ —— **不支持 @@BT@@x-api-key@@BT@@**（那是 S2 官方用法） |
-| 端点 | @@BT@@paper/search@@BT@@、@@BT@@paper/{id}@@BT@@、@@BT@@paper/{id}/citations@@BT@@、@@BT@@paper/{id}/references@@BT@@、@@BT@@author/search@@BT@@、@@BT@@author/{id}@@BT@@、@@BT@@author/{id}/papers@@BT@@、@@BT@@paper/batch@@BT@@、@@BT@@paper/search/bulk@@BT@@、@@BT@@GET /api/credits@@BT@@（免费） |
-| 计费 | 每次成功调用扣积分（1 分起，batch/bulk 固定 2 分）；失败退还；响应头 @@BT@@x-credits-charged@@BT@@ / @@BT@@x-credits-remaining@@BT@@ 可对账 |
+| REST 基址 | `https://ai4scholar.net/graph/v1`（Semantic Scholar 形态） |
+| 认证 | `Authorization: Bearer <AI4SCHOLAR_API_KEY>` —— **不支持 `x-api-key`**（那是 S2 官方用法） |
+| 端点 | `paper/search`、`paper/{id}`、`paper/{id}/citations`、`paper/{id}/references`、`author/search`、`author/{id}`、`author/{id}/papers`、`paper/batch`、`paper/search/bulk`、`GET /api/credits`（免费） |
+| 计费 | 每次成功调用扣积分（1 分起，batch/bulk 固定 2 分）；失败退还；响应头 `x-credits-charged` / `x-credits-remaining` 可对账 |
 | 限流 | 免费 10 次/分；专业版 100 次/分；团队版不限 |
-| 密钥 | @@BT@@~/.config/vision-ai/.env@@BT@@ 的 @@BT@@AI4SCHOLAR_API_KEY@@BT@@（不进 config.json） |
+| 密钥 | `~/.config/vision-ai/.env` 的 `AI4SCHOLAR_API_KEY`（不进 config.json） |
 | 验收 | 实测 search / detail / citations / references / author search 全部 200；一次 academic 检索贡献 15 条结果、扣 1 积分 |
 
 ### 它能覆盖多少来源
 
 | 通道 | 覆盖范围 |
 |---|---|
-| **REST 开放 API**（本技能接入的就是这条） | **仅 Semantic Scholar**：2 亿+ 篇（计算机/生物医学/物理/数学，每周更新）——实测返回 @@BT@@paperId@@BT@@/@@BT@@externalIds@@BT@@/@@BT@@citationCount@@BT@@，是标准 S2 结构 |
+| **REST 开放 API**（本技能接入的就是这条） | **仅 Semantic Scholar**：2 亿+ 篇（计算机/生物医学/物理/数学，每周更新）——实测返回 `paperId`/`externalIds`/`citationCount`，是标准 S2 结构 |
 | **MCP 通道**（托管 SSE 或本地 stdio，29 个工具） | arXiv、PubMed（3500 万+）、Semantic Scholar（2 亿+）、Google Scholar（3.89 亿+）、bioRxiv、medRxiv，外加按 DOI 下载 |
 | **平台网页端**（无 API） | Google Patents（1.2 亿+，100+ 国家/地区）、中文文献（中文核心/CSSCI/CSCD/北大核心、学位论文、会议论文） |
 
@@ -276,68 +283,65 @@ Google Patents 与中文文献目前只在他家网页端，没有 API。
 
 ### PDF 下载（本地 stdio MCP，已实测）
 
-托管版 MCP 的 @@BT@@download_*@@BT@@ 会直接返回「该工具仅在本地模式（stdio）下可用」，所以下载必须本机装一次：
+托管版 MCP 的 `download_*` 会直接返回「该工具仅在本地模式（stdio）下可用」，所以下载必须本机装一次：
 
-@@BT@@@@BT@@@@BT@@bash
+```bash
 uv venv --python 3.12 ~/.local/share/ai4scholar-mcp/venv
 uv pip install --python ~/.local/share/ai4scholar-mcp/venv/bin/python ai4scholar-mcp "mcp<2"
-@@BT@@@@BT@@@@BT@@
+```
 
-> 必须 @@BT@@mcp<2@@BT@@：ai4scholar-mcp 0.4.0 仍用旧版 @@BT@@mcp.server.fastmcp@@BT@@ API，
-> 装了 mcp 2.x 会直接 @@BT@@ModuleNotFoundError: No module named 'mcp.server.fastmcp'@@BT@@。
+> 必须 `mcp<2`：ai4scholar-mcp 0.4.0 仍用旧版 `mcp.server.fastmcp` API，
+> 装了 mcp 2.x 会直接 `ModuleNotFoundError: No module named 'mcp.server.fastmcp'`。
 
 用法（脚本会自动找上面的 venv）：
 
-@@BT@@@@BT@@@@BT@@bash
+```bash
 cd ~/projects/dc-skills
 uv run python unified-search/scripts/ai4scholar_download.py --doi 10.48550/arXiv.1706.03762
 uv run python unified-search/scripts/ai4scholar_download.py --arxiv 2312.10997 --out ./papers
 uv run python unified-search/scripts/ai4scholar_download.py --semantic <paperId>
 uv run python unified-search/scripts/ai4scholar_download.py --list-tools
-@@BT@@@@BT@@@@BT@@
+```
 
-实测（2026-09-12）：@@BT@@--arxiv 1706.03762@@BT@@ → 2,215,244 B；@@BT@@--arxiv 2312.10997@@BT@@ → 1,662,567 B；
-@@BT@@--semantic@@BT@@ → 885,323 B；三份文件 @@BT@@%PDF-@@BT@@ 魔数全部正确。下载链路为
+实测（2026-09-12）：`--arxiv 1706.03762` → 2,215,244 B；`--arxiv 2312.10997` → 1,662,567 B；
+`--semantic` → 885,323 B；三份文件 `%PDF-` 魔数全部正确。下载链路为
 Unpaywall → 出版商页面 → 可选 Sci-Hub；在校园网出口可借机构权限拿付费论文。
 
 ## 源健康与自愈（2026-09-12 体检 + 修复）
 
 | 现象 | 根因 | 现在的处理 |
 |---|---|---|
-| 所有 HTTP 源报 @@BT@@InvalidURL: Invalid port: ':1]'@@BT@@ | DSH 的 @@BT@@@deepseek-ai/dsh-http-proxy@@BT@@ 会把 loopback 绕过项 @@BT@@[::1]@@BT@@（连同 @@BT@@NODE_USE_ENV_PROXY=1@@BT@@）注入**所有**子进程；httpx 把 @@BT@@[::1]@@BT@@ 当 host:port 解析 | 脚本导入时自动清洗 @@BT@@no_proxy/NO_PROXY@@BT@@：只删方括号条目，保留裸 @@BT@@::1@@BT@@，语义不变 |
-| arxiv 报 @@BT@@429 Rate exceeded@@BT@@ | export API 对当前出口 IP 限流（同一时刻 arxiv.org HTML 页仍 200） | 自动降级抓 HTML 搜索页，超时 60s + 重试 1 次 |
-| dblp 返回 Anubis 挑战页（HTTP 200 + HTML） | dblp.org 位于 Anubis v1.27.0 之后（difficulty=4 的 SHA-256 PoW） | @@BT@@scripts/anubis_dblp.py@@BT@@ 纯 Python 解 PoW 换取 @@BT@@dblp_org-auth-*@@BT@@ cookie（JWT 1h），缓存 @@BT@@data/dblp_cookies.json@@BT@@；代理/直连双通道自动回退 |
-| firecrawl @@BT@@402 Payment Required@@BT@@ | 密钥有效但额度耗尽（本周期 2026-08-14 → **2026-09-14 重置**） | 命中 401/402/403 即在本次进程内熔断，不再重复白打 API；@@BT@@--fetch markdown_body@@BT@@ 自动落到 keenable |
-| semantic_scholar @@BT@@429 Too Many Requests@@BT@@ | 未配置 @@BT@@S2_API_KEY@@BT@@，走匿名共享限流（实测 4 次里 1 次成功） | **需人工申请免费 key**，见下 |
+| 所有 HTTP 源报 `InvalidURL: Invalid port: ':1]'` | DSH 的 `@deepseek-ai/dsh-http-proxy` 会把 loopback 绕过项 `[::1]`（连同 `NODE_USE_ENV_PROXY=1`）注入**所有**子进程；httpx 把 `[::1]` 当 host:port 解析 | 脚本导入时自动清洗 `no_proxy/NO_PROXY`：只删方括号条目，保留裸 `::1`，语义不变 |
+| arxiv 报 `429 Rate exceeded` | export API 对当前出口 IP 限流（同一时刻 arxiv.org HTML 页仍 200） | 自动降级抓 HTML 搜索页，超时 60s + 重试 1 次 |
+| dblp 返回 Anubis 挑战页（HTTP 200 + HTML） | dblp.org 位于 Anubis v1.27.0 之后（difficulty=4 的 SHA-256 PoW） | [`scripts/anubis_dblp.py`](scripts/anubis_dblp.py) 纯 Python 解 PoW 换取 `dblp_org-auth-*` cookie（JWT 1h），缓存 `data/dblp_cookies.json`；代理/直连双通道自动回退 |
+| firecrawl `402 Payment Required` | 密钥有效但额度耗尽（本周期 2026-08-14 → **2026-09-14 重置**） | 命中 401/402/403 即在本次进程内熔断，不再重复白打 API；`--fetch markdown_body` 自动落到 keenable |
+| semantic_scholar `429 Too Many Requests` | 未配置 `S2_API_KEY`，走匿名共享限流（实测 4 次里 1 次成功） | **需人工申请免费 key**，见下 |
 
 ### semantic_scholar API key 申请（免费）
 
 1. 打开官方页 https://www.semanticscholar.org/product/api#api-key-form ，点 **Request an API key** 填表（需登录 Semantic Scholar 账号）
 2. 密钥通过**邮件**发送。官方限流口径：未认证=全站共享且会被额外节流；带 key 起步 1 RPS。**不要外传密钥**
-3. 写入统一密钥文件 @@BT@@~/.config/vision-ai/.env@@BT@@（本脚本自动加载）：
-   @@BT@@S2_API_KEY=<你的key>@@BT@@
-4. 验证：@@BT@@cd ~/projects/dc-skills && uv run python unified-search/scripts/unified_search.py "retrieval augmented generation" --mode academic@@BT@@ ，
-   输出 JSON 的 @@BT@@sources_failed@@BT@@ 中不再出现 @@BT@@semantic_scholar@@BT@@ 即为生效
+3. 写入统一密钥文件 `~/.config/vision-ai/.env`（本脚本自动加载）：
+   `S2_API_KEY=<你的key>`
+4. 验证：`cd ~/projects/dc-skills && uv run python unified-search/scripts/unified_search.py "retrieval augmented generation" --mode academic` ，
+   输出 JSON 的 `sources_failed` 中不再出现 `semantic_scholar` 即为生效
 
 ### 输出新增字段
 
-- @@BT@@sources_failed@@BT@@：完全失败的源 + 错误原因（区分「没搜到」与「源挂了」）
-- @@BT@@degraded@@BT@@：@@BT@@true@@BT@@ 表示本轮有源失败
+- `sources_failed`：完全失败的源 + 错误原因（区分「没搜到」与「源挂了」）
+- `degraded`：`true` 表示本轮有源失败
 
 ### 排查命令
 
-@@BT@@@@BT@@@@BT@@bash
+```bash
 cd ~/projects/dc-skills
-
-# 逐源体检（一条命令看各源真实状态与降级通道）
-uv run python unified-search/scripts/probe_sources2.py nobracket
 
 # 配额 / 真实额度（tavily、firecrawl 走官方 usage 接口）
 uv run python unified-search/scripts/unified_search.py --quota
 
 # dblp 过墙单独自测
 uv run python unified-search/scripts/anubis_dblp.py "transformer" -n 5
-@@BT@@@@BT@@@@BT@@
+```
 
 ## Troubleshooting
 
