@@ -1,15 +1,7 @@
 version: 1
 documents:
-  AGENT.md:
-    id: agent
-    kind: reference
-    status: active
   AGENTS.md:
     id: agents
-    kind: reference
-    status: active
-  CLAUDE.md:
-    id: claude
     kind: reference
     status: active
   codegraph-explore/SKILL.md:
