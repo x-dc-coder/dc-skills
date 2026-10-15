@@ -8,8 +8,9 @@
 #   uv run python scripts/skills-sync --check                     # 只检查漂移，不修改
 #
 # 启用一个按需技能：把技能名加进对应 agent 的 extra，再跑 skills-sync。
-# 安装器着陆区 ~/.agents/skills（通用技能安装器的默认目标，见 .skill-lock.json）如出现新技能：
-#   mv ~/.agents/skills/<name> ~/projects/dc-skills/ 并在此文件登记，再跑 skills-sync。
+# 安装器着陆区 ~/.agents/skills（通用技能安装器的默认目标，见 .skill-lock.json）：
+#   Orca 官方技能（orca-cli/orchestration/computer-use，2026-10-15 定策）常驻该区走官方
+#   `npx skills update` 更新，不收编主库；其他来源新技能仍按 mv 进主库登记流程处理。
 #
 # ── 各 Agent 自注册根与可控配置（2026-09-23 实测；完整机制与风险见 技能管理.md）──
 # claude-code: 自注册 = 插件市场 ~/.claude/plugins/cache + 账号同步 ~/.claude/skills/synced（农场根内，须保持关闭）
@@ -20,7 +21,8 @@
 # dsh:        自注册 = 只装插件不装技能；出厂 cordis 预设自带 2 技能（customSkillDirs rank 300 > 农场 400）
 #              可控 = 各预设 agent.cordis.yml 的 skill-filesystem config（customSkillDirs/includeDefaultRoots）
 # orca:       自注册 = orca skills install 转发社区 skills CLI（npx skills add --global），可写农场目录
-#              可控 = 安装时 --agent universal / --agent <names>；着陆区约定保持为空（skillctl inventory 监控）
+#              可控 = 安装时 --agent universal / --agent <names>；orca 系官方技能常驻着陆区
+#              ~/.agents/skills 由官方通道更新（2026-10-15 定策，不再 mv 收编；skillctl inventory 监控）
 # lark-cli:   自注册 = 28 域技能编译进二进制（lark-cli skills read），随 lark-cli update 走
 # keenable:   无技能自注册（仅 MCP server + managed_deny_tools），无需处理
 #
@@ -60,11 +62,8 @@ base:
   - test-guardian       # 测试工程质量规范
   - codegraph-explore   # 任意语言的大仓符号检索（member）
   - github-workflow     # GitHub 仓库生命周期（member）
-  # ── agentops（entry: orca-cli）──
-  - orca-cli            # Orca worktree/终端操作
-  - orchestration       # Orca worker 编排
-  - task-hub            # 跨会话任务中心
-  - computer-use        # GUI 驱动（orca computer）
+  # ── standalone manual（详见文末 standalone 段）──
+  - task-hub            # 跨会话任务中心（standalone manual，2026-10-15 出 agentops）
   # ── info（entry: unified-search）──
   - unified-search      # 10 源聚合搜索
   - kimi-webbridge      # 真实浏览器控制
@@ -81,9 +80,10 @@ base:
   - dsh-ui-optimization         # DSH 插件 UI 优化（member；plugin-specialist 预设亦挂载）
   # ── meta（entry: dc-skill-creator）──
   - dc-skill-creator    # 本仓库技能创建工具（validate/new_skill/check_triggers）
-  - cloudreve-storage   # Cloudreve 云存储网盘操作与备份管理工具：支持文件浏览(ls/tree)
-  # ── standalone 运维技能 ──
+  # ── standalone manual 运维技能 ──
   - proxy-ops
+  - cloudreve-storage   # Cloudreve 云存储（standalone manual，2026-10-15 出 agentops）
+  - agent-balances      # 查询各编程 Agent 额度与用量（standalone manual，2026-10-15 出 agentops）
 
 # 按需技能：默认不进任何农场。目前为空；新的按需技能写在这里，再放进某个 agent 的 extra。
 on_demand:
@@ -147,6 +147,15 @@ standalone:
   word-extractor:
     load: manual
     description: ".docx 高精度提取（2026-10-15 officecli 归档、docs 族解散后转单体）"
+  task-hub:
+    load: manual
+    description: "跨会话任务中心总线：任务新建/推进/查询/依赖调度（2026-10-15 出 agentops 转单体）"
+  cloudreve-storage:
+    load: manual
+    description: "Cloudreve 云存储网盘操作与备份管理（2026-10-15 出 agentops 转单体）"
+  agent-balances:
+    load: manual
+    description: "查询各编程 Agent 额度与用量余额（2026-10-15 出 agentops 转单体）"
 
 mcps:
   codegraph:
@@ -194,9 +203,6 @@ families:
     requires:
       cli: [git, gh]
       mcp: [codegraph]
-  agentops:          # Agent 运维：Orca 编排 + 任务中心 + GUI 驱动 + Cloudreve 云存储
-    entry: orca-cli
-    members: [orchestration, task-hub, computer-use, cloudreve-storage]
   info:              # 信息与视觉：搜索/真实浏览器/图像理解
     entry: unified-search
     members: [kimi-webbridge, vision-workflow]

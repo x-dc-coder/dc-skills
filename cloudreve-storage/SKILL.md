@@ -4,8 +4,7 @@ description: >
   Cloudreve 云存储网盘操作与备份管理工具：支持文件浏览(ls/tree)、读取(cat)、上传下载(put/get)、移动重命名(mv)、删除(rm)及基于统一产物树的规范化备份与恢复(backup/restore/prune)。当用户需要上传、下载、浏览 Cloudreve 网盘文件，或对生成产物与状态文件进行云端归档与恢复时触发。
 metadata:
   version: "0.1"
-  family: agentops
-  role: member
+  role: standalone
   load-mode: manual
 disable-model-invocation: true
 ---

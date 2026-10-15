@@ -57,7 +57,7 @@ uv run python scripts/skills-sync && uv run python scripts/skillctl lint
 1. **命名**（唯一硬卡点）：kebab-case，`^[a-z0-9-]+$`，≤64，须等于目录名；当场用
    `validate.py` 的 R2 逻辑验，不合规立即给归一化建议。查重：主库 + `archive/` + App 自管根。
 2. **族群**（键必须存在于 `agent-map.yaml` 的 `families`）：thesis / drawing / frontend /
-   software / agentops / info / db / bridge / lark / dshplugin / meta。
+   software / info / db / bridge / lark / dshplugin / meta。
    都不匹配就省略 `--family`，脚本写成 `role: standalone`、`load-mode: auto`。
    不要传 `--family standalone`，也不要传已删除的 coding、infra、repo。
    传了 `--family` 就是该族 member（`load-mode: manual`，骨架写上 `disable-model-invocation: true`，不进模型清单，`/name` 显式触发）。`agents/openai.yaml` 仍由随后的 `family-apply --apply` 生成。

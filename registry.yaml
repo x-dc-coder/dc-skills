@@ -269,8 +269,9 @@ app_roots:
   - name: agents-landing
     type: app_root
     location: "~/.agents/skills"
-    count_baseline: {entries: 0}
-    asserts: [must_be_empty]             # 🚨 非空即高危（规约 P1）
+    count_baseline: {entries: 3}
+    asserts: []
+    notes: "2026-10-15 政策翻转：Orca 官方技能（orca-cli/orchestration/computer-use）常驻该区走官方更新，不收编；非预期新技能仍按 mv 进主库流程评估"
 
 # ── 本地依赖服务 ──
 services:

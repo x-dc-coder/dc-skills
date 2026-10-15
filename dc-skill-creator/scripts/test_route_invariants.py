@@ -114,7 +114,6 @@ def test_entry_descriptions_keep_member_phrases() -> None:
     assert "用我的浏览器" in description("unified-search")
     assert "机制图" in description("design-ui")
     assert "插件前端丑" in description("dsh-plugin-troubleshooting")
-    assert "待办" in description("orca-cli")
 
 
 def test_output_docs_do_not_teach_retired_paths() -> None:

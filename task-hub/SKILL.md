@@ -3,8 +3,8 @@ name: task-hub
 description: >
   本地快捷任务管理与全局任务中心调度：跨会话管理任务、新建任务、编辑任务全字段、智能识别依赖关系、查询待办与就绪任务、更新进度、导出报表及生成看板。当用户在任意会话需要新建任务、编辑任务（标题/截止日/优先级/排期/依赖）、查看任务、推进任务状态（start/done/wait）、推断或调整依赖关系、或询问任务安排/计划时使用本技能。
 metadata:
-  family: agentops
-  role: member
+  version: "1.0"
+  role: standalone
   load-mode: manual
 disable-model-invocation: true
 ---

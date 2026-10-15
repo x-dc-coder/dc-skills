@@ -439,7 +439,7 @@ APP_OWNED_ROOTS = [
     ("~/.codex/skills/.system", "Codex 自带（随 CLI 更新）"),
     ("~/.codex/plugins/cache", "Codex 插件市场（codex plugin add）"),
     ("~/.claude/plugins/cache", "Claude Code 插件市场（claude plugin install）"),
-    ("~/.agents/skills", "社区 skills CLI 着陆区（orca skills install 等，约定保持为空）"),
+    ("~/.agents/skills", "社区 skills CLI 区（Orca 官方技能常驻，官方通道自更新，不收编）"),
 ]
 
 
@@ -474,18 +474,18 @@ def cmd_inventory(args):
         if 0 < len(names) <= 12:
             print(f"      {', '.join(names)}")
 
-    # 检查 1：着陆区必须为空（社区 skills CLI 的落地约定是 mv 进主库并登记）
+    # 检查 1：着陆区居民清单（2026-10-15 起政策翻转：Orca 官方技能常驻该区走官方更新，
+    # 不再要求为空；orca 系三技能为预期居民，其他新技能按「mv 进主库登记」流程评估收编）
     landing = app_skills.get("~/.agents/skills", [])
     if landing:
-        print(f"\n🚨 着陆区 ~/.agents/skills 非空（{len(landing)} 个）：")
-        print("   按 agent-map.yaml 约定应 mv 进主库并登记，再跑 skills-sync。")
-        print("   Grok 已 ignore 该路径，但 dsh(rank 500)/Codex 仍会扫描到——有重名覆盖风险。")
+        print(f"\nℹ️ 着陆区 ~/.agents/skills 现有 {len(landing)} 个技能：")
+        print("   " + ", ".join(landing))
+        print("   orca-cli/orchestration/computer-use 为官方通道预期居民；其他新技能请评估是否 mv 进主库登记。")
 
-    # 检查 2：App 自管根与主库重名（同名按各 Agent 优先级裁决，非均等暴露）
+    # 检查 2：App 自管根与主库重名（同名按各 Agent 优先级裁决，非均等暴露；
+    # 着陆区自 2026-10-15 起常驻官方技能，一并参与重名检查防双注册）
     collisions = []
     for raw, names in app_skills.items():
-        if raw == "~/.agents/skills":
-            continue
         for n in names:
             if n.rsplit("/", 1)[-1] in master:
                 collisions.append((raw, n.rsplit("/", 1)[-1]))

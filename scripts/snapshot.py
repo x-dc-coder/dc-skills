@@ -916,7 +916,6 @@ def render_html_dashboard(doc: dict[str, Any], output_path: Path | str | None = 
     const FAMILY_TITLES = {{
       software: "软件工程 (Software Engineering)",
       thesis: "学术论文 (Thesis & Paper)",
-      agentops: "Agent 运维与编排 (Agent Operations)",
       drawing: "工程图表 (Diagrams & Charts)",
       frontend: "前端设计 (Frontend UI/UX)",
       info: "信息检索与视觉 (Search & Web)",

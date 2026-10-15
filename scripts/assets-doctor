@@ -14,7 +14,7 @@
   (d) mcp       MCP 期望矩阵对账 + codegraph 索引新鲜度 + 会话注入 server 差分
   (e) models    模型渠道：注册一致性 / env key 存在（不打印值）/ 上游可达 / 到期 / provider 悬空
   (f) app_roots App 自管根基线计数 + 与主库重名
-  (g) landing   着陆区 ~/.agents/skills 必须为空（P1）
+  (g) landing   着陆区 ~/.agents/skills 居民对账（Orca 官方技能预期常驻，其他来源评估收编）
 
 用法：
   cd ~/projects/dc-skills && uv run python scripts/assets-doctor            # 人读报告
@@ -572,16 +572,25 @@ def check_app_roots(rep: Report, reg: dict) -> None:
     rep.add(g, "ok", "app_roots-summary", f"{len(reg.get('app_roots') or [])} 个 App 自管根对账完成")
 
 
-# ── (g) 着陆区（并入 (f) 的 must_be_empty；此处单独成组便于 --only） ──────────
+# ── (g) 着陆区（2026-10-15 政策翻转：Orca 官方技能常驻，不再要求为空；单独成组便于 --only） ──────────
+
+ORCA_OFFICIAL_SKILLS = {"orca-cli", "orchestration", "computer-use"}
+
 
 def check_landing(rep: Report, reg: dict) -> None:
     g = "landing"
     root = Path(os.path.expanduser("~/.agents/skills"))
-    n = len([p for p in root.iterdir() if p.name != ".skill-lock.json"]) if root.is_dir() else 0
-    if n:
-        rep.add(g, "crit", "agents-landing", f"着陆区非空（{n} 个）—— 规约 P1 要求保持为空")
+    residents = sorted([p.name for p in root.iterdir() if p.name != ".skill-lock.json"]) if root.is_dir() else []
+    unexpected = [n for n in residents if n not in ORCA_OFFICIAL_SKILLS]
+    if unexpected:
+        rep.add(g, "warn", "agents-landing",
+                f"着陆区出现非 Orca 官方技能（{len(unexpected)} 个: {unexpected[:5]}…）—— 评估是否 mv 进主库登记",
+                hint="mv ~/.agents/skills/<name> ~/projects/dc-skills/ → agent-map 登记 → skills-sync")
+    elif residents:
+        rep.add(g, "ok", "agents-landing",
+                f"着陆区 {len(residents)} 个 Orca 官方技能（{'/'.join(residents)}），官方通道自更新 ✅")
     else:
-        rep.add(g, "ok", "agents-landing", "~/.agents/skills 为空 ✅")
+        rep.add(g, "warn", "agents-landing", "着陆区为空——Orca 官方技能未安装（orca skills install / npx skills add stablyai/orca -g）")
 
 
 # ── 输出 ───────────────────────────────────────────────────────────────────

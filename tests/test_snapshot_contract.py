@@ -3,7 +3,7 @@
 确保：
   1. 快照 Schema 格式（schema_version: 1）严格满足 monitor-panel 的对接要求；
   2. 原子落盘写入无残留且内容完备；
-  3. 离线 HTML 仪表盘自包含、无外部网络依赖，包含核心 33 技能和 5 大 Agent 矩阵；
+  3. 离线 HTML 仪表盘自包含、无外部网络依赖，包含核心 31 技能和 5 大 Agent 矩阵；
   4. assets-doctor 的 --export-snapshot 与 --html 参数行为稳定无回归。
 """
 
@@ -52,18 +52,18 @@ class TestSnapshotContract:
         assert "master_commit" in meta
 
         summary = doc["summary"]
-        assert summary["skills_total"] == 33
-        assert summary["families_total"] == 11
+        assert summary["skills_total"] == 31
+        assert summary["families_total"] == 10
         assert set(summary["agents"]) == {"claude-code", "grok", "dsh", "zcode", "codex"}
-        assert summary["load_modes"]["auto"] == 11
-        assert summary["load_modes"]["manual"] == 22
-        assert summary["roles"]["entry"] == 11
-        assert summary["roles"]["member"] == 20
-        assert summary["roles"]["standalone"] == 2
+        assert summary["load_modes"]["auto"] == 10
+        assert summary["load_modes"]["manual"] == 21
+        assert summary["roles"]["entry"] == 10
+        assert summary["roles"]["member"] == 16
+        assert summary["roles"]["standalone"] == 5
         assert summary["doctor"]["warn"] == 1
 
         skills = doc["skills"]
-        assert len(skills) == 33
+        assert len(skills) == 31
 
         skill_map = {s["name"]: s for s in skills}
         assert "proxy-ops" in skill_map
@@ -93,7 +93,7 @@ class TestSnapshotContract:
 
         loaded = json.loads(target.read_text(encoding="utf-8"))
         assert loaded["schema_version"] == 1
-        assert loaded["summary"]["skills_total"] == 33
+        assert loaded["summary"]["skills_total"] == 31
 
     def test_render_html_dashboard_offline(self, tmp_path):
         rep = DummyReport()

@@ -8,10 +8,6 @@ documents:
     id: skill.codegraph-explore
     kind: reference
     status: active
-  computer-use/SKILL.md:
-    id: skill.computer-use
-    kind: reference
-    status: active
   db-skill/references/mysql-config.md:
     id: db-skill.references.mysql-config
     kind: reference
@@ -398,14 +394,6 @@ documents:
     status: active
   md-to-thesis-latex/SKILL.md:
     id: skill.md-to-thesis-latex
-    kind: reference
-    status: active
-  orca-cli/SKILL.md:
-    id: skill.orca-cli
-    kind: reference
-    status: active
-  orchestration/SKILL.md:
-    id: skill.orchestration
     kind: reference
     status: active
   OUTPUT.md:
