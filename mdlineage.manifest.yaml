@@ -396,22 +396,6 @@ documents:
     id: skill.md-to-thesis-latex
     kind: reference
     status: active
-  officecli/references/advanced-operations.md:
-    id: officecli.references.advanced-operations
-    kind: reference
-    status: active
-  officecli/references/dom-operations.md:
-    id: officecli.references.dom-operations
-    kind: reference
-    status: active
-  officecli/references/watch-marks.md:
-    id: officecli.references.watch-marks
-    kind: reference
-    status: active
-  officecli/SKILL.md:
-    id: skill.officecli
-    kind: reference
-    status: active
   orca-cli/SKILL.md:
     id: skill.orca-cli
     kind: reference
@@ -710,10 +694,6 @@ documents:
     status: active
   test-guardian/SKILL.md:
     id: skill.test-guardian
-    kind: reference
-    status: active
-  thesis-export/SKILL.md:
-    id: skill.thesis-export
     kind: reference
     status: active
   thesis-ref-check/SKILL.md:

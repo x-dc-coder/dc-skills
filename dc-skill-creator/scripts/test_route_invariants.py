@@ -87,13 +87,6 @@ def test_thesis_routes_through_diagram_types() -> None:
     assert "diagram-flow" not in spec
 
 
-def test_officecli_claims_office_work() -> None:
-    desc = description("officecli")
-    assert "word-extractor" in desc
-    assert "docx" in desc
-    assert "pptx" in desc
-
-
 def test_kimi_does_not_require_missing_playwright() -> None:
     body = skill_text("kimi-webbridge").split("---", 2)[2]
     assert "没有 Playwright MCP" in body
@@ -122,7 +115,6 @@ def test_entry_descriptions_keep_member_phrases() -> None:
     assert "机制图" in description("design-ui")
     assert "插件前端丑" in description("dsh-plugin-troubleshooting")
     assert "待办" in description("orca-cli")
-    assert "分析论文 docx" in description("officecli")
 
 
 def test_output_docs_do_not_teach_retired_paths() -> None:

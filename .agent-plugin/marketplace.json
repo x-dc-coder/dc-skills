@@ -1,6 +1,6 @@
 {
   "name": "dc-skills",
-  "description": "dc-skills 技能农场：11 族群 / 34 技能的插件市场声明层（本机走 skills-sync 软链，本文件供原生 /plugins 发现与外发）",
+  "description": "dc-skills 技能农场：11 族群 / 32 技能的插件市场声明层（本机走 skills-sync 软链，本文件供原生 /plugins 发现与外发）",
   "owner": {
     "name": "x-dc-coder"
   },
@@ -15,7 +15,8 @@
         "./orca-cli",
         "./orchestration",
         "./task-hub",
-        "./computer-use"
+        "./computer-use",
+        "./cloudreve-storage"
       ]
     },
     {
@@ -34,16 +35,6 @@
       "strict": false,
       "skills": [
         "./db-skill"
-      ]
-    },
-    {
-      "name": "dc-docs",
-      "description": "docs 族群：入口 officecli + 1 个 manual 成员",
-      "source": ".",
-      "strict": false,
-      "skills": [
-        "./officecli",
-        "./word-extractor"
       ]
     },
     {
@@ -123,13 +114,12 @@
     },
     {
       "name": "dc-thesis",
-      "description": "thesis 族群：入口 thesis-writing + 5 个 manual 成员",
+      "description": "thesis 族群：入口 thesis-writing + 4 个 manual 成员",
       "source": ".",
       "strict": false,
       "skills": [
         "./thesis-writing",
         "./thesis-ref-check",
-        "./thesis-export",
         "./md-to-thesis-latex",
         "./paper-metrics",
         "./paper-reader"

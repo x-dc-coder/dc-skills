@@ -2,7 +2,7 @@
 name: thesis-writing
 description: >
   双模式学术论文写作：本科毕设（≥15000 字、六章、Web 系统）或期刊论文。当用户要写论文、写毕设、生成论文草稿、整理期刊论文（write a thesis / draft a paper）时使用。
-  读论文 PDF、MinerU/Marker 转换走 paper-reader，不要改用 App 自带的 pdf 技能。生成毕设 PDF、排版、封面拼接走 md-to-thesis-latex 或 thesis-export，不是读 PDF。术语检查、导出 docx、转 LaTeX 走族内成员。论文 AI 腔走 paper-metrics，不是代码 deslop。
+  读论文 PDF、MinerU/Marker 转换走 paper-reader，不要改用 App 自带的 pdf 技能。生成毕设 PDF、排版、封面拼接走 md-to-thesis-latex，不是读 PDF。术语检查、转 LaTeX 走族内成员。论文 AI 腔走 paper-metrics，不是代码 deslop。
   插图走 diagram 技能的类型（er/ers/module/usecase/sequence/flow），没有名为 diagram-er 的独立技能。
 metadata:
   family: thesis
@@ -18,7 +18,6 @@ metadata:
 | 技能 | 用途 | 何时选它 |
 |---|---|---|
 | [`thesis-ref-check`](../thesis-ref-check/SKILL.md) | 论文术语一致性检查 | 定稿前术语变体/前后不一检查与修正 |
-| [`thesis-export`](../thesis-export/SKILL.md) | 论文 Markdown→docx 导出与格式验证 | 导出 Word/导出前格式检查/封面拼接 |
 | [`md-to-thesis-latex`](../md-to-thesis-latex/SKILL.md) | 毕业论文 md→LaTeX→PDF | 转 LaTeX 排版输出 PDF |
 | [`paper-metrics`](../paper-metrics/SKILL.md) | 论文写作特征指标层 | 写作特征测量/AI 味量化分析 |
 | [`paper-reader`](../paper-reader/SKILL.md) | 学术论文 PDF 双引擎阅读 | 读 PDF 论文/转换/总结 |
@@ -64,7 +63,7 @@ metadata:
 
 ### 阶段二：大纲生成
 
-1. 读取 `references/undergrad-template.md`，获取标准章节结构和字数分配
+1. 读取 [`references/undergrad-template.md`](references/undergrad-template.md)，获取标准章节结构和字数分配
 2. 根据项目分析结果，将模板中的占位符替换为实际内容：
    - 确定相关技术栈的具体名称
    - 确定需求分析中的角色和功能
@@ -72,12 +71,12 @@ metadata:
    - 确定数据库实体和表结构
    - 确定第4章各功能模块的具体子节
 3. 标注每章预估字数（确保总计 >= 15000 字）
-4. 标注所有图片位置，引用 `references/undergrad-image-spec.md` 的占位符格式
+4. 标注所有图片位置，引用 [`references/undergrad-image-spec.md`](references/undergrad-image-spec.md) 的占位符格式
 5. 呈现完整大纲，等待用户确认或修改
 
 ### 阶段三：逐章撰写
 
-1. 读取 `references/undergrad-example-output.md` 作为写作风格参考
+1. 读取 [`references/undergrad-example-output.md`](references/undergrad-example-output.md) 作为写作风格参考
 2. 按大纲顺序逐章生成 Markdown 内容
 3. **所有图片均使用占位符**，不直接生成图片。占位符格式见下文"图片占位符规范"
 4. 每章完成后写入 `<cwd>/skills-output/thesis/thesis-writing/<时间戳>/第X章-章节名.md`
@@ -207,8 +206,8 @@ profiler 是纯 Python 脚本（stdlib 实现，**零第三方依赖、零 LLM t
 ### 阶段 D：逐章生成
 
 与 Mode A 阶段三相同的循环，两点差异：
-- 读取 `references/journal-example-output.md` 作为 few-shot 参考（而非 Web 系统示例）
-- 图片占位符使用**期刊图表词汇**（见 `references/journal-image-spec.md`），按子类型路由到对应 diagram skill：
+- 读取 [`references/journal-example-output.md`](references/journal-example-output.md) 作为 few-shot 参考（而非 Web 系统示例）
+- 图片占位符使用**期刊图表词汇**（见 [`references/journal-image-spec.md`](references/journal-image-spec.md)），按子类型路由到对应 diagram skill：
 
 | 期刊图片类型 | 对接 skill | 备注 |
 |-------------|-----------|------|
@@ -308,7 +307,7 @@ uv run python paper-metrics/scripts/validate_draft.py \
 
 ### 占位符类型与对应生成 Skill
 
-**Mode A（本科毕设）** — 详见 `references/undergrad-image-spec.md`：
+**Mode A（本科毕设）** — 详见 [`references/undergrad-image-spec.md`](references/undergrad-image-spec.md)：
 
 | 占位符中的图片类型 | diagram 类型 | 所需输入 |
 |-------------------|---------------|---------|
@@ -320,7 +319,7 @@ uv run python paper-metrics/scripts/validate_draft.py \
 | 时序图（模块交互） | `sequence` | JSON 文件（participants + messages） |
 | 界面截图 | 不适用 | 需实际运行系统后手动截图 |
 
-**Mode B（期刊论文）** — 详见 `references/journal-image-spec.md`：
+**Mode B（期刊论文）** — 详见 [`references/journal-image-spec.md`](references/journal-image-spec.md)：
 
 | 占位符中的图片类型 | diagram 类型 | 所需输入 |
 |-------------------|---------------|---------|
@@ -362,7 +361,7 @@ uv run python paper-metrics/scripts/validate_draft.py \
 
 ## Markdown 格式规范（两模式共享）
 
-所有生成的 Markdown 文档必须符合 `references/shared-markdown-norms.md` 中的机械化规范（由 `check_markdown_spec.py` 检查）。本规范与 Words-Production 仓（`/mnt/e/AllProjects202604/Words-Production`）的 `tools/check_markdown_spec.py` 与《使用手册/Markdown与样式要求》行为对齐；checker 代码短期允许两仓重复，后续 Agent 化时吸收为单一实现。要点：
+所有生成的 Markdown 文档必须符合 [`references/shared-markdown-norms.md`](references/shared-markdown-norms.md) 中的机械化规范（由 `check_markdown_spec.py` 检查）。本规范与 Words-Production 仓（`/mnt/e/AllProjects202604/Words-Production`）的 `tools/check_markdown_spec.py` 与《使用手册/Markdown与样式要求》行为对齐；checker 代码短期允许两仓重复，后续 Agent 化时吸收为单一实现。要点：
 
 - **编码**：UTF-8 无 BOM，LF 行尾
 - **标题**：ATX 风格（`#`/`##`/`###`），编号连续不跳级
@@ -376,14 +375,14 @@ uv run python paper-metrics/scripts/validate_draft.py \
 - **Mermaid**：\`\`\`mermaid 围栏（大小写不敏感、\`\`\` 与 mermaid 间可有空白）导出时会被删除，检查器报 `MERMAID_DISABLED` WARN；\`~~~mermaid\` 不受影响，应渲染为图片后引用
 
 各模式特有的写作规范：
-- Mode A：见 `references/writing-norms.md`（GB/T 7714 强制、≥15000 字、CY/T 35-2001 编号）
-- Mode B：见 `references/journal-writing-norms.md`（时态、引用密度、对冲语言、可复现性、引文风格由 profiler 决定）
+- Mode A：见 [`references/writing-norms.md`](references/writing-norms.md)（GB/T 7714 强制、≥15000 字、CY/T 35-2001 编号）
+- Mode B：见 [`references/journal-writing-norms.md`](references/journal-writing-norms.md)（时态、引用密度、对冲语言、可复现性、引文风格由 profiler 决定）
 
 ## 写作规范要求
 
-- Mode A：读取 `references/writing-norms.md` 获取本科毕设特有规范
-- Mode B：读取 `references/journal-writing-norms.md` 获取期刊论文特有规范
-- 两模式共享：读取 `references/shared-markdown-norms.md` 获取机械化 Markdown 规范
+- Mode A：读取 [`references/writing-norms.md`](references/writing-norms.md) 获取本科毕设特有规范
+- Mode B：读取 [`references/journal-writing-norms.md`](references/journal-writing-norms.md) 获取期刊论文特有规范
+- 两模式共享：读取 [`references/shared-markdown-norms.md`](references/shared-markdown-norms.md) 获取机械化 Markdown 规范
 - 章节编号使用阿拉伯数字：1, 1.1, 1.1.1
 - 图片使用文字占位符，格式见对应的 image-spec 文件
 - 表格使用 Markdown 表格格式

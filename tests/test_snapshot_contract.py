@@ -3,7 +3,7 @@
 确保：
   1. 快照 Schema 格式（schema_version: 1）严格满足 monitor-panel 的对接要求；
   2. 原子落盘写入无残留且内容完备；
-  3. 离线 HTML 仪表盘自包含、无外部网络依赖，包含核心 35 技能和 5 大 Agent 矩阵；
+  3. 离线 HTML 仪表盘自包含、无外部网络依赖，包含核心 33 技能和 5 大 Agent 矩阵；
   4. assets-doctor 的 --export-snapshot 与 --html 参数行为稳定无回归。
 """
 
@@ -26,7 +26,7 @@ class DummyReport:
     """模拟 assets-doctor 的 Report 实例。"""
     def __init__(self, items=None, counts_dict=None):
         self.items = items or [
-            {"group": "contract", "level": "warn", "name": "officecli", "msg": "SKILL.md 421 行 > 400 门禁", "hint": ""},
+            {"group": "contract", "level": "warn", "name": "md-to-thesis-latex", "msg": "SKILL.md 401 行 > 400 门禁", "hint": ""},
             {"group": "farm", "level": "ok", "name": "farm", "msg": "农场零漂移", "hint": ""},
         ]
         self._counts = counts_dict or {"crit": 0, "warn": 1, "ok": 20}
@@ -52,18 +52,18 @@ class TestSnapshotContract:
         assert "master_commit" in meta
 
         summary = doc["summary"]
-        assert summary["skills_total"] == 35
-        assert summary["families_total"] == 12
+        assert summary["skills_total"] == 33
+        assert summary["families_total"] == 11
         assert set(summary["agents"]) == {"claude-code", "grok", "dsh", "zcode", "codex"}
-        assert summary["load_modes"]["auto"] == 12
-        assert summary["load_modes"]["manual"] == 23
-        assert summary["roles"]["entry"] == 12
-        assert summary["roles"]["member"] == 22
-        assert summary["roles"]["standalone"] == 1
+        assert summary["load_modes"]["auto"] == 11
+        assert summary["load_modes"]["manual"] == 22
+        assert summary["roles"]["entry"] == 11
+        assert summary["roles"]["member"] == 20
+        assert summary["roles"]["standalone"] == 2
         assert summary["doctor"]["warn"] == 1
 
         skills = doc["skills"]
-        assert len(skills) == 35
+        assert len(skills) == 33
 
         skill_map = {s["name"]: s for s in skills}
         assert "proxy-ops" in skill_map
@@ -75,8 +75,8 @@ class TestSnapshotContract:
         assert p["status"] == "ok"
 
         # 检查带警告的技能状态映射
-        assert "officecli" in skill_map
-        o = skill_map["officecli"]
+        assert "md-to-thesis-latex" in skill_map
+        o = skill_map["md-to-thesis-latex"]
         assert o["status"] == "warn"
         assert "400" in o["status_hint"]
 
@@ -93,7 +93,7 @@ class TestSnapshotContract:
 
         loaded = json.loads(target.read_text(encoding="utf-8"))
         assert loaded["schema_version"] == 1
-        assert loaded["summary"]["skills_total"] == 35
+        assert loaded["summary"]["skills_total"] == 33
 
     def test_render_html_dashboard_offline(self, tmp_path):
         rep = DummyReport()

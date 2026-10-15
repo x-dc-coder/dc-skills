@@ -56,7 +56,8 @@ def build(m: dict) -> dict:
     if orphans:
         print(f"! 未归族的技能（不会进 marketplace）: {orphans}", file=sys.stderr)
     return {"name": "dc-skills",
-            "description": "dc-skills 技能农场：11 族群 / 34 技能的插件市场声明层"
+            "description": f"dc-skills 技能农场：{len(m.get('families') or {})} 族群 / "
+                           f"{len(base) + len(on_demand)} 技能的插件市场声明层"
                            "（本机走 skills-sync 软链，本文件供原生 /plugins 发现与外发）",
             "owner": {"name": "x-dc-coder"},
             "x-generated-by": HEADER_NOTE,

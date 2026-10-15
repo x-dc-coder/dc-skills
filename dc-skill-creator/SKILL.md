@@ -28,7 +28,7 @@ CLI 管**形式正确**（确定性校验与骨架生成），本 SKILL 管**内
 ## 依赖说明
 
 - Python ≥3.10 + pyyaml（随主库 `.venv`，A 类技能）
-- 无外部二进制依赖；规则全文见 `docs/specs/技能编写规则.md`
+- 无外部二进制依赖；规则全文见 [技能编写规则.md](../docs/specs/技能编写规则.md)
 
 ## 快速用法
 
@@ -57,20 +57,20 @@ uv run python scripts/skills-sync && uv run python scripts/skillctl lint
 1. **命名**（唯一硬卡点）：kebab-case，`^[a-z0-9-]+$`，≤64，须等于目录名；当场用
    `validate.py` 的 R2 逻辑验，不合规立即给归一化建议。查重：主库 + `archive/` + App 自管根。
 2. **族群**（键必须存在于 `agent-map.yaml` 的 `families`）：thesis / drawing / frontend /
-   software / agentops / info / docs / db / bridge / lark / dshplugin / meta。
+   software / agentops / info / db / bridge / lark / dshplugin / meta。
    都不匹配就省略 `--family`，脚本写成 `role: standalone`、`load-mode: auto`。
    不要传 `--family standalone`，也不要传已删除的 coding、infra、repo。
    传了 `--family` 就是该族 member（`load-mode: manual`，骨架写上 `disable-model-invocation: true`，不进模型清单，`/name` 显式触发）。`agents/openai.yaml` 仍由随后的 `family-apply --apply` 生成。
    新的族群入口要改 `families.<族>.entry`，本脚手架不会把新技能写成 entry。
 3. **能力 + 触发场景**（自由文本）：CLI 不代写 quality，但先用 `check_triggers.py` 预检重叠；
    description 草稿给用户确认或编辑（关键触发词放最前 80 字符，≤1024，祈使句 Use when…）。
-4. **环境分类**：A（轻量 Python，建 `.venv` 软链 + `scripts/__init__.py`）/ B（重型独立
+4. **环境分类**：A（轻量 Python，建 `.venv` 软链 + [`scripts/__init__.py`](scripts/__init__.py)）/ B（重型独立
    venvs）/ C（无统一 venv，默认）。
-5. **外部依赖**：默认空；填了 → 必须先登记 `docs/arch/环境依赖.md`，否则 R6 拒绝。
+5. **外部依赖**：默认空；填了 → 必须先登记 [`docs/arch/环境依赖.md`](docs/arch/环境依赖.md)，否则 R6 拒绝。
 6. **启用范围**：on_demand（默认）/ base / 某 agent extra / dsh preset —— 决定 agent-map 写法。
 
 随后：`new_skill.py` 生成骨架 →（member 跑 `family-apply --apply`）→ 按下方写作原则写正文 →
-`validate.py` 循环修到退出 0 → 验收清单（`references/checklist.md`）→ git 提交模板。
+`validate.py` 循环修到退出 0 → 验收清单（[`references/checklist.md`](references/checklist.md)）→ git 提交模板。
 
 ## 写作原则（内容正确）
 
@@ -85,9 +85,9 @@ uv run python scripts/skills-sync && uv run python scripts/skillctl lint
 
 ## 详细规程
 
-- 验收清单全文（提交前逐项打钩）：`references/checklist.md`
-- description 写法与 1024 字符预算分配（含 bad/good 对照）：`references/description-guide.md`
-- R1-R13 规则表与违规消息的规则编号对照：`docs/specs/技能编写规则.md`
+- 验收清单全文（提交前逐项打钩，与 `validate.py` R1–R13 一一对应）：[references/checklist.md](references/checklist.md)
+- description 写法与 1024 字符预算分配（含 bad/good 对照）：[references/description-guide.md](references/description-guide.md)
+- 规则正文（A1–F7 分节）：[技能编写规则.md](../docs/specs/技能编写规则.md)；R 编号是本仓校验器的编号，对照见 checklist
 - 与 `skillctl` 的边界：本工具管**创建态**（单技能 + 增量关系），`skillctl lint/inventory`
   管**运行态**（全仓快照）；`skills-sync` 管物化，三者不重叠。
 
@@ -95,4 +95,4 @@ uv run python scripts/skills-sync && uv run python scripts/skillctl lint
 
 - 不生成 `agents/openai.yaml`（由 family-apply 统一生成，避免双写）
 - 不生成 `evals/`（仅用户显式要求时建空目录 + evals.json 模板，B9）
-- 不做打包/发布（`.agent-plugin/` 声明层由 `scripts/plugin-catalog.py` 生成，见 W3）
+- 不做打包/发布（`.agent-plugin/` 声明层由 [`scripts/plugin-catalog.py`](scripts/plugin-catalog.py) 生成，见 W3）
