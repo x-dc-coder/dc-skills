@@ -45,6 +45,7 @@ def test_programming_body_routing_contract() -> None:
     body = skill_text("programming").split("---", 2)[2]
     assert "一次提交只打开 git-master 或 github-workflow 其中一个" in body
     assert "不限 .py/.rs/.ts/.go" in body
+    assert "references/philosophy.md" in body  # C+②：七公理/TDD 下沉后正文必须保留指针
 
 
 def test_codegraph_is_a_member() -> None:
