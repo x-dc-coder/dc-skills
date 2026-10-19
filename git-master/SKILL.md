@@ -42,7 +42,7 @@ git rev-parse --abbrev-ref @{upstream}
 1. `git init -b master`
 2. 身份：`git config user.name x-dc-coder`、`git config user.email x.dc0521@gmail.com`
 3. `git config core.quotepath false`（中文文件名不转义）
-4. 写两层忽略：`.gitignore` 放团队共享规则，按栈挑选——通用 `.DS_Store`、`Thumbs.db`、`.idea/`、`.vscode/`、`*.log`、`logs/`；Python 加 `__pycache__/`、`*.py[cod]`、`.pytest_cache/`、`.venv/`、`dist/`；Go 加 `bin/`、`coverage.out`、`*.test`；Node 加 `node_modules/`。`.git/info/exclude` 放本机敏感规则（`.env`、`*.key`、`*.pem`、`credentials*.json`），不入版本控制。
+4. 写三层忽略（模板按栈取自 [references/gitignore-templates.md](references/gitignore-templates.md)，均为本机实战沉淀）：项目 `.gitignore` 放团队共享规则——通用底座（含 WSL 交互垃圾 `*:Zone.Identifier` 与 UNC 残留）加项目栈对应的 Python/Node/Go/Rust/LaTeX 段；`.git/info/exclude` 放本机敏感规则（`.env`、`*.key`、`*.pem`、`credentials*.json`），不入版本控制；机器级工具产物（`skills-output/`、`.codegraph/` 等）由 `~/.gitignore_global` 兜底（输出规范 C-14），团队仓库在项目层再写一份让协作者同样干净。
 
 汇报初始化结果后**询问是否创建 GitHub 远端，等用户确认**。确认且 `gh auth status` 通过后：`gh repo create <name> --private --source=. --remote=origin`，首推走 M3。
 
@@ -202,9 +202,10 @@ PR 正文截图走网页附件流（粘贴进编辑框得 user-attachments 链�
 1. 不 commit、rebase、push、force-push、reset、stash-pop、删除任何东西，除非用户明确要求该操作；纯调查请求报告后即停。
 2. 默认分支（master/main）禁裸 `--force`；改写已推送历史必须 `--force-with-lease` 且用户显式要求。
 3. 暂存与推送前扫 `.env`、密钥文件、证书、service-account JSON；已泄露的密钥靠轮换作废，改写历史只是辅助。
-4. 团队共享忽略规则放 `.gitignore`，本机敏感规则放 `.git/info/exclude`；密钥类模式禁入 `.gitignore`。
+4. 忽略规则三层分工：团队共享放 `.gitignore`，本机敏感规则放 `.git/info/exclude`，机器级工具产物由 `~/.gitignore_global` 兜底；密钥类模式禁入 `.gitignore`，用通配符不逐文件列举。
 
 ## references
 
 - [references/actions-recipes.md](references/actions-recipes.md) — CI / 发布 / 自建部署 / 失败通知模板与 Secrets 配置
+- [references/gitignore-templates.md](references/gitignore-templates.md) — 三层忽略规则与本机栈定制模板
 - [references/github-attachment-upload.md](references/github-attachment-upload.md) — PR 证据附件上传规程
