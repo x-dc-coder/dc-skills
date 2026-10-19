@@ -38,7 +38,7 @@ disable-model-invocation: true
 **用「符号名 / 文件名袋子」，不要用宽泛的长句自然语言。**
 
 实测反例：问 *"unified-search 的源码结构：入口 main、各搜索源 adapter、去重排序与配额管理如何组织"* ——
-codegraph 抓了 `main` 这个极常见符号，返回 `drawio-xml` / `word-extractor` / `github-workflow` 等 **10 个不相关文件**，
+codegraph 抓了 `main` 这个极常见符号，返回 `drawio-xml` / `word-extractor` / `paper-reader` 等 **10 个不相关文件**，
 **恰恰没返回 unified-search**。
 改成符号名袋 `mode_general dedup_and_rank search_keenable search_with_retry load_config` → 一次精准命中 40 符号 / 2 文件。
 

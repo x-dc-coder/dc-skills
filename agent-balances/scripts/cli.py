@@ -591,8 +591,63 @@ def antigravity_balance():
     return not_local("antigravity", "no local Antigravity credentials found")
 
 
+def commandcode_balance():
+    auth = read_json(os.path.join(HOME, ".commandcode", "auth.json"))
+    key = (auth or {}).get("apiKey")
+    if not key:
+        gw_cfg = read_json(os.path.join(HOME, ".local", "share", "model-gateway", "config.json"))
+        key = (((gw_cfg or {}).get("channels") or {}).get("commandcode") or {}).get("key")
+    if not key:
+        return not_local("commandcode", "no API key in ~/.commandcode/auth.json or gateway config.json")
+
+    headers = {"Authorization": f"Bearer {key}", "Content-Type": "application/json", "User-Agent": "commandcode/1.82.5"}
+    s1, whoami = fetch("https://api.commandcode.ai/alpha/whoami?limits=1", headers=headers)
+    s2, credits = fetch("https://api.commandcode.ai/alpha/billing/credits", headers=headers)
+    s3, sub = fetch("https://api.commandcode.ai/alpha/billing/subscriptions", headers=headers)
+    s4, usage = fetch("https://api.commandcode.ai/alpha/usage/summary", headers=headers)
+
+    if s1 != 200 or not isinstance(whoami, dict):
+        return result("commandcode", "error", error=f"HTTP {s1} — auth failed")
+
+    user = whoami.get("user") or {}
+    out = {
+        "user": user.get("userName") or user.get("name"),
+        "email": user.get("email"),
+        "planType": ((sub or {}).get("data") or {}).get("planId") or "individual-goat",
+    }
+
+    w_lim = (credits or {}).get("windowLimits") or {}
+    five_h = w_lim.get("fiveHour") or {}
+    weekly = w_lim.get("weekly") or {}
+    if five_h:
+        cap = five_h.get("cap") or 14.0
+        used = five_h.get("used") or 0.0
+        pct = round(used / cap * 100, 1) if cap > 0 else 0.0
+        out["session"] = window(pct, 300, five_h.get("resetAt"))
+        out["session"]["used"] = round(used, 2)
+        out["session"]["limit"] = round(cap, 2)
+    if weekly:
+        cap = weekly.get("cap") or 35.0
+        used = weekly.get("used") or 0.0
+        pct = round(used / cap * 100, 1) if cap > 0 else 0.0
+        out["weekly"] = window(pct, 10080, weekly.get("resetAt"))
+        out["weekly"]["used"] = round(used, 2)
+        out["weekly"]["limit"] = round(cap, 2)
+
+    mon_rem = ((credits or {}).get("credits") or {}).get("monthlyCredits") or 0.0
+    mon_spent = (usage or {}).get("totalCost") or 0.0
+    out["monthly"] = {
+        "remaining": round(mon_rem, 2),
+        "spent": round(mon_spent, 2),
+        "total": 70.0,
+        "usedPercent": round((70.0 - mon_rem) / 70.0 * 100, 1) if mon_rem <= 70.0 else 0.0,
+    }
+    return result("commandcode", "ok", **out)
+
+
 PROVIDERS = {
     "grok": grok_balance,
+    "commandcode": commandcode_balance,
     "codex": codex_balance,
     "cursor": cursor_balance,
     "claude": claude_balance,

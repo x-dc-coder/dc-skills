@@ -2,6 +2,6 @@
 # 由 scripts/family-apply.py 生成；SKILL.md description 变更后需重跑刷新。
 interface:
   display_name: "Git Master"
-  short_description: "MUST USE whenever a task needs a commit or git-history"
+  short_description: "git 与 GitHub 全流程：从本地提交到 CI/CD 发布"
 policy:
   allow_implicit_invocation: false

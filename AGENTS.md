@@ -21,11 +21,11 @@ cd ~/projects/dc-skills && uv run python <skill-name>/scripts/<script>.py ...
 ```
 
 - `cd ~/projects/dc-skills` 确保 uv 的 `pyproject.toml` 解析起点正确
-- 技能脚本位于各自的子目录下，如 `github-workflow/scripts/github_bootstrap.py`
-- 已登记例外（2026-10-15）：`github-workflow` 全部脚本与 `test-guardian audit --staged` 需要以
-  目标仓库为 cwd（脚本从 git remote / 暂存区取上下文），用
+- 技能脚本位于各自的子目录下，如 `db-skill/scripts/mysql_tool.py`
+- 已登记例外（2026-10-15；2026-10-19 收窄）：`test-guardian audit --staged` 需要以
+  目标仓库为 cwd（脚本从暂存区取上下文），用
   `uv run --project ~/projects/dc-skills python ~/projects/dc-skills/<skill>/scripts/<script>.py`
-  固定依赖环境、保持当前目录不变
+  固定依赖环境、保持当前目录不变（原 github-workflow 脚本例外随该技能归档作废）
 
 ### 为什么是 `cd` 而非 `--directory`
 
@@ -35,13 +35,13 @@ cd ~/projects/dc-skills && uv run python <skill-name>/scripts/<script>.py ...
 
 ```bash
 # ❌ 错误：会解析当前项目（如 Words-Production）的 pyproject.toml
-uv run python scripts/github_issues.py ...
+uv run python scripts/<skill-script>.py ...
 
 # ❌ 错误：可能缺少 skills 项目的依赖
-python3 scripts/github_issues.py ...
+python3 scripts/<skill-script>.py ...
 
 # ❌ 错误：--directory 不会改变相对路径的解析基准
-uv run --directory ~/projects/dc-skills python scripts/github_issues.py ...
+uv run --directory ~/projects/dc-skills python scripts/<skill-script>.py ...
 ```
 
 ### 为什么需要这个约束

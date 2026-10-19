@@ -264,24 +264,8 @@ documents:
     id: skill.git-master
     kind: reference
     status: active
-  github-workflow/references/commit-rules.md:
-    id: github-workflow.references.commit-rules
-    kind: reference
-    status: active
-  github-workflow/references/config-format.md:
-    id: github-workflow.references.config-format
-    kind: reference
-    status: active
-  github-workflow/references/gh-cheatsheet.md:
-    id: github-workflow.references.gh-cheatsheet
-    kind: reference
-    status: active
-  github-workflow/references/safety-and-ignore.md:
-    id: github-workflow.references.safety-and-ignore
-    kind: reference
-    status: active
-  github-workflow/SKILL.md:
-    id: skill.github-workflow
+  git-master/references/actions-recipes.md:
+    id: git-master.references.actions-recipes
     kind: reference
     status: active
   kimi-webbridge/references/operations.md:

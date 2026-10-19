@@ -62,6 +62,7 @@ uv run python agent-balances/scripts/cli.py --output
 | cursor | `<WIN>/AppData/Roaming/Cursor/User/globalStorage/state.vscdb`（cursorAuth/*） | `cursor.com/api/usage-summary` | plan 月窗 + auto/api 分桶 + onDemand |
 | claude | `.claude/.credentials.json`（WSL 或 Windows 侧） | `api.anthropic.com/api/oauth/usage` | five_hour→session；seven_day→weekly |
 | zcode | `<WIN>/.orca/zcode-plan-api-key.enc`（DPAPI+AES-GCM 解密）或 `~/.zcode/cli/config.json` | `open.bigmodel.cn`（或 api.z.ai）`/api/monitor/usage/quota/limit` | limits 的 unit×number 映射分钟数；300=session，10080=weekly |
+| commandcode | `~/.commandcode/auth.json` 或网关 `config.json` | `api.commandcode.ai/alpha/billing/credits` 等 | fiveHour→session(300min)；weekly→weekly；monthlyCredits→monthly |
 | kimi | `~/.kimi-code/credentials/kimi-code.json` | `api.kimi.com/coding/v1/usages` | 原始响应（`--raw` 查看） |
 | gemini / minimax / opencode-go / antigravity | 见下方"未接通" | — | — |
 

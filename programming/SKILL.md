@@ -1,8 +1,8 @@
 ---
 name: programming
 description: >
-  software 族入口。当用户要 commit、提交、rebase、squash、blame、bisect、查谁写的，读 git-master；
-  初始化仓库、gh、PR、issue、preview、publish，读 github-workflow；崩溃、静默失败、结果错误、内存泄漏、卡死，读 debugging；
+  software 族入口。当用户要 commit、提交、rebase、squash、blame、bisect、查谁写的、初始化仓库、推送、push、PR、issue、release、发布、Actions、CI、gh，读 git-master（git 与 GitHub 全流程都在这一个技能）；
+  崩溃、静默失败、结果错误、内存泄漏、卡死，读 debugging；
   任意语言的调用链、谁在调用、大仓影响面，读 codegraph-explore；假绿、测试门禁，读 test-guardian；
   代码 deslop、去掉代码里的 AI 味，读 remove-ai-slops（论文的 AI 腔不在这里，走 paper-metrics）。派发子代理、按角色组合选模型、交叉分析、架构决策、外部专家，也读本技能。写或改 .py/.pyi/.rs/.ts/.tsx/.mts/.cts/.go 时也先读本技能。
   哲学：Pydantic v2、serde+thiserror、Zod、gin+sqlc+pgx，parse-don't-validate，250 行，TDD。
@@ -20,13 +20,12 @@ metadata:
 | 技能 | 用途 | 何时选它 |
 |---|---|---|
 | [`debugging`](../debugging/SKILL.md) | 系统化调试（假设驱动闭环） | 崩溃、静默失败、结果错误、卡死、内存泄漏、时序异常。不限语言 |
-| [`git-master`](../git-master/SKILL.md) | 已有仓库的本地 git | commit、提交、暂存、rebase、squash、fixup、blame、bisect、reflog、谁写的。提交信息沿用该仓库既有风格 |
-| [`github-workflow`](../github-workflow/SKILL.md) | GitHub 仓库生命周期 | 初始化仓库、gh repo、PR、issue、preview、publish。这些流程里的提交信息用该技能的 Conventional Commits |
+| [`git-master`](../git-master/SKILL.md) | git 与 GitHub 全流程（七模式） | commit、提交、暂存、rebase、squash、fixup、强推/改写远程历史、blame、bisect、reflog、谁写的；初始化仓库、push 推送、gh 指令（PR/issue/release）、GitHub Actions CI/CD 与自动发布。提交信息：新仓库 Conventional Commits 中文起步，已有仓库沿用既有风格 |
 | [`remove-ai-slops`](../remove-ai-slops/SKILL.md) | AI 味代码清除 | 清理分支改动中的 AI 生成代码味 |
 | [`test-guardian`](../test-guardian/SKILL.md) | 测试防假绿规范与双盲质检 | 审计测试是否真绿、测试分层与工程门禁 |
 | [`codegraph-explore`](../codegraph-explore/SKILL.md) | 任意语言的符号、调用链、影响面 | 理解大仓、定位定义或调用者、评估重构影响。不限 .py/.rs/.ts/.go。小仓、配置、Markdown 不要读它 |
 
-一次提交只打开 git-master 或 github-workflow 其中一个。查本地历史、在已有仓库里提交，打开 git-master。要初始化仓库、建远端、走 preview/publish 或处理 PR/issue，打开 github-workflow。
+git 与 GitHub 的事都进 git-master，一次请求按 Mode Gate 先归类唯一模式再执行。
 
 ---
 

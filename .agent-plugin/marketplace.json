@@ -1,11 +1,22 @@
 {
   "name": "dc-skills",
-  "description": "dc-skills 技能农场：6 族群 / 31 技能的插件市场声明层（本机走 skills-sync 软链，本文件供原生 /plugins 发现与外发）",
+  "description": "dc-skills 技能农场：7 族群 / 31 技能的插件市场声明层（本机走 skills-sync 软链，本文件供原生 /plugins 发现与外发）",
   "owner": {
     "name": "x-dc-coder"
   },
   "x-generated-by": "由 scripts/plugin-catalog.py 从 agent-map.yaml 生成，DO NOT EDIT；改族群请改 agent-map 后重跑 --apply",
   "plugins": [
+    {
+      "name": "dc-agent-infra",
+      "description": "agent-infra 族群：入口 agent-infra + 2 个 manual 成员",
+      "source": ".",
+      "strict": false,
+      "skills": [
+        "./agent-infra",
+        "./unified-gateway",
+        "./agent-balances"
+      ]
+    },
     {
       "name": "dc-drawing",
       "description": "drawing 族群：入口 diagram + 1 个 manual 成员",
@@ -50,7 +61,7 @@
     },
     {
       "name": "dc-software",
-      "description": "software 族群：入口 programming + 6 个 manual 成员",
+      "description": "software 族群：入口 programming + 5 个 manual 成员",
       "source": ".",
       "strict": false,
       "skills": [
@@ -59,7 +70,6 @@
         "./git-master",
         "./remove-ai-slops",
         "./test-guardian",
-        "./github-workflow",
         "./codegraph-explore"
       ]
     },

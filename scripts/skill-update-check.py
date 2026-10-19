@@ -125,9 +125,9 @@ TRACKED_DEPS: list[dict] = [
     # ── 基线比对通道（系统包，不联网）────────────────────────────────────
     {"id": "uv", "skill": "全部 Python 技能", "bin": "uv", "channel": "baseline",
      "upgrade": "uv self update"},
-    {"id": "gh", "skill": "github-workflow", "bin": "gh", "channel": "baseline",
+    {"id": "gh", "skill": "git-master", "bin": "gh", "channel": "baseline",
      "upgrade": "见官方安装文档"},
-    {"id": "git", "skill": "全部（github-workflow 为基座）", "bin": "git", "channel": "baseline",
+    {"id": "git", "skill": "全部（git 为基座）", "bin": "git", "channel": "baseline",
      "upgrade": "sudo apt update && sudo apt install git"},
     {"id": "node", "skill": "drawio-xml / lark-cli / diagram", "bin": "node", "channel": "baseline",
      "baseline_key": "node / npx", "upgrade": "nvm install --lts"},

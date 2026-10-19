@@ -54,14 +54,13 @@ base:
   - md-to-thesis-latex  # 毕业论文 md→LaTeX→PDF
   - paper-metrics       # 论文写作特征指标层
   - paper-reader        # 论文 PDF 双引擎阅读（venvs 11GB）
-  # ── software（entry: programming；codegraph / github 是成员，不是入口）──
+  # ── software（entry: programming；git/GitHub 全流程收拢在 git-master 一个成员）──
   - programming         # 编程任务分流（oh-my-openagent 4.17.1 vendored）
   - debugging           # 系统化调试（omo vendored）
-  - git-master          # 已有仓库的本地 git（omo vendored）
+  - git-master          # git 与 GitHub 全流程（2026-10-19 并入 github-workflow：七模式含 Actions）
   - remove-ai-slops     # AI 味代码清除（omo vendored）
   - test-guardian       # 测试工程质量规范
   - codegraph-explore   # 任意语言的大仓符号检索（member）
-  - github-workflow     # GitHub 仓库生命周期（member）
   # ── standalone manual（详见文末 standalone 段）──
   - task-hub            # 跨会话任务中心（standalone manual，2026-10-15 出 agentops）
   # ── info（entry: unified-search）──
@@ -223,13 +222,12 @@ families:
       design-dataviz: [图表配色, 仪表盘]
   software:          # 软件工程：omo 4 技能为核心（debugging/git-master/programming/remove-ai-slops，
     entry: programming   # oh-my-openagent 4.17.1 vendored）+ test-guardian + repo 工程并入
-    members: [debugging, git-master, remove-ai-slops, test-guardian, github-workflow, codegraph-explore]
+    members: [debugging, git-master, remove-ai-slops, test-guardian, codegraph-explore]
     triggers:
       debugging: [崩溃, 静默失败, 结果错误, 内存泄漏, 卡死]
-      git-master: [commit, 提交, rebase, squash, blame, bisect, 查谁写的]
+      git-master: [commit, 提交, rebase, squash, blame, bisect, 查谁写的, 初始化仓库, 推送, push, PR, issue, release, 发布, Actions, CI, gh]
       remove-ai-slops: [代码 deslop, 去掉代码里的 AI 味]
       test-guardian: [假绿, 测试门禁]
-      github-workflow: [初始化仓库, gh, PR, issue, preview, publish, github-workflow]
       codegraph-explore: [调用链, 谁在调用, 大仓影响面]
     requires:
       cli: [git, gh]

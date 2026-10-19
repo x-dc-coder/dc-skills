@@ -43,7 +43,7 @@ def test_db_skill_does_not_own_infra() -> None:
 
 def test_programming_body_routing_contract() -> None:
     body = skill_text("programming").split("---", 2)[2]
-    assert "一次提交只打开 git-master 或 github-workflow 其中一个" in body
+    assert "git 与 GitHub 的事都进 git-master" in body
     assert "不限 .py/.rs/.ts/.go" in body
     assert "references/philosophy.md" in body  # C+②：七公理/TDD 下沉后正文必须保留指针
 
@@ -159,6 +159,9 @@ def test_output_docs_do_not_teach_retired_paths() -> None:
     assert "仅在用户显式指定" not in env
 
 
-def test_git_commit_styles_stay_separate() -> None:
-    assert "git-master" in skill_text("github-workflow")
-    assert "github-workflow" in skill_text("git-master")
+def test_commit_style_rule_unified() -> None:
+    """2026-10-19 合并后单轨规范：新仓库 Conventional Commits 中文起步，已有仓库沿用既有风格。"""
+    text = skill_text("git-master")
+    assert "Conventional Commits" in text
+    assert "沿用" in text
+    assert "github-workflow" not in text  # 已归档，正文不得再路由到旧技能

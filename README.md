@@ -36,7 +36,6 @@
 ├── db-skill/              # MySQL/PostgreSQL 工具
 ├── word-extractor/        # .docx 提取
 ├── unified-search/        # 10 源聚合搜索（含 keenable 源，原 keenable-cli 已并入）
-├── github-workflow/       # GitHub-first git 工作流（gh CLI）
 ├── drawio-xml/            # .drawio 图表（MCP 协同，npx 按需拉取）
 ├── kimi-webbridge/        # 真实浏览器控制（daemon）
 ├── vision-workflow/       # 视觉任务编排（Vision MCP）
@@ -45,7 +44,7 @@
 │
 ├── paper-reader/          # ⚠️ 例外：持有独立重型 venvs
 │   └── venvs/             # marker ~5.1GB / mineru ~613MB（GPU 模型权重，不共享）
-├── debugging/ git-master/ programming/ remove-ai-slops/  # omo vendor 4 技能（oh-my-openagent 4.17.1）
+├── debugging/ git-master/ programming/ remove-ai-slops/  # omo vendor 4 技能（oh-my-openagent 4.17.1；git-master 已扩为 git/GitHub 全流程）
 ├── dsh-ui-optimization/  dsh-plugin-troubleshooting/     # DSH 插件技能（plugin-specialist 预设）
 ├── agent-infra/           # Agent 基础设施族群入口（统揽网关运维与各 Agent 额度对账）
 ├── unified-gateway/ agent-balances/  # Agent-Infra 成员技能（网关运维与额度用量）
@@ -81,7 +80,7 @@ uv run python scripts/skills-sync --check  # 只检查漂移，不修改
 
 | 类别 | 环境 | 适合的 Skill | 说明 |
 |------|------|-------------|------|
-| **A. 统一共享** | `.venv/` 符号链接 | diagram 聚合的脚本目录（diagram-er/ers/module/sequence/usecase）、db-skill、word-extractor、unified-search、github-workflow、thesis-writing、paper-metrics | 依赖轻量（Pillow/sqlglot/psycopg2/requests/pytest 等），共享一份 venv |
+| **A. 统一共享** | `.venv/` 符号链接 | diagram 聚合的脚本目录（diagram-er/ers/module/sequence/usecase）、db-skill、word-extractor、unified-search、thesis-writing、paper-metrics | 依赖轻量（Pillow/sqlglot/psycopg2/requests/pytest 等），共享一份 venv |
 | **B. 独立重型** | skill 内 `venvs/` | paper-reader | 含 GPU 模型权重（5GB+），不可合并，`.gitignore` 已忽略 |
 | **C. 无统一 venv** | 系统/Windows Python 或二进制 | diagram-draft/flow、design-ui/diagram/dataviz（纯文档）、drawio-xml（npx）、kimi-webbridge、md-to-thesis-latex、thesis-ref-check、agent-infra、unified-gateway、proxy-ops、wsl-windows-bridge | 无统一 venv（系统/Windows Python 或自带运行时） |
 

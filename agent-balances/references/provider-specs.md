@@ -77,6 +77,15 @@
 - 窗口分钟数 = `unit_minutes × number`，映射 `{1:1440, 3:60, 5:1, 6:10080}`；
   特判：`TIME_LIMIT` 且 unit=5 且 number=1 → 720（12 小时窗）。300→session，10080→weekly。
 
+### commandcode
+- 读 `~/.commandcode/auth.json` 的 `apiKey`，或网关 `~/.local/share/model-gateway/config.json` 的 `channels.commandcode.key`。
+- `GET https://api.commandcode.ai/alpha/whoami?limits=1`（用户信息）
+- `GET https://api.commandcode.ai/alpha/billing/credits`（月度余额与滑动窗口 limits）
+- `GET https://api.commandcode.ai/alpha/billing/subscriptions`（套餐信息）
+- `GET https://api.commandcode.ai/alpha/usage/summary`（周期用量）
+- 头：`Authorization: Bearer <key>`，`Content-Type: application/json`，`User-Agent: commandcode/1.82.5`。
+- 窗口语义：fiveHour→session (300 min)，weekly→weekly (10080 min)，monthlyCredits→monthly。
+
 ### gemini（未接线，规格备好）
 1. `POST https://cloudcode-pa.googleapis.com/v1internal:loadCodeAssist`，
    body `{metadata:{ideType:'GEMINI_CLI',pluginType:'GEMINI'}}` → `cloudaicompanionProject`。
