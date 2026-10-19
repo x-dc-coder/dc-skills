@@ -32,19 +32,19 @@ metadata:
 
 ## 子代理派发
 
-编程或架构任务需要派发子代理、做交叉分析或请外部专家时，按「角色 → Agent → 模型」派发。终审由主会话直接承担（`grok-4.7` 官方渠道；官方余额恢复前临时终审用 `glm-5.3`），不经派发。渠道、协议、窗口、思考档位与 Agent 渠道事实见 [`references/模型渠道.md`](references/模型渠道.md)（与 [`docs/arch/模型渠道.md`](docs/arch/模型渠道.md) 同一份）。登记只记渠道事实，不决定派谁。
+编程或架构任务需要派发子代理、做交叉分析或请外部专家时，按「角色 → Agent → 模型」派发。终审由主会话直接承担（`grok-4.7` 官方渠道），不经派发。渠道、协议、窗口、思考档位与 Agent 渠道事实见 [`references/模型渠道.md`](references/模型渠道.md)（与 [`docs/arch/模型渠道.md`](docs/arch/模型渠道.md) 同一份）。登记只记渠道事实，不决定派谁。
 
 1. **角色组合（Agent 承载）**。先对上角色，再按表选 Agent 与模型；同一行的模型一起用。用户点名模型或 Agent 时，按用户指定执行。
 
 | 角色 | 常用组合 |
 |---|---|
-| 执行 | Grok 子代理：`deepseek-v4.1-flash`（默认，8320 网关）或 `gemini-3.8-flash`。机械批量用 `qwen3.8-27b`（最大输出 4096，长任务拆批） |
+| 执行 | Grok 子代理：`deepseek-v4.1-flash`（默认，8320 网关）或 `gemini-3.8-flash`。 |
 | 交叉分析 | Grok 子代理：`glm-5.3` + `grok-4.7`，加难时 + `Atria-Dawn-Preview`；仍不收敛（分歧 >2 处且两轮无收敛迹象）才跨 Agent 升 commandcode `muse-spark-1.3` |
 | 分析（默认启用） | commandcode：`muse-spark-1.3`（性价比最高，分析默认档） |
 | 难题升级 | commandcode：`kimi-k3`（bug 深挖）或 `claude-sonnet-5-5`（设计仲裁）——非常难的任务才启用，按问题类型二选一 |
 | 前端优化 | 默认双 Agent：`gemini-3.8-flash`（Grok 子代理）+ `step`（step CLI，仅 `step-5-preview`） |
 | StepFun 模型 | 一律 step CLI（仅 `step-5-preview`）；Grok 内 slug 停止派发 |
-| 外部专家 | codex：`gpt-6-astra`（≤3 次/天，仅成功调用计数；连续 2 次失败由用户带到外部客户端，失败不计配额） |
+| 外部专家 | codex：`gpt-6-astra`（连续 2 次失败由用户带到外部客户端） |
 
 2. **交叉分析**。组合内的模型各自给出分析，主会话综合后裁决。看缺陷、边界和分歧。
 3. **外部专家**。任务足够复杂，或内部组合仍无法收敛时，把背景、分歧和待决问题交给 `gpt-6-astra`。渠道不可用时，由用户把同一份问题带到外部客户端。
