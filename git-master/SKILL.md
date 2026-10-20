@@ -72,6 +72,15 @@ git log -1 --oneline               # 提交后核对
 
 **提交信息规范（中文优先）**：格式 `<type>(<scope>): <中文 subject>`。type/scope 用英文：`feat fix docs style refactor perf test chore build ci revert`；subject 中文优先，不超过 50 字符，动宾结构，结尾无标点；英文专业术语保留原文（token、middleware、API 名），不强行翻译；body 可选，中文，每行不超过 72 字符，与 subject 空一行；禁 `Co-Authored-By`。已有仓库沿用其既有风格；仓库风格混杂或新仓库时用本规范。暂存前扫一眼 `.env`、密钥、证书不进库。
 
+**备份文件检查（M2 暂存前、M3 推送前共用）**：扫备份残留，命中即提示，绝不默认混入提交——
+
+```bash
+find . \( -name .git -o -name node_modules -o -name venvs -o -name .venv -o -name __pycache__ \) -prune -o \
+  -type f \( -name '*.bak' -o -name '*.bak.*' -o -name '*.orig' -o -name '*.rej' -o -name '*~' \) -print
+```
+
+`*.swp` 排除（可能是打开中的编辑会话）。命中后列出数量、总大小、最老的一个，按判定给建议：原始文件（去掉备份后缀的同名文件，如 `a.py.bak` → `a.py`）存在且比备份新 → 已过期，建议删；备份比原始新 → 可能是有用回滚点，停下问用户；无原始文件的孤儿备份 → 超 30 天建议删，否则保留。用户确认后 `rm -- <files>`；已被 git 跟踪的改用 `git rm --cached` 并补 ignore 规则。确认前只报告，不动手。
+
 ## M3 推送
 
 ```bash
@@ -83,7 +92,7 @@ git push                           # 日常
 
 未提交的改动先按 M2 分组逐批提交（一条提交一条信息），然后一次 push。**push 成功判定**：输出含 `To github.com:...` 与 `master -> master`（或对应分支更新行）。
 
-- 推前自查：工作区状态与预期一致；改动里无 `.env`/密钥/证书/service-account JSON。
+- 推前自查：工作区状态与预期一致；改动里无 `.env`/密钥/证书/service-account JSON；无备份文件混入（`*.bak`/`*.bak.*`/`*.orig`/`*.rej`/`*~`，检查与判定规则见 M2，含在待推 diff 与未跟踪文件里都算命中）。
 - 9p/drvfs 挂载（/mnt/*）上 `git push -u` 可能报 EPERM（无法写 `.git/config`）：退普通 `git push`，内容照常推送。
 - 默认分支禁 `--force`；改写已推送历史见 M4。
 

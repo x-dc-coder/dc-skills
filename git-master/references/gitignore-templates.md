@@ -38,6 +38,12 @@ desktop.ini
 # 日志
 *.log
 logs/
+
+# 编辑器与工具备份残留（M2/M3 每次提交推送前会扫描提示清理）
+*.bak
+*.bak.*
+*.orig
+*.rej
 ```
 
 ## Python（uv 工作流）
